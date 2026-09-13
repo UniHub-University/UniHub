@@ -1,39 +1,60 @@
 using Microsoft.EntityFrameworkCore;
 using UniHub.Infrastructure.Data;
 using UniHub.Application.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Adiciona o suporte aos Controllers (para ele reconhecer o AuthController)
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<AppDbContext>(options => 
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Registra o AuthService no "container" de injeção de dependência do ASP.NET.
-// É essa linha que permite o AuthController pedir um AuthService no construtor
-// (do jeito que ajustamos acima) e realmente receber um, já pronto, na hora
-// de cada requisição. AddScoped = "cria um novo AuthService por requisição HTTP,
-// e reaproveita ele durante toda aquela requisição"
 builder.Services.AddScoped<AuthService>();
 
-// 2. Configurações para o Swagger (interface gráfica para testar a API)
+// --- INÍCIO DA CONFIGURAÇÃO JWT ---
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = Encoding.ASCII.GetBytes(jwtSettings["SecureKey"]!);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(secretKey),
+        ValidateIssuer = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidateAudience = true,
+        ValidAudience = jwtSettings["Audience"],
+        ClockSkew = TimeSpan.Zero
+    };
+});
+// --- FIM DA CONFIGURAÇÃO JWT ---
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// 3. Habilita o Swagger no ambiente de desenvolvimento
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection();
-
+// A ordem aqui é CRÍTICA. Authentication sempre antes de Authorization.
+app.UseAuthentication();
 app.UseAuthorization();
 
-// 4. Mapeia as rotas dos seus controladores
 app.MapControllers();
 
 app.Run();
