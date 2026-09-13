@@ -1,10 +1,18 @@
 using System;
 using System.Threading.Tasks;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using System.Collections.Generic;
+
 using Google.Apis.Auth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+
 using UniHub.Domain.Entities;
 using UniHub.Infrastructure.Data;
+using UniHub.Application.DTOs.Seguranca;
 
 namespace UniHub.Application.Services;
 
@@ -29,7 +37,7 @@ public class AuthService
         _config = config;
     }
 
-    public async Task<Usuario> ValidarLoginGoogleAsync(string idToken)
+    public async Task<LoginResult> ValidarLoginGoogleAsync(string idToken)
     {
         // Valida a assinatura do token diretamente com os servidores do Google
         var payload = await GoogleJsonWebSignature.ValidateAsync(idToken);
@@ -43,7 +51,7 @@ public class AuthService
         // Consulta se esse usuário já existe no banco pelo email institucional
         var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.EmailInstitucional == payload.Email);
 
-        // Retorna o usuário validado (futuramente, conectaremos com o banco aqui)
+        // Se não existir, cria e persiste o usuário (primeiro acesso)
         if (usuario == null)
         {
             usuario = new Usuario
@@ -57,7 +65,56 @@ public class AuthService
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
         }
-        // Retorno obrigatório do usuário (novo ou existente)
-        return usuario;
+        // Gera o token JWT e empacota junto com os dados do usuário
+        var token = GerarTokenJwt(usuario);
+        return new LoginResult(
+            token, 
+            usuario.Id, 
+            usuario.NomeCompleto, 
+            usuario.EmailInstitucional, 
+            usuario.FotoPerfilUrl
+        );
+    }
+
+
+    // Gera um JWT (JSON Web Token) assinado, contendo as informações essenciais do usuário autenticado
+    // É esse token que o frontend vai guardar após o login e reenviar em
+    // todas as requisições futuras (no cabeçalho "Authorization: Bearer ..."),
+    // pra provar quem é o usuário sem precisar logar de novo a cada clique.
+    //
+    // "private" porque é um detalhe interno de COMO o AuthService cumpre sua responsabilidade
+    private string GerarTokenJwt(Usuario usuario)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+
+        // Lê a chave secreta do appsettings.json (seção "JwtSettings"),
+        // a mesma que vocês já configuraram juntos.
+        var chaveSecreta = _config["JwtSettings:SecureKey"]
+            ?? throw new InvalidOperationException("JwtSettings:SecureKey não configurada.");
+        var key = Encoding.UTF8.GetBytes(chaveSecreta);
+
+        // Tempo de expiração configurável via appsettings.json.
+        // Se não vier configurado, usa 120 minutos como padrão.
+        var minutosExpiracao = _config.GetValue<int?>("JwtSettings:MinutosExpiracao") ?? 120;
+
+        // Cria as regras e os dados do token (Claims)
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, usuario.EmailInstitucional),
+                new Claim(ClaimTypes.Name, usuario.NomeCompleto),
+                new Claim(ClaimTypes.Role, usuario.Role.ToString())
+            }),
+            Expires = DateTime.UtcNow.AddMinutes(minutosExpiracao),
+            Issuer = _config["JwtSettings:Issuer"],
+            Audience = _config["JwtSettings:Audience"],
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
     }
 }

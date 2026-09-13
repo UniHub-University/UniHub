@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using System; 
+using UniHub.Application.DTOs.Seguranca; 
 using UniHub.Application.DTOs;
 using UniHub.Application.Services;
 
@@ -26,12 +28,23 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var usuarioValidado = await _authService.ValidarLoginGoogleAsync(request.IdToken);
-            return Ok(new { Mensagem = "Login autorizado!", Usuario = usuarioValidado.NomeCompleto });
+            // O AuthService agora devolve um LoginResult pronto (Token, Id,
+            // NomeCompleto, EmailInstitucional, FotoPerfilUrl), em vez de
+            // só o Usuario cru
+            var resultadoLogin = await _authService.ValidarLoginGoogleAsync(request.IdToken);
+
+            // Devolve o LoginResult direto: o ASP.NET Core serializa esse
+            // objeto pra JSON automaticamente, incluindo o Token que o
+            // frontend vai guardar e reenviar nas próximas requisições
+            return Ok(resultadoLogin);
         }
-        catch (System.Exception ex)
+        catch (UnauthorizedAccessException ex)
         {
-            return BadRequest(new { Erro = ex.Message });
+            return Unauthorized(new { Erro = ex.Message });  // 401 Unauthorized
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Erro = ex.Message });  // 400 Bad Request
         }
     }
 }
