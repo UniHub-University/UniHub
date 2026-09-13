@@ -11,9 +11,14 @@ public class AuthController : ControllerBase
 {
     private readonly AuthService _authService;
 
-    public AuthController()
+    // Em vez de criar o AuthService manualmente com "new" (o que exigiria
+    // passar AppDbContext e IConfiguration na mão, coisas que o Controller
+    // nem deveria conhecer), o ASP.NET entrega um AuthService já pronto
+    // aqui, com tudo que ele precisa por dentro. Isso é injeção de dependência:
+    // o Controller só "pede" o serviço, quem monta ele é o framework.
+    public AuthController(AuthService authService)
     {
-        _authService = new AuthService();
+        _authService = authService;
     }
 
     [HttpPost("google-login")]

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UniHub.Infrastructure.Data;
+using UniHub.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Registra o AuthService no "container" de injeção de dependência do ASP.NET.
+// É essa linha que permite o AuthController pedir um AuthService no construtor
+// (do jeito que ajustamos acima) e realmente receber um, já pronto, na hora
+// de cada requisição. AddScoped = "cria um novo AuthService por requisição HTTP,
+// e reaproveita ele durante toda aquela requisição"
+builder.Services.AddScoped<AuthService>();
 
 // 2. Configurações para o Swagger (interface gráfica para testar a API)
 builder.Services.AddEndpointsApiExplorer();
