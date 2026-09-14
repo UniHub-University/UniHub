@@ -16,7 +16,7 @@ builder.Services.AddScoped<AuthService>();
 
 // --- INÍCIO DA CONFIGURAÇÃO JWT ---
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = Encoding.ASCII.GetBytes(jwtSettings["SecureKey"]!);
+var secretKey = Encoding.UTF8.GetBytes(jwtSettings["SecureKey"]!);
 
 builder.Services.AddAuthentication(options =>
 {

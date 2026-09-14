@@ -35,7 +35,11 @@ public class AuthController : ControllerBase
                 Token = token // O front-end usará isso para acessar as rotas protegidas
             });
         }
-        catch (System.Exception ex)
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { Erro = ex.Message });
+        }
+        catch (Exception ex)
         {
             return BadRequest(new { Erro = ex.Message });
         }

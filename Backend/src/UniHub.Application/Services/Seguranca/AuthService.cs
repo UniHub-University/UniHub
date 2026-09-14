@@ -55,7 +55,7 @@ public class AuthService
     public string GerarTokenJwt(Usuario usuario)
     {
         var jwtSettings = _config.GetSection("JwtSettings");
-        var secretKey = Encoding.ASCII.GetBytes(jwtSettings["SecureKey"]!);
+        var secretKey = Encoding.UTF8.GetBytes(jwtSettings["SecureKey"]!);
 
         var claims = new[]
         {
@@ -67,10 +67,14 @@ public class AuthService
         var key = new SymmetricSecurityKey(secretKey);
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+        // Tempo de expiração configurável via appsettings.json.
+        // Se não vier configurado, usa 120 minutos como padrão.
+        var minutosExpiracao = jwtSettings.GetValue<int?>("MinutosExpiracao") ?? 120;
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddHours(4), // Token válido por 4 horas
+            Expires = DateTime.UtcNow.AddMinutes(minutosExpiracao),
             Issuer = jwtSettings["Issuer"],
             Audience = jwtSettings["Audience"],
             SigningCredentials = credentials
