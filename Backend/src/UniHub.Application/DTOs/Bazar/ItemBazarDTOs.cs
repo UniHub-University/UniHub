@@ -8,8 +8,7 @@ public record CriarItemBazarDto(
     decimal Preco,
     int QuantidadeDisponivel,
     string Categoria,
-    CondicaoItem Condicao,
-    Guid VendedorId
+    CondicaoItem Condicao
 );
 
 public record AtualizarItemBazarDto(

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using UniHub.Application.DTOs.Bazar;
 using UniHub.Domain.Entities;
@@ -8,6 +9,7 @@ namespace UniHub.API.Controllers;
 
 [ApiController]
 [Route("api/itens-bazar")]
+[Authorize]
 public class ItensBazarController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -17,15 +19,14 @@ public class ItensBazarController : ControllerBase
         _context = context;
     }
 
-    // CREATE: POST /api/itens-bazar
+        // CREATE: POST /api/itens-bazar
     [HttpPost]
     public async Task<ActionResult<ItemBazarRespostaDto>> Criar([FromBody] CriarItemBazarDto dto)
     {
-        var vendedorExiste = await _context.Vendedores.AnyAsync(v => v.Id == dto.VendedorId);
-        if (!vendedorExiste)
-        {
-            return BadRequest(new { mensagem = "Vendedor não encontrado com o ID informado." });
-        }
+        var usuarioId = Guid.Parse(User.FindFirst("sub")?.Value ?? Guid.Empty.ToString());
+        var vendedor = await _context.Vendedores.FirstOrDefaultAsync(v => v.UsuarioId == usuarioId);
+        if (vendedor is null)
+            return BadRequest(new { mensagem = "Usuario precisa ter um perfil de vendedor para publicar itens." });
 
         var item = new ItemBazar
         {
@@ -35,7 +36,7 @@ public class ItensBazarController : ControllerBase
             QuantidadeDisponivel = dto.QuantidadeDisponivel,
             Categoria = dto.Categoria,
             Condicao = dto.Condicao,
-            VendedorId = dto.VendedorId,
+            VendedorId = vendedor.Id, // nao vem mais do dto
             DataPublicacao = DateTime.UtcNow,
             Status = ProdutoStatus.Disponivel
         };
@@ -67,7 +68,7 @@ public class ItensBazarController : ControllerBase
         return Ok(MapearParaDto(item));
     }
 
-    // UPDATE: PUT /api/itens-bazar/{id}
+       // UPDATE: PUT /api/itens-bazar/{id}
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Atualizar(Guid id, [FromBody] AtualizarItemBazarDto dto)
     {
@@ -75,6 +76,11 @@ public class ItensBazarController : ControllerBase
 
         if (item == null)
             return NotFound(new { mensagem = "Item do bazar não encontrado." });
+
+        var usuarioId = Guid.Parse(User.FindFirst("sub")?.Value ?? Guid.Empty.ToString());
+        var vendedor = await _context.Vendedores.FirstOrDefaultAsync(v => v.UsuarioId == usuarioId);
+        if (vendedor is null || item.VendedorId != vendedor.Id)
+            return Forbid(); // 403: item existe, mas nao pertence a esse usuario
 
         item.Nome = dto.Nome;
         item.Descricao = dto.Descricao;
@@ -88,7 +94,7 @@ public class ItensBazarController : ControllerBase
         return NoContent();
     }
 
-    // DELETE: DELETE /api/itens-bazar/{id}
+       // DELETE: DELETE /api/itens-bazar/{id}
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Remover(Guid id)
     {
@@ -96,6 +102,11 @@ public class ItensBazarController : ControllerBase
 
         if (item == null)
             return NotFound(new { mensagem = "Item do bazar não encontrado." });
+
+        var usuarioId = Guid.Parse(User.FindFirst("sub")?.Value ?? Guid.Empty.ToString());
+        var vendedor = await _context.Vendedores.FirstOrDefaultAsync(v => v.UsuarioId == usuarioId);
+        if (vendedor is null || item.VendedorId != vendedor.Id)
+            return Forbid(); // 403: item existe, mas nao pertence a esse usuario
 
         _context.ItensBazar.Remove(item);
         await _context.SaveChangesAsync();
