@@ -1,8 +1,12 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Google.Apis.Auth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using UniHub.Domain.Entities;
 using UniHub.Infrastructure.Data;
 
@@ -10,19 +14,9 @@ namespace UniHub.Application.Services;
 
 public class AuthService
 {
-    // É a conexão com o banco de dados (Neon/Postgres, via Entity Framework).
-    // Sem ele, o AuthService não teria como consultar se um usuário já existe
-    // (_context.Usuarios.FirstOrDefaultAsync) nem salvar um novo usuário
-    // no primeiro acesso (_context.Usuarios.Add / SaveChangesAsync).
     private readonly AppDbContext _context;
-
-    // É o acesso às configurações do appsettings.json — em especial,
-    // a chave secreta usada para assinar o Token JWT (JwtSettings:SecureKey).
-    // Sem ele, o método que gera o token não teria de onde ler essa chave.
     private readonly IConfiguration _config;
 
-    // O contexto do banco e a configuração (chaves do JWT) chegam via
-    // injeção de dependência, em vez de serem instanciados aqui dentro.
     public AuthService(AppDbContext context, IConfiguration config)
     {
         _context = context;
@@ -31,19 +25,15 @@ public class AuthService
 
     public async Task<Usuario> ValidarLoginGoogleAsync(string idToken)
     {
-        // Valida a assinatura do token diretamente com os servidores do Google
         var payload = await GoogleJsonWebSignature.ValidateAsync(idToken);
 
-        // Bloqueia o acesso de qualquer e-mail que não seja da instituição
         if (!payload.Email.EndsWith("@unifesp.br"))
         {
             throw new UnauthorizedAccessException("Acesso negado. Utilize seu e-mail @unifesp.br.");
         }
 
-        // Consulta se esse usuário já existe no banco pelo email institucional
         var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.EmailInstitucional == payload.Email);
 
-        // Retorna o usuário validado (futuramente, conectaremos com o banco aqui)
         if (usuario == null)
         {
             usuario = new Usuario
@@ -57,7 +47,42 @@ public class AuthService
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
         }
-        // Retorno obrigatório do usuário (novo ou existente)
+        
         return usuario;
+    }
+
+    // NOVO MÉTODO: Cria o token oficial do UniHub usando os dados do appsettings.json
+    public string GerarTokenJwt(Usuario usuario)
+    {
+        var jwtSettings = _config.GetSection("JwtSettings");
+        var secretKey = Encoding.UTF8.GetBytes(jwtSettings["SecureKey"]!);
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, usuario.EmailInstitucional),
+            new Claim(JwtRegisteredClaimNames.Name, usuario.NomeCompleto)
+        };
+
+        var key = new SymmetricSecurityKey(secretKey);
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        // Tempo de expiração configurável via appsettings.json.
+        // Se não vier configurado, usa 120 minutos como padrão.
+        var minutosExpiracao = jwtSettings.GetValue<int?>("MinutosExpiracao") ?? 120;
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.UtcNow.AddMinutes(minutosExpiracao),
+            Issuer = jwtSettings["Issuer"],
+            Audience = jwtSettings["Audience"],
+            SigningCredentials = credentials
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+
+        return tokenHandler.WriteToken(token);
     }
 }
