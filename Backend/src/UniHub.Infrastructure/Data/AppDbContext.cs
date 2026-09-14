@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Vendedor> Vendedores { get; set; }
     public DbSet<Produto> Produtos { get; set; }
+    public DbSet<ItemBazar> ItensBazar { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
