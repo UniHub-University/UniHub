@@ -107,6 +107,36 @@ public class ItensBazarController : ControllerBase
         return NoContent();
     }
 
+        // SEARCH: GET /api/itens-bazar/buscar?categoria=&precoMin=&precoMax=&disponivel=
+    [HttpGet("buscar")]
+    public async Task<ActionResult<IEnumerable<ItemBazarRespostaDto>>> Buscar(
+        [FromQuery] string? categoria,
+        [FromQuery] decimal? precoMin,
+        [FromQuery] decimal? precoMax,
+        [FromQuery] bool? disponivel)
+    {
+        var query = _context.ItensBazar.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(categoria))
+            query = query.Where(item => item.Categoria == categoria);
+
+        if (precoMin.HasValue)
+            query = query.Where(item => item.Preco >= precoMin.Value);
+
+        if (precoMax.HasValue)
+            query = query.Where(item => item.Preco <= precoMax.Value);
+
+        if (disponivel.HasValue)
+        {
+            var statusEsperado = disponivel.Value ? ProdutoStatus.Disponivel : ProdutoStatus.Esgotado;
+            query = query.Where(item => item.Status == statusEsperado);
+        }
+
+        var itens = await query.ToListAsync();
+        var resposta = itens.Select(MapearParaDto);
+
+        return Ok(resposta);
+    }
     private static ItemBazarRespostaDto MapearParaDto(ItemBazar item) =>
         new(
             item.Id,
