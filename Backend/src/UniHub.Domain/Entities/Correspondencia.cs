@@ -40,7 +40,9 @@ public class Correspondencia
 
         Status = StatusCorrespondencia.AceitaPeloVoluntario;
         AceitaEm = DateTime.UtcNow;
-        Solicitacao?.MarcarEmAndamento();
+        if (Solicitacao is null)
+              throw new InvalidOperationException("Solicitacao precisa estar carregada (via Include) para aceitar a correspondencia.");
+        Solicitacao.MarcarEmAndamento();
     }
 
     /// Chamado explicitamente pelo solicitante (nunca automaticamente).
