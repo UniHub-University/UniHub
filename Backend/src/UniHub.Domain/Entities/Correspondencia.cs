@@ -62,5 +62,10 @@ public class Correspondencia
         Status = StatusCorrespondencia.Concluida;
     }
 
-    public void Cancelar() => Status = StatusCorrespondencia.Cancelada;
+    public void Cancelar()
+{
+    if (Status == StatusCorrespondencia.Concluida)
+        throw new InvalidOperationException("Nao e possivel cancelar uma correspondencia ja concluida.");
+    Status = StatusCorrespondencia.Cancelada;
+}
 }
