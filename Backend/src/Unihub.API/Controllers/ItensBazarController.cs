@@ -51,13 +51,9 @@ public class ItensBazarController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ItemBazarRespostaDto>>> ObterTodos()
     {
-        var itens = await _context.ItensBazar
-            .AsNoTracking()
-            .Select(item => MapearParaDto(item))
-            .ToListAsync();
-
-        return Ok(itens);
-    }
+        var itens = await _context.ItensBazar.AsNoTracking().ToListAsync();
+        var resposta = itens.Select(MapearParaDto);
+        return Ok(resposta);    }
 
     // READ: GET /api/itens-bazar/{id}
     [HttpGet("{id:guid}")]
