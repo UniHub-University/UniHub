@@ -41,7 +41,7 @@ public class Doacao
 
     public void ConfirmarEntrega()
     {
-        if(Status != StatusDoacao.Prometida)
+        if(Status != StatusDoacao.Pendente)
             throw new InvalidOperationException("Só uma doação prometida pode ser marcada como entregue.");
             Status = StatusDoacao.Concluida;
             EntregueEm = DateTime.UtcNow;
