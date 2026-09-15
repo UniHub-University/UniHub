@@ -15,7 +15,7 @@ public class PedidoRepository :IPedidoRepository
 
     public async Task<Pedido> AddAsync(Pedido pedido){
         _context.Set<Pedido>().Add(pedido);
-        await _context.SaveChantesAsync();
+        await _context.SaveChangesAsync();
         return pedido;
     }
 
