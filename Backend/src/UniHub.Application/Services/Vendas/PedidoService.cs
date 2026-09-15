@@ -1,6 +1,6 @@
 using UniHub.Application.DTOs.Vendas;
 using UniHub.Application.Interfaces.Vendas;
-using Unihub.Domain.Entities;
+using UniHub.Domain.Entities;
 
 namespace UniHub.Application.Services.Vendas;
 
