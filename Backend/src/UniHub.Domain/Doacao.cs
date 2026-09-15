@@ -49,7 +49,7 @@ public class Doacao
 
     public void Cancelar()
     {
-        if(Status == StatusDoacao.Entregue)
+        if(Status == StatusDoacao.Concluida)
             throw new InvalidOperationException("Não é possível cancelar uma doação já entregue.");
             Status = StatusDoacao.Cancelada;
     }
