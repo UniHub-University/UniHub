@@ -34,7 +34,7 @@ public class Doacao
 
     public string Descricao {get; set;} = string.Empty;
 
-    public StatusDoacao Status {get; private set;} = StatusDoacao.Prometida;
+    public StatusDoacao Status {get; private set;} = StatusDoacao.Pendente;
 
     public DateTime CreatedAt {get; set;} = DateTime.UtcNow;
     public DateTime? EntregueEm {get; private set; }
