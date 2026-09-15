@@ -39,7 +39,7 @@ public class Doacao
     public DateTime CreatedAt {get; set;} = DateTime.UtcNow;
     public DateTime? EntregueEm {get; private set; }
 
-    public void ConfimarEntrega()
+    public void ConfirmarEntrega()
     {
         if(Status != StatusDoacao.Prometida)
             throw new InvalidOperationException("Só uma doação prometida pode ser marcada como entregue.");
