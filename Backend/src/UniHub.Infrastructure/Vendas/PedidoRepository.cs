@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using UniHub.Application.Interface.Vendas;
 using UniHub.Domain.Entities;
-using Unihub.Infrastructure.Data;
+using UniHub.Infrastructure.Data;
 
 namespace Unihub.Infrastracture.Repositories.Vendas;
 
