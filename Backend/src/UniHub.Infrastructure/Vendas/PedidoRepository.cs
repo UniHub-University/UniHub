@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using UniHub.Application.Interface.Vendas;
+using UniHub.Application.Interfaces.Vendas;
 using UniHub.Domain.Entities;
 using UniHub.Infrastructure.Data;
 
