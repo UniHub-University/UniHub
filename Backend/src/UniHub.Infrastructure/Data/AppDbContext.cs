@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<Vendedor> Vendedores { get; set; }
     public DbSet<Produto> Produtos { get; set; }
     public DbSet<ItemBazar> ItensBazar { get; set; }
+    public DbSet<RestricaoAlimentar> RestricoesAlimentares { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -24,5 +25,10 @@ public class AppDbContext : DbContext
             .HasOne(u => u.Vendedor)
             .WithOne(v => v.Usuario)
             .HasForeignKey<Vendedor>(v => v.UsuarioId);
+
+        modelBuilder.Entity<Usuario>()
+            .HasMany(u => u.RestricoesAlimentares)
+            .WithMany(r => r.Usuarios)
+            .UsingEntity(j => j.ToTable("UsuarioRestricaoAlimentar")); // Nome explícito para a tabela associativa N:N
     }
 }
