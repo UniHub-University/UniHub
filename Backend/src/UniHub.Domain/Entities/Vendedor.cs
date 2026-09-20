@@ -19,6 +19,9 @@ public class Vendedor
     public decimal NotaMedia { get; private set; } = 0;
     public int QtdAvaliacoes { get; private set; } = 0;
 
+    public ICollection<LocalVenda> Locais { get; set; } = new List<LocalVenda>();
+    public ICollection<HorarioVenda> Horarios { get; set; } = new List<HorarioVenda>();
+
     public List<Produto> ProdutosPublicados { get; set; } = new();
 
     // Adiciona um novo produto a lista de produtos publicados pelo vendedor.
