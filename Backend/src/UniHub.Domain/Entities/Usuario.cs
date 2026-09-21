@@ -52,7 +52,7 @@ public class Usuario
     // solicitacoes de apoio feitas por este usuario (modulo Acao Solidaria)
     public ICollection<SolicitacaoApoio> Solicitacoes { get; set; } = new List<SolicitacaoApoio>();
 
-    public virtual ICollection<RestricaoAlimentar> RestricoesAlimentares { get; set; } = new List<RestricaoAlimentar>();
+    public ICollection<RestricaoAlimentar> RestricoesAlimentares { get; set; } = new List<RestricaoAlimentar>();
 
     /// Atualiza os dados basicos de cadastro do usuario (nome, telefone e foto).
     /// O email institucional e o GoogleId nao sao alterados aqui de proposito,
