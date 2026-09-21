@@ -20,14 +20,15 @@ public class VendedorController : ControllerBase
     }
 
     [HttpPut("logistica")]
+    
     public async Task<IActionResult> AtualizarLogistica([FromBody] AtualizarLogisticaDTO dto)
     {
         var usuarioId = Guid.Parse(User.FindFirst("sub")?.Value ?? Guid.Empty.ToString());
-        var sucesso = await _vendedorService.AtualizarLogisticaAsync(usuarioId, dto);
+        var resultado = await _vendedorService.AtualizarLogisticaAsync(usuarioId, dto);
 
-        if (!sucesso)
-            return BadRequest(new { mensagem = "Usuário não possui um perfil de vendedor válido ou erro ao atualizar." });
+        if (!resultado.Sucesso)
+            return BadRequest(new { mensagem = resultado.Mensagem });  
 
-        return Ok(new { mensagem = "Locais e horários atualizados com sucesso!" });
+        return Ok(new { mensagem = resultado.Mensagem });
     }
 }
