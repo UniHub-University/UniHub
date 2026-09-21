@@ -16,7 +16,11 @@ namespace UniHub.Application.DTOs
 
     public class HorarioVendaDTO
     {
-        public string DiaSemana { get; set; } = string.Empty;
+        public enum DiaSemana
+{
+    Domingo = 0, Segunda = 1, Terca = 2, Quarta = 3,
+    Quinta = 4, Sexta = 5, Sabado = 6
+}
         public string HoraInicio { get; set; } = string.Empty; // Enviar como string "12:00"
         public string HoraFim { get; set; } = string.Empty;
     }
