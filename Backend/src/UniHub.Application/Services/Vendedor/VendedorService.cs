@@ -20,6 +20,13 @@ public class VendedorService
     }
 
     public async Task<LogisticaResultDto> AtualizarLogisticaAsync(Guid usuarioId, AtualizarLogisticaDTO dto)
+
+    public VendedorService(AppDbContext context)
+    {
+        _context = context;
+    }
+
+   public async Task<LogisticaResultDto> AtualizarLogisticaAsync(Guid usuarioId, AtualizarLogisticaDTO dto)
     {
         var vendedor = await _context.Vendedores
             .Include(v => v.Locais)
@@ -43,15 +50,15 @@ public class VendedorService
 
         foreach (var horarioDto in dto.Horarios)
         {
-            if(!TimeSpan.TryParse(horarioDto.HoraInicio, out var horaInicio) ||
-               !TimeSpan.TryParse(horarioDto.HoraFim, out var horaFim))
+            if (!TimeSpan.TryParse(horarioDto.HoraInicio, out var horaInicio) ||
+                !TimeSpan.TryParse(horarioDto.HoraFim, out var horaFim))
             {
                 return new LogisticaResultDto(false, $"Horário inválido para '{horarioDto.DiaSemana}'. Use o formato HH:mm.");
             }
 
-            if(horaInicio >= horaFim)
+            if (horaInicio >= horaFim)
             {
-                return new LogisticaResultDto(false, $"Horário de início dever ser antes do fim ('{horarioDto.DiaSemana}').");
+                return new LogisticaResultDto(false, $"Horário de início deve ser antes do fim ('{horarioDto.DiaSemana}').");
             }
 
             vendedor.Horarios.Add(new HorarioVenda

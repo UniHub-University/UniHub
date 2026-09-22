@@ -16,6 +16,10 @@ public class AppDbContext : DbContext
     public DbSet<ItemBazar> ItensBazar { get; set; }
     public DbSet<RestricaoAlimentar> RestricoesAlimentares { get; set; }
 
+    public DbSet<RestricaoAlimentar> RestricoesAlimentares { get; set; }
+    public DbSet<HorarioVenda> HorariosVenda { get; set; }
+    public DbSet<LocalVenda> LocaisVenda { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -26,9 +30,22 @@ public class AppDbContext : DbContext
             .WithOne(v => v.Usuario)
             .HasForeignKey<Vendedor>(v => v.UsuarioId);
 
+        // 1. Relação N:N (Muitos-para-Muitos) entre Usuario e RestricaoAlimentar
         modelBuilder.Entity<Usuario>()
-            .HasMany(u => u.RestricoesAlimentares)
+            .HasMany(u => u.RestricoesAlimentares) 
             .WithMany(r => r.Usuarios)
-            .UsingEntity(j => j.ToTable("UsuarioRestricaoAlimentar")); // Nome explícito para a tabela associativa N:N
+            .UsingEntity(j => j.ToTable("UsuarioRestricaoAlimentar"));
+
+        // 2. Relação 1:N (Um-para-Muitos) entre Vendedor e HorarioVenda
+        modelBuilder.Entity<Vendedor>()
+            .HasMany(v => v.Horarios)
+            .WithOne(h => h.Vendedor)
+            .HasForeignKey(h => h.VendedorId);
+
+        // 3. Relação 1:N (Um-para-Muitos) entre Vendedor e LocalVenda
+        modelBuilder.Entity<Vendedor>()
+            .HasMany(v => v.Locais)
+            .WithOne(l => l.Vendedor)
+            .HasForeignKey(l => l.VendedorId);
     }
 }
