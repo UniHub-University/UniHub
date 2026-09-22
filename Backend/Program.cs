@@ -47,9 +47,21 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("PermitirFrontend", policy =>
     {
-        policy.AllowAnyOrigin() // Em produção, trocamos pelo domínio real do frontend
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        // Verifica se o sistema está rodando em ambiente local (Development)
+        if (builder.Environment.IsDevelopment())
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        }
+        else
+        {
+            // Em produção, usa o WithOrigins para travar a API apenas para o domínio oficial
+            // Colocamos URLs de exemplo que a equipe do Front poderá ajustar depois
+            policy.WithOrigins("https://unihub.com.br", "https://unihub-app.vercel.app") 
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        }
     });
 });
 
