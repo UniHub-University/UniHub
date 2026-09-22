@@ -17,7 +17,7 @@ public class AppDbContext : DbContext
 
     // --- MAPEAMENTOS PENDENTES DA SPRINT (Membros 3 e 6) ---
     // Descomente as linhas abaixo quando as classes existirem no projeto.
-    // public DbSet<RestricaoAlimentar> RestricoesAlimentares { get; set; }
+    public DbSet<RestricaoAlimentar> RestricoesAlimentares { get; set; }
     // public DbSet<HorarioVenda> HorariosVenda { get; set; }
     // public DbSet<LocalVenda> LocaisVenda { get; set; }
 
