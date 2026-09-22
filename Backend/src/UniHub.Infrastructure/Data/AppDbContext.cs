@@ -17,7 +17,7 @@ public class AppDbContext : DbContext
 
     // --- MAPEAMENTOS PENDENTES DA SPRINT (Membros 3 e 6) ---
     // Descomente as linhas abaixo quando as classes existirem no projeto.
-    // public DbSet<RestricaoAlimentar> RestricoesAlimentares { get; set; }
+    public DbSet<RestricaoAlimentar> RestricoesAlimentares { get; set; }
     // public DbSet<HorarioVenda> HorariosVenda { get; set; }
     // public DbSet<LocalVenda> LocaisVenda { get; set; }
 
@@ -35,7 +35,7 @@ public class AppDbContext : DbContext
         // Descomente o bloco abaixo assim que os membros 3 e 6 finalizarem o merge.
 
         /*
-        // 1. Relação N:N (Muitos-para-Muitos) entre Usuario e RestricaoAlimentar
+        1. Relação N:N (Muitos-para-Muitos) entre Usuario e RestricaoAlimentar
         modelBuilder.Entity<Usuario>()
             .HasMany(u => u.Restricoes) 
             .WithMany(r => r.Usuarios)
