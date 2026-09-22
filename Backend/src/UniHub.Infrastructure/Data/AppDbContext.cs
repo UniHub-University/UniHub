@@ -35,7 +35,7 @@ public class AppDbContext : DbContext
         // Descomente o bloco abaixo assim que os membros 3 e 6 finalizarem o merge.
 
         /*
-        // 1. Relação N:N (Muitos-para-Muitos) entre Usuario e RestricaoAlimentar
+        1. Relação N:N (Muitos-para-Muitos) entre Usuario e RestricaoAlimentar
         modelBuilder.Entity<Usuario>()
             .HasMany(u => u.Restricoes) 
             .WithMany(r => r.Usuarios)
