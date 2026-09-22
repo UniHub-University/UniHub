@@ -31,7 +31,7 @@ public class AppDbContext : DbContext
 
         // 1. Relação N:N (Muitos-para-Muitos) entre Usuario e RestricaoAlimentar
         modelBuilder.Entity<Usuario>()
-            .HasMany(u => u.Restricoes) 
+            .HasMany(u => u.RestricoesAlimentares) 
             .WithMany(r => r.Usuarios)
             .UsingEntity(j => j.ToTable("UsuarioRestricaoAlimentar"));
 
