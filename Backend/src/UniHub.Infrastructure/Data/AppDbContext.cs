@@ -16,7 +16,6 @@ public class AppDbContext : DbContext
     public DbSet<ItemBazar> ItensBazar { get; set; }
     public DbSet<RestricaoAlimentar> RestricoesAlimentares { get; set; }
 
-    public DbSet<RestricaoAlimentar> RestricoesAlimentares { get; set; }
     public DbSet<HorarioVenda> HorariosVenda { get; set; }
     public DbSet<LocalVenda> LocaisVenda { get; set; }
 

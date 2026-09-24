@@ -59,7 +59,7 @@ public class PerfilConsumidorController : ControllerBase
         var idsDesejados = dto?.RestricoesIds ?? new List<Guid>();
 
         // 3. Acesso direto via DbSet adicionado no AppDbContext (_context.RestricaoAlimentar)
-        var restricoesAtuais = await _context.RestricaoAlimentar
+        var restricoesAtuais = await _context.RestricoesAlimentares
             .Include(r => r.Usuarios)
             .Where(r => r.Usuarios.Any(u => u.Id == usuario.Id))
             .ToListAsync();
@@ -68,7 +68,7 @@ public class PerfilConsumidorController : ControllerBase
         List<RestricaoAlimentar> novasRestricoes = new();
         if (idsDesejados.Any())
         {
-            novasRestricoes = await _context.RestricaoAlimentar
+            novasRestricoes = await _context.RestricoesAlimentares
                 .Include(r => r.Usuarios)
                 .Where(r => idsDesejados.Contains(r.Id))
                 .ToListAsync();
