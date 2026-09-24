@@ -19,6 +19,15 @@ public class Vendedor
     public decimal NotaMedia { get; private set; } = 0;
     public int QtdAvaliacoes { get; private set; } = 0;
 
+    
+    // Restaurados apos regressao identificada em PR anterior -- estes
+    // campos sao usados por VendedorService.AtualizarInfoAsync e pela
+    // rota PUT /api/perfil/vendedor/info.
+    public string? FotoUrl { get; set; }
+    public string? CardapioUrl { get; set; }
+    public string? DescricaoNegocio { get; set; }
+
+    // --- Logistica ---
     public ICollection<LocalVenda> Locais { get; set; } = new List<LocalVenda>();
     public ICollection<HorarioVenda> Horarios { get; set; } = new List<HorarioVenda>();
 

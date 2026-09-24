@@ -19,13 +19,13 @@ public class VendedorService
         _imageStorage = imageStorage;
     }
 
-   public async Task<LogisticaResultDto> AtualizarLogisticaAsync(Guid usuarioId, AtualizarLogisticaDTO dto)
+    public async Task<LogisticaResultDto> AtualizarLogisticaAsync(Guid usuarioId, AtualizarLogisticaDTO dto)
     {
         var vendedor = await _context.Vendedores
             .Include(v => v.Locais)
             .Include(v => v.Horarios)
             .FirstOrDefaultAsync(v => v.UsuarioId == usuarioId);
-        
+
         if (vendedor == null)
             return new LogisticaResultDto(false, "Usuário não possui um perfil de vendedor válido.");
 
@@ -43,6 +43,15 @@ public class VendedorService
 
         foreach (var horarioDto in dto.Horarios)
         {
+            // HorarioVendaDTO.DiaSemana ainda chega como string do frontend
+            // (ex: "Segunda"); a entidade usa o enum DiaSemana (Domain.Entities).
+            // Enum.TryParse com ignoreCase=true evita quebrar por diferenca
+            // de maiuscula/minuscula vinda do cliente.
+            if (!Enum.TryParse<DiaSemana>(horarioDto.DiaSemana, ignoreCase: true, out var diaSemana))
+            {
+                return new LogisticaResultDto(false, $"Dia da semana inválido: '{horarioDto.DiaSemana}'.");
+            }
+
             if (!TimeSpan.TryParse(horarioDto.HoraInicio, out var horaInicio) ||
                 !TimeSpan.TryParse(horarioDto.HoraFim, out var horaFim))
             {
@@ -56,7 +65,7 @@ public class VendedorService
 
             vendedor.Horarios.Add(new HorarioVenda
             {
-                DiaSemana = horarioDto.DiaSemana,
+                DiaSemana = diaSemana,
                 HoraInicio = horaInicio,
                 HoraFim = horaFim
             });
@@ -64,56 +73,55 @@ public class VendedorService
 
         await _context.SaveChangesAsync();
         return new LogisticaResultDto(true, "Logística atualizada com sucesso.");
-
     }
 
-    /* Atualiza os dados descritivos da loja (foto, cardapio, descricao).
-    Espera que FotoUrl/CardapioUrl ja tenham sido geradas previamente
-    via POST /api/upload/imagem -- este metodo so persiste as URLs,
-     nao faz upload. */
-
+    /// Atualiza os dados descritivos da loja (foto, cardapio, descricao).
+    /// Espera que FotoUrl/CardapioUrl ja tenham sido geradas previamente
+    /// via POST /api/upload/imagem -- este metodo so persiste as URLs,
+    /// nao faz upload.
     public async Task<InfoVendedorResultDto> AtualizarInfoAsync(Guid usuarioId, AtualizarInfoVendedorDto dto)
     {
         var vendedor = await _context.Vendedores.FirstOrDefaultAsync(v => v.UsuarioId == usuarioId);
 
-        if(vendedor == null)
+        if (vendedor == null)
             return new InfoVendedorResultDto(false, "Usuário não possui um perfil de vendedor válido.");
 
-        // Validar se as URLs pertencem ao provedor de imagens configurado
-        if(!string.IsNullOrWhiteSpace(dto.FotoUrl) && !_imageStorage.UrlPertenceAoProvedor(dto.FotoUrl))
+        // Valida que as URLs recebidas realmente vieram do Cloudinary configurado.
+        if (!string.IsNullOrWhiteSpace(dto.FotoUrl) && !_imageStorage.UrlPertenceAoProvedor(dto.FotoUrl))
             return new InfoVendedorResultDto(false, "A URL da foto não pertence ao provedor de imagens configurado.");
-        
-        if(!string.IsNullOrWhiteSpace(dto.CardapioUrl) && !_imageStorage.UrlPertenceAoProvedor(dto.CardapioUrl))
+
+        if (!string.IsNullOrWhiteSpace(dto.CardapioUrl) && !_imageStorage.UrlPertenceAoProvedor(dto.CardapioUrl))
             return new InfoVendedorResultDto(false, "A URL do cardápio não pertence ao provedor de imagens configurado.");
-        
-        //Se a foto ou cardapio foram alterados, deletar a imagem antiga do provedor
-        if(dto.FotoUrl is not null && dto.FotoUrl != vendedor.FotoUrl)
+
+        // Se a foto ou cardapio mudaram, remove a imagem antiga do provedor
+        // para nao deixar imagens orfas consumindo a cota gratuita.
+        if (dto.FotoUrl is not null && dto.FotoUrl != vendedor.FotoUrl)
         {
-            await RemoverImagemAntiga(vendedor.FotoUrl);
+            await RemoverImagemAntigaAsync(vendedor.FotoUrl);
             vendedor.FotoUrl = string.IsNullOrWhiteSpace(dto.FotoUrl) ? null : dto.FotoUrl;
         }
 
-        if(dto.CardapioUrl is not null && dto.CardapioUrl != vendedor.CardapioUrl)
+        if (dto.CardapioUrl is not null && dto.CardapioUrl != vendedor.CardapioUrl)
         {
-            await RemoverImagemAntiga(vendedor.CardapioUrl);
+            await RemoverImagemAntigaAsync(vendedor.CardapioUrl);
             vendedor.CardapioUrl = string.IsNullOrWhiteSpace(dto.CardapioUrl) ? null : dto.CardapioUrl;
         }
 
-        if(dto.Descricao is not null)
+        if (dto.DescricaoNegocio is not null)
         {
-            vendedor.Descricao = dto.Descricao;
+            vendedor.DescricaoNegocio = dto.DescricaoNegocio;
         }
 
         await _context.SaveChangesAsync();
         return new InfoVendedorResultDto(true, "Informações da loja atualizadas com sucesso!");
     }
 
-    private async Task RemoverImagemAntiga(string? urlAntiga)
+    private async Task RemoverImagemAntigaAsync(string? urlAntiga)
     {
-        if(string.IsNullOrWhiteSpace(urlAntiga)) return;
+        if (string.IsNullOrWhiteSpace(urlAntiga)) return;
 
         var publicId = _imageStorage.ExtrairPublicId(urlAntiga);
-        if(publicId is not null)
+        if (publicId is not null)
         {
             await _imageStorage.DeleteAsync(publicId);
         }
