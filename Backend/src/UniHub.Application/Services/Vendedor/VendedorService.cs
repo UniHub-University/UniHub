@@ -19,13 +19,6 @@ public class VendedorService
         _imageStorage = imageStorage;
     }
 
-    public async Task<LogisticaResultDto> AtualizarLogisticaAsync(Guid usuarioId, AtualizarLogisticaDTO dto)
-
-    public VendedorService(AppDbContext context)
-    {
-        _context = context;
-    }
-
    public async Task<LogisticaResultDto> AtualizarLogisticaAsync(Guid usuarioId, AtualizarLogisticaDTO dto)
     {
         var vendedor = await _context.Vendedores
