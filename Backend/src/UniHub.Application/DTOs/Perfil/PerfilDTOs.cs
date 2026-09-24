@@ -1,1 +1,12 @@
-namespace UniHub.Application.DTOs.Perfil; public record PerfilRespostaDto( Guid Id, string NomeCompleto, string EmailInstitucional, string Telefone, string FotoPerfilUrl, string Role, bool EhVendedor, bool EhVoluntario );
+namespace UniHub.Application.DTOs.Perfil; 
+
+public record PerfilRespostaDto(
+  Guid Id,
+  string NomeCompleto,
+  string EmailInstitucional,
+  string Telefone,
+  string FotoPerfilUrl,
+  string Role,
+  bool EhVendedor,
+  bool EhVoluntario 
+);
