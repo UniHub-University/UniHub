@@ -1,9 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using UniHub.Infrastructure.Data;
 using UniHub.Application.Services;
+using UniHub.Application.DTOs;
+using UniHub.Application.Interfaces;
+using UniHub.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +16,12 @@ builder.Services.AddControllers();
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("Cloudinary"));
 
-builder.Services.AddDbContext<AppDbContext>(options => 
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddSingleton<IImageStorageService, CloudinaryImageStorageService>();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+           .EnableSensitiveDataLogging() // mostra os valores reais dos parametros no log
+           .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information));
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<VendedorService>();
@@ -29,6 +37,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    options.MapInboundClaims = false;
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
@@ -45,7 +54,23 @@ builder.Services.AddAuthentication(options =>
 // --- FIM DA CONFIGURAÇÃO JWT ---
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Insira o token JWT."
+    });
+
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+    });
+});
 
 builder.Services.AddCors(options =>
 {
