@@ -32,7 +32,6 @@ public class VendedorController : ControllerBase
 
     }
 
-
     /* PUT /api/perfil/vendedor/info
     Recebe URLs ja geradas via POST /api/upload/imagem (pasta=cardapios
     ou pasta=perfis) e persiste no perfil do vendedor. Nao faz upload diretamente -- ver AtualizarInfoVendedorDto para o motivo dessa
@@ -48,5 +47,21 @@ public class VendedorController : ControllerBase
             return BadRequest(new { mensagem = resultado.Mensagem });
 
         return Ok(new { mensagem = resultado.Mensagem });
+    }
+
+    
+    /// POST /api/perfil/vendedor
+    /// Cria o perfil de Vendedor para o usuario autenticado, se ele ainda
+    /// nao tiver um. Pre-requisito para usar as rotas /logistica e /info.
+    [HttpPost]
+    public async Task<IActionResult> TornarSeVendedor()
+    {
+        var usuarioId = Guid.Parse(User.FindFirst("sub")?.Value ?? Guid.Empty.ToString());
+        var resultado = await _vendedorService.TornarSeVendedorAsync(usuarioId);
+    
+        if (!resultado.Sucesso)
+            return BadRequest(new { mensagem = resultado.Mensagem });
+    
+        return Ok(new { mensagem = resultado.Mensagem, vendedorId = resultado.VendedorId });
     }
 }

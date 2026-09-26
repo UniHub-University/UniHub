@@ -22,36 +22,17 @@ public class VendedorService
     public async Task<LogisticaResultDto> AtualizarLogisticaAsync(Guid usuarioId, AtualizarLogisticaDTO dto)
     {
         var vendedor = await _context.Vendedores
-            .Include(v => v.Locais)
-            .Include(v => v.Horarios)
             .FirstOrDefaultAsync(v => v.UsuarioId == usuarioId);
 
         if (vendedor == null)
             return new LogisticaResultDto(false, "Usuário não possui um perfil de vendedor válido.");
 
-        _context.Set<LocalVenda>().RemoveRange(vendedor.Locais);
-        _context.Set<HorarioVenda>().RemoveRange(vendedor.Horarios);
-
-        foreach (var localDto in dto.Locais)
-        {
-            vendedor.Locais.Add(new LocalVenda
-            {
-                Campus = localDto.Campus,
-                PontoDeEncontro = localDto.PontoDeEncontro
-            });
-        }
-
+        // 1. Validar e montar as novas listas ANTES de apagar qualquer coisa --
+        // assim, se algo for invalido, o vendedor nao fica sem logistica
+        // cadastrada por causa de uma validacao que falhou no meio do processo.
+        var novosHorarios = new List<HorarioVenda>();
         foreach (var horarioDto in dto.Horarios)
         {
-            // HorarioVendaDTO.DiaSemana ainda chega como string do frontend
-            // (ex: "Segunda"); a entidade usa o enum DiaSemana (Domain.Entities).
-            // Enum.TryParse com ignoreCase=true evita quebrar por diferenca
-            // de maiuscula/minuscula vinda do cliente.
-            if (!Enum.TryParse<DiaSemana>(horarioDto.DiaSemana, ignoreCase: true, out var diaSemana))
-            {
-                return new LogisticaResultDto(false, $"Dia da semana inválido: '{horarioDto.DiaSemana}'.");
-            }
-
             if (!TimeSpan.TryParse(horarioDto.HoraInicio, out var horaInicio) ||
                 !TimeSpan.TryParse(horarioDto.HoraFim, out var horaFim))
             {
@@ -63,18 +44,63 @@ public class VendedorService
                 return new LogisticaResultDto(false, $"Horário de início deve ser antes do fim ('{horarioDto.DiaSemana}').");
             }
 
-            vendedor.Horarios.Add(new HorarioVenda
+            novosHorarios.Add(new HorarioVenda
             {
-                DiaSemana = diaSemana,
+                VendedorId = vendedor.Id,
+                DiaSemana = horarioDto.DiaSemana,
                 HoraInicio = horaInicio,
                 HoraFim = horaFim
             });
         }
 
+        var novosLocais = dto.Locais.Select(localDto => new LocalVenda
+        {
+            VendedorId = vendedor.Id,
+            Campus = localDto.Campus,
+            PontoDeEncontro = localDto.PontoDeEncontro
+        }).ToList();
+
+        // 2. So depois de tudo validado, apaga o antigo -- DELETE em massa
+        // direto no banco (uma unica instrucao SQL por tabela), sem depender
+        // de entidades rastreadas em memoria. Isso elimina o
+        // DbUpdateConcurrencyException que estava ocorrendo antes.
+        await _context.Set<LocalVenda>()
+            .Where(l => l.VendedorId == vendedor.Id)
+            .ExecuteDeleteAsync();
+
+        await _context.Set<HorarioVenda>()
+            .Where(h => h.VendedorId == vendedor.Id)
+            .ExecuteDeleteAsync();
+
+        // 3. Insere o novo.
+        _context.Set<LocalVenda>().AddRange(novosLocais);
+        _context.Set<HorarioVenda>().AddRange(novosHorarios);
+
         await _context.SaveChangesAsync();
         return new LogisticaResultDto(true, "Logística atualizada com sucesso.");
     }
 
+    public async Task<TornarVendedorResultDto> TornarSeVendedorAsync(Guid usuarioId)
+    {
+        var usuario = await _context.Usuarios
+            .Include(u => u.Vendedor)
+            .FirstOrDefaultAsync(u => u.Id == usuarioId);
+    
+        if (usuario is null)
+            return new TornarVendedorResultDto(false, "Usuário não encontrado.", null);
+    
+        if (usuario.Vendedor is not null)
+            return new TornarVendedorResultDto(false, "Usuário já possui um perfil de vendedor.", usuario.Vendedor.Id);
+    
+        var vendedor = usuario.TornarSeVendedor();
+    
+        _context.Vendedores.Add(vendedor);
+        await _context.SaveChangesAsync();
+    
+        return new TornarVendedorResultDto(true, "Perfil de vendedor criado com sucesso!", vendedor.Id);
+    }
+
+    
     /// Atualiza os dados descritivos da loja (foto, cardapio, descricao).
     /// Espera que FotoUrl/CardapioUrl ja tenham sido geradas previamente
     /// via POST /api/upload/imagem -- este metodo so persiste as URLs,

@@ -7,3 +7,5 @@ public record AtualizarInfoVendedorDto(
 );
 
 public record InfoVendedorResultDto(bool Sucesso, string Mensagem);
+
+public record TornarVendedorResultDto(bool Sucesso, string Mensagem, Guid? VendedorId);
