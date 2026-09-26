@@ -31,7 +31,7 @@ public class PerfilController : ControllerBase
         if (usuario is null) 
             return NotFound(new { mensagem = "Usuario nao encontrado." }); 
 
-        var resposta = new PerfilRespostaDto(
+        var perfilResposta = new PerfilRespostaDto(
             usuario.Id, 
             usuario.NomeCompleto, 
             usuario.EmailInstitucional, 
@@ -39,9 +39,10 @@ public class PerfilController : ControllerBase
             usuario.FotoPerfilUrl, 
             usuario.Role.ToString(), 
             usuario.Vendedor != null, 
-            usuario.Voluntario != null 
+            usuario.Voluntario != null,
+            usuario.CreatedAt 
         ); 
 
-        return Ok(resposta); 
+        return Ok(perfilResposta); 
     } 
 }

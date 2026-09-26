@@ -56,7 +56,7 @@ public class PerfilConsumidorController : ControllerBase
             return NotFound(new { mensagem = "Utilizador autenticado não encontrado na base de dados." });
         }
 
-        var idsDesejados = dto?.RestricoesIds ?? new List<Guid>();
+        var idsDesejados = dto?.RestricoesIds ?? new List<int>();
 
         // 3. Acesso direto via DbSet adicionado no AppDbContext (_context.RestricaoAlimentar)
         var restricoesAtuais = await _context.RestricoesAlimentares
