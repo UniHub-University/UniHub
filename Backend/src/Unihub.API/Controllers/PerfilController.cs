@@ -39,7 +39,8 @@ public class PerfilController : ControllerBase
             usuario.FotoPerfilUrl, 
             usuario.Role.ToString(), 
             usuario.Vendedor != null, 
-            usuario.Voluntario != null 
+            usuario.Voluntario != null,
+             usuario.CreatedAt 
         ); 
 
         return Ok(resposta); 

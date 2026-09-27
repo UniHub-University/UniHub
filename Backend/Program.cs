@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi;
+using UniHub.Application.Interfaces.Vendas;
+using UniHub.Application.Services.Vendas;
+using UniHub.Infrastructure.Repositories.Vendas;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +28,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<VendedorService>();
+
+builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
+builder.Services.AddScoped<PedidoService>();
 
 // --- INÍCIO DA CONFIGURAÇÃO JWT ---
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
