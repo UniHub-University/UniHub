@@ -6,7 +6,7 @@ namespace UniHub.Domain.Entities
 {
     public class RestricaoAlimentar
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public int Id { get; set; }
         public string Nome {get; set;} = string.Empty;
         public string? Descricao {get; set;}
 

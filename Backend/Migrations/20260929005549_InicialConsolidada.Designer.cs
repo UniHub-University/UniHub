@@ -13,8 +13,8 @@ using UniHub.Infrastructure.Data;
 namespace Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260924231603_AdicionarInfoVendedor")]
-    partial class AdicionarInfoVendedor
+    [Migration("20260929005549_InicialConsolidada")]
+    partial class InicialConsolidada
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,8 +28,8 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("RestricaoAlimentarUsuario", b =>
                 {
-                    b.Property<Guid>("RestricoesAlimentaresId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("RestricoesAlimentaresId")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("UsuariosId")
                         .HasColumnType("uuid");
@@ -258,9 +258,11 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("UniHub.Domain.Entities.RestricaoAlimentar", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Descricao")
                         .HasColumnType("text");
