@@ -5,6 +5,6 @@ namespace UniHub.Application.DTOs
 {
     public class AtualizarRestricoesDto
     {
-        public List<Guid> RestricoesIds { get; set; } = new();
+        public List<int> RestricoesIds { get; set; } = new();
     }
 }
