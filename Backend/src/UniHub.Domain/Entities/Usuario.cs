@@ -6,7 +6,7 @@ public enum UserRole
 {
     Aluno = 0,
     Voluntario = 1,
-    Admin = 1
+    Admin = 2
 }
 
 /// Representa um usuario do sistema.
