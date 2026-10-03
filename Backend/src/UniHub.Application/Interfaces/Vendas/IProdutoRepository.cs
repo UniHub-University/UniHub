@@ -13,5 +13,5 @@ public interface IProdutoRepository
     // Exclusão lógica: marca o produto como Inativo em vez de apagar a
     // linha do banco. Preserva o histórico de ItensPedido que referenciam
     // esse produto. Retorna false se o produto NAO existir.
-    Task <bool> DesativarAsync(Guid produtoId);
+    Task <bool> InativarAsync(Guid produtoId);
 }

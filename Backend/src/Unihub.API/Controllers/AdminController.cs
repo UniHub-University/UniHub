@@ -16,10 +16,10 @@ public class AdminController : ControllerBase
         _produtoRepository = produtoRepository;
     }
 
-    [HttpDelete("produtos/{id:guid}/desativar")]
-    public async Task<IActionResult> DesativarProduto(Guid id)
+    [HttpDelete("produtos/{id:guid}/inativar")]
+    public async Task<IActionResult> InativarProduto(Guid id)
     {
-        var sucesso = await _produtoRepository.DesativarAsync(id);
+        var sucesso = await _produtoRepository.InativarAsync(id);
 
         if (!sucesso)
         {

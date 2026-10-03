@@ -1,4 +1,3 @@
-using CloudinaryDotNet.Actions;
 using Microsoft.EntityFrameworkCore;
 using UniHub.Application.Interfaces.Vendas;
 using UniHub.Domain.Entities;
@@ -38,7 +37,7 @@ public class ProdutoRepository : IProdutoRepository
                SET ""QuantidadeDisponivel"" = ""QuantidadeDisponivel"" + {quantidade}
                WHERE ""Id"" = {produtoId}");
     }
-    public async Task<bool> DesativarAsync (Guid produtoId)
+    public async Task<bool> InativarAsync (Guid produtoId)
     {
         var produto = await _context.Set<Produto>().FirstOrDefaultAsync(p => p.Id == produtoId);
 
