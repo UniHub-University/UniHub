@@ -31,6 +31,7 @@ builder.Services.AddScoped<VendedorService>();
 
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
+builder.Services.AddScoped<ProdutoService>();
 builder.Services.AddScoped<PedidoService>();
 
 // --- INÍCIO DA CONFIGURAÇÃO JWT ---

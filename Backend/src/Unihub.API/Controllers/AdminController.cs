@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using UniHub.Application.Interfaces.Vendas;
+using UniHub.Application.Services.Vendas;
 
 namespace UniHub.API.Controllers;
 
@@ -9,17 +9,17 @@ namespace UniHub.API.Controllers;
 [Authorize(Roles = "Admin")] // Protege o controller
 public class AdminController : ControllerBase
 {
-    private readonly IProdutoRepository _produtoRepository;
+    private readonly ProdutoService _produtoService;
 
-    public AdminController(IProdutoRepository produtoRepository)
+    public AdminController(ProdutoService produtoService)
     {
-        _produtoRepository = produtoRepository;
+        _produtoService = produtoService;
     }
 
     [HttpDelete("produtos/{id:guid}/inativar")]
     public async Task<IActionResult> InativarProduto(Guid id)
     {
-        var sucesso = await _produtoRepository.InativarAsync(id);
+        var sucesso = await _produtoService.InativarProdutoAsync(id);
 
         if (!sucesso)
         {
