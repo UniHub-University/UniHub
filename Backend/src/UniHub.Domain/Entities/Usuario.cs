@@ -96,4 +96,9 @@ public class Usuario
 
         return Voluntario;
     }
+
+    public void SuspenderConta()
+    {
+        IsActive = false;
+    }
 }
