@@ -34,5 +34,22 @@ namespace UniHub.Infrastructure.Repositories
 
             return true;
         }
+
+        public async Task<bool> ReativarAsync(Guid id)
+        {
+            var usuario = await _context.Usuarios.FindAsync(id);
+
+            if (usuario == null)
+            {
+                return false;
+            }
+
+            usuario.ReativarConta();
+
+            _context.Usuarios.Update(usuario);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
     }
 }
