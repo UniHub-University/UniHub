@@ -44,4 +44,17 @@ public class AdminController : ControllerBase
 
         return NoContent(); // Retorna HTTP 204 (No Content)
     }
+
+    [HttpPatch("usuarios/{id:guid}/reativar")]
+    public async Task<IActionResult> ReativarConta(Guid id)
+    {
+        var sucesso = await _usuarioRepository.ReativarAsync(id);
+
+        if (!sucesso)
+        {
+            return NotFound(new {mensagem = "Usuário não encontrado no sistema."});
+        }
+
+        return NoContent(); // Se for sucesso, retona 204
+    }
 }

@@ -101,4 +101,9 @@ public class Usuario
     {
         IsActive = false;
     }
+
+    public void ReativarConta()
+    {
+        IsActive = true;
+    }
 }
