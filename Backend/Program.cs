@@ -11,6 +11,7 @@ using Microsoft.OpenApi;
 using UniHub.Application.Interfaces.Vendas;
 using UniHub.Application.Services.Vendas;
 using UniHub.Infrastructure.Repositories.Vendas;
+using UniHub.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,8 +31,10 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<VendedorService>();
 
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
 builder.Services.AddScoped<PedidoService>();
+builder.Services.AddScoped<ProdutoService>();
 
 // --- INÍCIO DA CONFIGURAÇÃO JWT ---
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -55,7 +58,8 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtSettings["Issuer"],
         ValidateAudience = true,
         ValidAudience = jwtSettings["Audience"],
-        ClockSkew = TimeSpan.Zero
+        ClockSkew = TimeSpan.Zero,
+        RoleClaimType = "role"
     };
 });
 // --- FIM DA CONFIGURAÇÃO JWT ---
