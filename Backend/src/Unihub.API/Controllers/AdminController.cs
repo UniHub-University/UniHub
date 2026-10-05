@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UniHub.Application.Services.Vendas;
+using UniHub.Application.Interfaces;
 
 namespace UniHub.API.Controllers;
 
@@ -10,10 +11,12 @@ namespace UniHub.API.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly ProdutoService _produtoService;
+    private readonly IUsuarioRepository _usuarioRepository;
 
-    public AdminController(ProdutoService produtoService)
+    public AdminController(ProdutoService produtoService, IUsuarioRepository usuarioRepository)
     {
         _produtoService = produtoService;
+        _usuarioRepository = usuarioRepository;
     }
 
     [HttpDelete("produtos/{id:guid}/inativar")]
@@ -24,6 +27,19 @@ public class AdminController : ControllerBase
         if (!sucesso)
         {
             return NotFound(new { mensagem = "Produto não encontrado no sistema." });
+        }
+
+        return NoContent(); // Retorna HTTP 204 (No Content)
+    }
+
+    [HttpPatch("usuarios/{id:guid}/suspender")]
+    public async Task<IActionResult> SuspenderConta(Guid id)
+    {
+        var sucesso = await _usuarioRepository.SuspenderAsync(id);
+
+        if (!sucesso)
+        {
+            return NotFound(new { mensagem = "Usuário não encontrado no sistema." });
         }
 
         return NoContent(); // Retorna HTTP 204 (No Content)
