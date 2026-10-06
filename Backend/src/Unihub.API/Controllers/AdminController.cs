@@ -19,7 +19,7 @@ public class AdminController : ControllerBase
         _usuarioRepository = usuarioRepository;
     }
 
-    [HttpDelete("produtos/{id:guid}/inativar")]
+    [HttpPatch("produtos/{id:guid}/inativar")]
     public async Task<IActionResult> InativarProduto(Guid id)
     {
         var sucesso = await _produtoService.InativarProdutoAsync(id);
