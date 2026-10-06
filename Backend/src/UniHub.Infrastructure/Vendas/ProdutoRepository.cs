@@ -38,18 +38,11 @@ public class ProdutoRepository : IProdutoRepository
                WHERE ""Id"" = {produtoId}");
     }
 
-    public async Task<bool> InativarAsync (Guid produtoId)
+    public async Task<bool> InativarAsync(Guid produtoId)
     {
-        var produto = await _context.Set<Produto>().FirstOrDefaultAsync(p => p.Id == produtoId);
-
-        if (produto == null)
-        {
-            return false;
-        }
-
-        produto.Status = ProdutoStatus.Inativo;
-        await _context.SaveChangesAsync();
-
-        return true;
+        var linhas = await _context.Set<Produto>()
+            .Where(p => p.Id == produtoId)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.Status, ProdutoStatus.Inativo));
+        return linhas == 1;
     }
 }
