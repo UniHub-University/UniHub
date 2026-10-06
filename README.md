@@ -1,62 +1,142 @@
 # UniHub 🎓
 
-O **UniHub** é um ecossistema digital desenvolvido para centralizar e otimizar as interações socioeconômicas no campus universitário da UNIFESP. O projeto mitiga a fragmentação de informações (dispersas em grupos de WhatsApp) através de uma plataforma unificada de alta disponibilidade, dividida em três pilares: comércio de alimentos, revenda de materiais acadêmicos e impacto social.
+O **UniHub** é um ecossistema digital desenvolvido para centralizar e otimizar as interações socioeconômicas no campus universitário da UNIFESP. O projeto combate a fragmentação de informações (hoje espalhadas em grupos de WhatsApp) através de uma plataforma unificada, de acesso restrito à comunidade acadêmica (`@unifesp.br`), organizada em três pilares: **comércio de alimentos**, **revenda de materiais acadêmicos** e **impacto social**.
+
+> Projeto desenvolvido na disciplina de **Engenharia de Software**, com metodologia Scrum (sprints de 2 semanas) por uma equipe de ~7-8 integrantes.
 
 ---
 
-## 🚀 Módulos do Sistema
+## → Módulos do Sistema
 
-*   🍔 **Alimentação:** Painel em tempo real para vendedores gerenciarem seus estoques e para alunos realizarem reservas, evitando filas e incertezas durante o intervalo.
-*   📚 **Bazar Acadêmico:** Marketplace focado na compra e venda segura de materiais universitários, como livros, calculadoras e equipamentos de laboratório.
-*   🤝 **Ação Solidária:** Módulo dedicado ao apoio social, conectando alunos em vulnerabilidade socioeconômica a voluntários, operando sob rigoroso sigilo de identidade.
+* 🍔 **Alimentação:** painel de pedidos em tempo real — vendedores gerenciam o estoque de lanches e alunos reservam, evitando filas e incertezas no intervalo. É o módulo que concentra o maior desafio técnico (concorrência de estoque).
+* ▪ **Bazar Acadêmico:** marketplace de compra e venda de materiais universitários entre alunos (livros, calculadoras, equipamentos), reaproveitando a mesma modelagem de produto/estoque.
+* 🤝 **Ação Solidária:** conecta alunos em situação de vulnerabilidade a voluntários, com **pseudonimização rigorosa** da identidade do solicitante (privacy by design / LGPD).
 
 ---
 
-## 🛠️ Stack Tecnológica e Arquitetura
+## 🏛️ Arquitetura
 
-O sistema foi desenhado com foco em resiliência, escalabilidade horizontal e segurança de dados, utilizando as seguintes tecnologias:
+O backend segue uma **Clean Architecture simplificada** (projeto único, camadas separadas por pastas), em que cada camada só conhece a camada abaixo:
 
-*   **Frontend:** React.js com JavaScript (Single Page Application).
-*   **Backend:** API RESTful em C# (.NET Core).
-*   **Banco de Dados:** Relacional (SQL Server / PostgreSQL) acessado via Entity Framework Core.
-*   **Infraestrutura (Cloud):** AWS (Instâncias EC2 para a aplicação e RDS para o banco de dados).
-*   **Integração Contínua:** GitHub Actions para CI/CD.
+```
+API  →  Application  →  Infrastructure  →  Domain
+```
+
+* **Domain** — entidades puras, sem dependência de nada (regras e invariantes de negócio).
+* **Application** — serviços (regra de negócio), interfaces de repositório e DTOs, organizados por módulo.
+* **Infrastructure** — EF Core, `AppDbContext`, repositórios concretos e integrações externas (Cloudinary).
+* **API** — Controllers, autenticação JWT e composição via injeção de dependência.
+
+![Diagrama de Arquitetura do UniHub](Documentos/UniHub%20-%20Diagrama%20Arquitetural.png)
+
+O diagrama acima mostra o fluxo completo: o **Frontend (React + Vite)** se autentica via **Google OAuth**, consome a **API REST (.NET)** enviando o **JWT**, e a API orquestra as entidades de domínio, persistindo em **PostgreSQL (Neon)** via Entity Framework Core e armazenando imagens no **Cloudinary**.
+
+---
+
+## 🛠️ Stack Tecnológica
+
+| Camada | Tecnologia |
+|---|---|
+| **Frontend** | React + Vite (JavaScript, SPA) |
+| **Backend** | C# / **.NET 10** (ASP.NET Core Web API) |
+| **ORM** | Entity Framework Core 10 (provider `Npgsql.EntityFrameworkCore.PostgreSQL`) |
+| **Banco de Dados** | **Neon** (PostgreSQL serverless) |
+| **Autenticação** | Google OAuth (login institucional) + JWT emitido pela própria API |
+| **Armazenamento de Imagens** | Cloudinary |
+| **Documentação de API** | Swagger / Swashbuckle (ambiente de Development) |
+| **Deploy** | Render (container Docker) — ver [`DEPLOY.md`](DEPLOY.md) |
 
 ---
 
 ## 🧠 Decisões de Engenharia e Diferenciais Técnicos
 
-Este projeto vai além de um CRUD tradicional, enfrentando desafios reais de engenharia de software:
+* **Controle de Concorrência Otimista (alta carga):** para suportar os picos do intervalo, o estoque **não** usa locks em memória (que não funcionam com múltiplas instâncias atrás de um load balancer). O decremento é um **UPDATE condicional atômico** no banco:
+  ```sql
+  UPDATE "Produtos"
+  SET "QuantidadeDisponivel" = "QuantidadeDisponivel" - @quantidade
+  WHERE "Id" = @id AND "QuantidadeDisponivel" >= @quantidade
+  ```
+  Se duas requisições disputam a última unidade, apenas uma afeta uma linha; a outra recebe zero linhas afetadas e sabe, de forma confiável, que perdeu a corrida.
 
-*   **Controle de Concorrência Otimista (Alta Carga):** Para suportar os picos extremos de requisições durante os intervalos das aulas, o sistema não utiliza bloqueios de *threads* em memória. A concorrência é gerenciada transacionalmente no banco de dados (`UPDATE com validação de linhas afetadas`), garantindo a consistência do estoque mesmo em um ambiente escalado horizontalmente.
-*   **Privacy by Design (LGPD):** O módulo de Ação Solidária foi modelado para evitar a re-identificação trivial. A identidade do solicitante é separada da solicitação através de pseudonimização no banco de dados, protegendo dados socioeconômicos sensíveis dos alunos.
-*   **Autenticação Institucional:** O acesso à plataforma é estritamente controlado. A emissão do token JWT pelo backend requer validação prévia do domínio institucional (`@unifesp.br`) via link de confirmação, garantindo um ambiente seguro e fechado para a comunidade acadêmica.
-*   **Performance:** Utilização de *Connection Pooling* para não esgotar as conexões com o RDS durante picos de acesso.
+* **Privacy by Design (LGPD):** no módulo de Ação Solidária, a identidade do solicitante é separada da solicitação por meio de um `CodigoPublico` pseudonimizado. A identidade real só pode ser revelada após `Correspondencia.AutorizarRevelacaoIdentidade()` explícito — **nunca** automaticamente.
+
+* **Autenticação Institucional:** o acesso é restrito ao domínio `@unifesp.br`, validado no login via Google OAuth antes da emissão do JWT.
+
+* **Banco serverless (Neon):** escolhido no lugar de uma instância sempre ligada por oferecer *scale-to-zero* (economia quando ocioso) e *branching* de banco por squad (ambientes de teste isolados). Usa-se sempre a connection string **com pooling** e **SSL**.
 
 ---
 
-## 👥 Estrutura da Equipe (Scrum Adaptado)
+## 📁 Estrutura do Repositório
 
-O projeto foi desenvolvido em ciclos ágeis (6 Sprints) por uma equipe técnica de 8 integrantes:
-
-*   **1x Tech Lead / Arquiteto:** Orquestração de rotas, code reviews e padrões de projeto.
-*   **2x Desenvolvedores Backend:** Lógica de negócios, API em C# e segurança.
-*   **2x Desenvolvedores Frontend:** UI/UX e consumo da API com React.
-*   **1x DBA:** Modelagem relacional, *views* e otimização de consultas SQL.
-*   **1x DevOps / Cloud:** Provisionamento AWS e CI/CD.
-*   **1x Analista de QA:** Testes de integração e testes de carga (concorrência).
+```
+UniHub/
+├── Backend/                 # API .NET 10 (ASP.NET Core)
+│   ├── src/
+│   │   ├── UniHub.Domain/           # Entidades
+│   │   ├── UniHub.Application/       # Serviços, Interfaces, DTOs
+│   │   ├── UniHub.Infrastructure/    # EF Core, repositórios, Cloudinary
+│   │   └── Unihub.API/               # Controllers
+│   ├── Migrations/
+│   ├── Dockerfile                   # Imagem de produção (deploy no Render)
+│   └── Program.cs
+├── Frontend/                # SPA React + Vite
+├── Documentos/              # Diagramas, identidade visual e documentos
+├── DEPLOY.md                # Runbook de deploy (Render + Neon)
+└── render.yaml              # Blueprint do serviço no Render
+```
 
 ---
 
 ## ⚙️ Como rodar o projeto localmente
 
 ### Pré-requisitos
-*   [.NET Core SDK](https://dotnet.microsoft.com/download)
-*   [Node.js e npm](https://nodejs.org/)
-*   [SQL Server](https://www.microsoft.com/pt-br/sql-server/sql-server-downloads) ou Docker para rodar o banco local.
+* [.NET 10 SDK](https://dotnet.microsoft.com/download)
+* [Node.js e npm](https://nodejs.org/)
+* Uma connection string de um banco **PostgreSQL** (recomendado: criar um projeto gratuito no [Neon](https://neon.tech))
 
-### Passos para execução
+### 1. Clonar o repositório
+```bash
+git clone https://github.com/UniHub-University/UniHub.git
+cd UniHub
+```
 
-1. **Clone o repositório:**
-   ```bash
-   git clone https://github.com/UniHub-University/Eng.-Software.git
+### 2. Backend
+Os segredos **nunca** ficam versionados — configure-os via `dotnet user-secrets` (localmente) ou variáveis de ambiente (produção).
+
+```bash
+cd Backend
+
+# Configure os segredos locais
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<sua-connection-string-do-neon-com-pooling-e-ssl>"
+dotnet user-secrets set "JwtSettings:SecureKey" "<chave-com-no-minimo-32-caracteres>"
+dotnet user-secrets set "Cloudinary:CloudName" "<cloud-name>"
+dotnet user-secrets set "Cloudinary:ApiKey" "<api-key>"
+dotnet user-secrets set "Cloudinary:ApiSecret" "<api-secret>"
+
+# Restaure e aplique as migrations
+dotnet restore
+dotnet ef database update
+
+# Rode a API
+dotnet run
+```
+Em ambiente **Development**, o Swagger fica disponível na URL informada pelo `dotnet run` (ex.: `http://localhost:5206/swagger`).
+
+### 3. Frontend
+```bash
+cd Frontend
+npm install
+npm run dev
+```
+
+---
+
+## 🚢 Deploy
+
+O deploy da API é feito no **Render**, a partir do `Backend/Dockerfile`, mantendo o banco no **Neon**. O passo a passo completo (variáveis de ambiente, migrations em produção, cold start e testes pós-deploy) está documentado em **[`DEPLOY.md`](DEPLOY.md)**.
+
+---
+
+## 👥 Equipe
+
+Projeto desenvolvido em ciclos ágeis (Scrum) com fatiamento vertical por domínio de negócio. Na Sprint 3, a divisão de squads foi: **Ação Solidária**, **Moderação e Gestão**, **Perfil do Vendedor (PIX)** e **Deploy**.
