@@ -45,7 +45,6 @@ namespace UniHub.Infrastructure.Repositories
 
             usuario.ReativarConta();
 
-            _context.Usuarios.Update(usuario);
             await _context.SaveChangesAsync();
 
             return true;
