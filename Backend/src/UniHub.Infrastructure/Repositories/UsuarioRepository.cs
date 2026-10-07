@@ -29,7 +29,6 @@ namespace UniHub.Infrastructure.Repositories
             usuario.SuspenderConta();
 
             //salva a alteracao no banco de dados 
-            _context.Usuarios.Update(usuario);
             await _context.SaveChangesAsync();
 
             return true;
