@@ -52,7 +52,9 @@ public class ItensBazarController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ItemBazarRespostaDto>>> ObterTodos()
     {
-        var itens = await _context.ItensBazar.AsNoTracking().ToListAsync();
+        // Adicionado Include(i => i.Vendedor)
+        var itens = await _context.ItensBazar.Include(i => i.Vendedor).AsNoTracking().ToListAsync();
+
         var resposta = itens.Select(MapearParaDto);
         return Ok(resposta);    }
 
@@ -60,7 +62,8 @@ public class ItensBazarController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ItemBazarRespostaDto>> ObterPorId(Guid id)
     {
-        var item = await _context.ItensBazar.FindAsync(id);
+        // Trocamos FindAsync por FirstOrDefaultAsync para permitir o Include
+        var item = await _context.ItensBazar.Include(i => i.Vendedor).FirstOrDefaultAsync(i => i.Id == id);
 
         if (item == null)
             return NotFound(new { mensagem = "Item do bazar não encontrado." });
@@ -125,6 +128,7 @@ public class ItensBazarController : ControllerBase
             item.Condicao,
             item.Status,
             item.DataPublicacao,
-            item.VendedorId
+            item.VendedorId,
+            item.Vendedor?.ChavePix // Adicionado: pega o PIX caso o vendedor esteja carregado
         );
 }

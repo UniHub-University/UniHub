@@ -1,3 +1,4 @@
+using System;
 using UniHub.Domain.Entities;
 
 namespace UniHub.Application.DTOs.Bazar;
@@ -31,5 +32,6 @@ public record ItemBazarRespostaDto(
     CondicaoItem Condicao,
     ProdutoStatus Status,
     DateTime DataPublicacao,
-    Guid VendedorId
+    Guid VendedorId,
+    string? ChavePix // Adicionado para exibir ao comprador (Sprint 3)
 );

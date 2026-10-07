@@ -27,6 +27,9 @@ public class Vendedor
     public string? CardapioUrl { get; set; }
     public string? DescricaoNegocio { get; set; }
 
+    // Campo adicionado para a Sprint 3 (Squad 3)
+    public string? ChavePix { get; set; }
+
     // --- Logistica ---
     public ICollection<LocalVenda> Locais { get; set; } = new List<LocalVenda>();
     public ICollection<HorarioVenda> Horarios { get; set; } = new List<HorarioVenda>();

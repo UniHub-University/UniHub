@@ -5,6 +5,7 @@ using UniHub.Application.DTOs;
 using UniHub.Application.Interfaces;
 using UniHub.Domain.Entities;
 using UniHub.Infrastructure.Data;
+using System.Text.RegularExpressions;
 
 namespace UniHub.Application.Services;
 
@@ -138,6 +139,23 @@ public class VendedorService
             vendedor.DescricaoNegocio = dto.DescricaoNegocio;
         }
 
+        // Validação e persistência da Chave PIX
+        if (dto.ChavePix is not null) // Verifica se o campo foi enviado na requisição
+        {
+            // Se foi enviada uma string vazia, o vendedor está removendo a chave
+            if (string.IsNullOrWhiteSpace(dto.ChavePix))
+            {
+                vendedor.ChavePix = null;
+            }
+            else
+            {
+                if (!FormatoPixValido(dto.ChavePix))
+                    return new InfoVendedorResultDto(false, "Formato de chave PIX inválido. Utilize CPF, CNPJ, E-mail, Telefone ou Chave Aleatória.");
+                
+                vendedor.ChavePix = dto.ChavePix.Trim();
+            }
+        }
+
         await _context.SaveChangesAsync();
         return new InfoVendedorResultDto(true, "Informações da loja atualizadas com sucesso!");
     }
@@ -151,5 +169,31 @@ public class VendedorService
         {
             await _imageStorage.DeleteAsync(publicId);
         }
+    }
+
+    private bool FormatoPixValido(string chavePix)
+    {
+        if (string.IsNullOrWhiteSpace(chavePix)) return false;
+
+        // Limpa a chave de possíveis formatações (pontos, traços, barras, parênteses)
+        // Mantém letras, números, @, + e - (úteis para email, telefone e EVP)
+        var chaveLimpa = Regex.Replace(chavePix, @"[^\w\-\.@+]", "");
+
+        // 1. CPF (11 dígitos numéricos)
+        if (Regex.IsMatch(chaveLimpa, @"^\d{11}$")) return true;
+
+        // 2. CNPJ (14 dígitos numéricos)
+        if (Regex.IsMatch(chaveLimpa, @"^\d{14}$")) return true;
+
+        // 3. Telefone (Padrão E.164: começa opcionalmente com + seguido de 10 a 14 dígitos)
+        if (Regex.IsMatch(chaveLimpa, @"^\+?[1-9]\d{9,13}$")) return true;
+
+        // 4. E-mail (Validação básica de formato)
+        if (Regex.IsMatch(chaveLimpa, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) return true;
+
+        // 5. Chave Aleatória / EVP (Formato UUID)
+        if (Guid.TryParse(chavePix, out _)) return true;
+
+        return false;
     }
 }
