@@ -114,23 +114,57 @@ public class VendedorService
             return new InfoVendedorResultDto(false, "Usuário não possui um perfil de vendedor válido.");
 
         // Valida que as URLs recebidas realmente vieram do Cloudinary configurado.
+        // Valores null ou strings vazias não passam por essa validação,
+        // pois não representam uma URL que será utilizada como imagem.
         if (!string.IsNullOrWhiteSpace(dto.FotoUrl) && !_imageStorage.UrlPertenceAoProvedor(dto.FotoUrl))
             return new InfoVendedorResultDto(false, "A URL da foto não pertence ao provedor de imagens configurado.");
 
         if (!string.IsNullOrWhiteSpace(dto.CardapioUrl) && !_imageStorage.UrlPertenceAoProvedor(dto.CardapioUrl))
             return new InfoVendedorResultDto(false, "A URL do cardápio não pertence ao provedor de imagens configurado.");
 
-        // Se a foto ou cardapio mudaram, remove a imagem antiga do provedor
-        // para nao deixar imagens orfas consumindo a cota gratuita.
+        // Atualização da foto do vendedor:
+        //
+        // 1. dto.FotoUrl == null:
+        //    Se o campo foi omitido do JSON ou enviado explicitamente como null,
+        //    mantém a foto atual. Nenhuma remoção ou alteração é realizada.
+        //
+        // 2. dto.FotoUrl contém uma nova URL válida do Cloudinary:
+        //    Remove a foto antiga do Cloudinary e substitui a URL salva
+        //    pela nova URL recebida.
+        //
+        // 3. dto.FotoUrl == "" (string vazia):
+        //    Indica que o vendedor deseja remover a foto atual.
+        //    Remove a imagem antiga do Cloudinary e salva null no banco,
+        //    deixando o perfil sem foto.
+        //
+        // 4. dto.FotoUrl contém a mesma URL já armazenada:
+        //    Não faz nada, evitando remover ou substituir a imagem atual.
+        //
+        // A condição abaixo ignora null e URLs iguais à atual.
+        // A string vazia, por ser diferente de null, permite solicitar a remoção.
         if (dto.FotoUrl is not null && dto.FotoUrl != vendedor.FotoUrl)
         {
             await RemoverImagemAntigaAsync(vendedor.FotoUrl);
+
+            // Se a URL recebida for vazia ou contiver apenas espaços,
+            // salva null para representar a ausência de foto.
+            // Caso contrário, salva a nova URL do Cloudinary.
             vendedor.FotoUrl = string.IsNullOrWhiteSpace(dto.FotoUrl) ? null : dto.FotoUrl;
         }
 
+        // Atualização do cardápio:
+        //
+        // A regra é a mesma aplicada à foto do vendedor:
+        // - null: mantém o cardápio atual;
+        // - nova URL válida do Cloudinary: remove o arquivo antigo e salva a nova URL;
+        // - "" (string vazia): remove o arquivo atual e salva null no banco;
+        // - mesma URL já armazenada: não realiza nenhuma alteração.
         if (dto.CardapioUrl is not null && dto.CardapioUrl != vendedor.CardapioUrl)
         {
             await RemoverImagemAntigaAsync(vendedor.CardapioUrl);
+
+            // Uma string vazia ou composta apenas por espaços remove o cardápio.
+            // Uma nova URL válida substitui a URL anteriormente armazenada.
             vendedor.CardapioUrl = string.IsNullOrWhiteSpace(dto.CardapioUrl) ? null : dto.CardapioUrl;
         }
 
