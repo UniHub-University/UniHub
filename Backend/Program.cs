@@ -11,8 +11,6 @@ using Microsoft.OpenApi;
 using UniHub.Application.Interfaces.Vendas;
 using UniHub.Application.Services.Vendas;
 using UniHub.Infrastructure.Repositories.Vendas;
-using UniHub.Application.Interfaces.AcaoSolidaria;
-using UniHub.Infrastructure.Repositories.AcaoSolidaria;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,8 +32,6 @@ builder.Services.AddScoped<VendedorService>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
 builder.Services.AddScoped<PedidoService>();
-
-builder.Services.AddScoped<ISolicitacaoApoioRepository, SolicitacaoApoioRepository>();
 
 // --- INÍCIO DA CONFIGURAÇÃO JWT ---
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
