@@ -19,6 +19,11 @@ public class AppDbContext : DbContext
     public DbSet<HorarioVenda> HorariosVenda { get; set; }
     public DbSet<LocalVenda> LocaisVenda { get; set; }
 
+    // Ação Solidária
+    public DbSet<SolicitacaoApoio> SolicitacoesApoio { get; set; }
+    public DbSet<Correspondencia> Correspondencias { get; set; }
+    public DbSet<Voluntario> Voluntarios { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -46,5 +51,27 @@ public class AppDbContext : DbContext
             .HasMany(v => v.Locais)
             .WithOne(l => l.Vendedor)
             .HasForeignKey(l => l.VendedorId);
+
+        // 4. Ação Solidária
+        modelBuilder.Entity<SolicitacaoApoio>(e =>
+        {
+            // nome fixado: o SQL de SolicitacaoApoioRepository usa "SolicitacoesApoio"
+            e.ToTable("SolicitacoesApoio");
+
+            // token de concorrência otimista (xmin no PostgreSQL)
+            e.Property(s => s.Version).IsRowVersion();
+
+            // enum salvo como texto: a coluna Categoria continua "text", sem mudar o schema
+            e.Property(s => s.Categoria).HasConversion<string>();
+
+            // Status continua numérico (integer): o UPDATE atômico do repositório grava o inteiro
+        });
+
+        // AreasDeAtuacao continua text[] no banco (cada enum vira texto).
+        // O índice único em UsuarioId já existe no snapshot.
+        modelBuilder.Entity<Voluntario>()
+            .PrimitiveCollection(v => v.AreasDeAtuacao)
+            .ElementType()
+            .HasConversion<string>();
     }
 }
