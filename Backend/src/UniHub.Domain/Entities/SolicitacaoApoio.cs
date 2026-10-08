@@ -28,7 +28,6 @@ public class SolicitacaoApoio
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // token de concorrência (vira a coluna xmin do PostgreSQL)
-    public uint Version { get; private set; }
 
     public ICollection<Correspondencia> Correspondencias { get; set; } = new List<Correspondencia>();
     public ICollection<Doacao> Doacoes { get; set; } = new List<Doacao>();
