@@ -5,7 +5,6 @@ namespace UniHub.Domain.Entities;
 public enum StatusCorrespondencia
 {
     Sugerida = 0, // match calculado, ninguém confirmou ainda
-
     AceitaPeloVoluntario = 1,
     Concluida = 2,
     Cancelada = 3
@@ -33,14 +32,14 @@ public class Correspondencia
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? AceitaEm { get; private set; }
 
+    /// A transição da solicitação (Aberta -> EmAndamento) NÃO é feita aqui:
+    /// ela acontece antes, de forma atômica no banco, via
+    /// ISolicitacaoApoioRepository.TryMarcarEmAndamentoAsync.
     public void Aceitar()
     {
-        if (Solicitacao is null)
-            throw new InvalidOperationException("Solicitacao precisa estar carregada para aceitar a correspondencia.");
         if (Status != StatusCorrespondencia.Sugerida)
             throw new InvalidOperationException("Só é possível aceitar uma correspondência sugerida.");
 
-        Solicitacao.MarcarEmAndamento(); // falha se outro voluntário já aceitou
         Status = StatusCorrespondencia.AceitaPeloVoluntario;
         AceitaEm = DateTime.UtcNow;
     }
@@ -60,8 +59,8 @@ public class Correspondencia
         if (Status != StatusCorrespondencia.AceitaPeloVoluntario)
             throw new InvalidOperationException("Correspondência precisa estar aceita para ser concluída.");
 
+        Solicitacao?.Concluir(); // valida primeiro; se falhar, o status da correspondência não muda
         Status = StatusCorrespondencia.Concluida;
-        Solicitacao?.Concluir();
     }
 
     public void Cancelar()
