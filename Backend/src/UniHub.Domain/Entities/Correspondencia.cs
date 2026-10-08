@@ -4,12 +4,14 @@ namespace UniHub.Domain.Entities;
 
 public enum StatusCorrespondencia
 {
-    Sugerida = 0,
+    Sugerida = 0, // match calculado, ninguém confirmou ainda
+
     AceitaPeloVoluntario = 1,
     Concluida = 2,
     Cancelada = 3
 }
 
+/// Representa o match entre um Voluntario e uma SolicitacaoApoio.
 /// Match entre um Voluntario e uma SolicitacaoApoio.
 /// A identidade do solicitante só é revelada se ele autorizar explicitamente,
 /// e só depois do aceite do voluntário.
@@ -43,6 +45,7 @@ public class Correspondencia
         AceitaEm = DateTime.UtcNow;
     }
 
+    /// Chamado explicitamente pelo solicitante (nunca automaticamente).
     public void AutorizarRevelacaoIdentidade()
     {
         if (Status != StatusCorrespondencia.AceitaPeloVoluntario)
