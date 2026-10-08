@@ -32,6 +32,7 @@ public class SolicitacaoApoio
     public ICollection<Correspondencia> Correspondencias { get; set; } = new List<Correspondencia>();
     public ICollection<Doacao> Doacoes { get; set; } = new List<Doacao>();
 
+    /// Chamado internamente quando uma Correspondencia é aceita.
     public void MarcarEmAndamento()
     {
         if (Status != StatusSolicitacao.Aberta)
