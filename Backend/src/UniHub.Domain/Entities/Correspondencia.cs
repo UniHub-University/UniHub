@@ -4,17 +4,16 @@ namespace UniHub.Domain.Entities;
 
 public enum StatusCorrespondencia
 {
-    Sugerida = 0,             // match calculado, ninguém confirmou ainda
-    AceitaPeloVoluntario = 1, // voluntário confirmou que vai atender
+    Sugerida = 0, // match calculado, ninguém confirmou ainda
+    AceitaPeloVoluntario = 1,
     Concluida = 2,
     Cancelada = 3
 }
 
 /// Representa o match entre um Voluntario e uma SolicitacaoApoio.
-/// A revelação de identidade fica simplificada aqui como um flag
-/// (IdentidadeRevelada) que só pode ser ligado depois do aceite, e
-/// exige que o próprio solicitante autorize explicitamente via
-/// AutorizarRevelacaoIdentidade() -- não é automático ao aceitar.
+/// Match entre um Voluntario e uma SolicitacaoApoio.
+/// A identidade do solicitante só é revelada se ele autorizar explicitamente,
+/// e só depois do aceite do voluntário.
 public class Correspondencia
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -27,12 +26,15 @@ public class Correspondencia
 
     public StatusCorrespondencia Status { get; private set; } = StatusCorrespondencia.Sugerida;
 
-    public bool IdentidadeRevelada { get; private set; } = false;
+    public bool IdentidadeRevelada { get; private set; }
     public DateTime? IdentidadeReveladaEm { get; private set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? AceitaEm { get; private set; }
 
+    /// A transição da solicitação (Aberta -> EmAndamento) NÃO é feita aqui:
+    /// ela acontece antes, de forma atômica no banco, via
+    /// ISolicitacaoApoioRepository.TryMarcarEmAndamentoAsync.
     public void Aceitar()
     {
         if (Status != StatusCorrespondencia.Sugerida)
@@ -40,14 +42,9 @@ public class Correspondencia
 
         Status = StatusCorrespondencia.AceitaPeloVoluntario;
         AceitaEm = DateTime.UtcNow;
-        if (Solicitacao is null)
-              throw new InvalidOperationException("Solicitacao precisa estar carregada (via Include) para aceitar a correspondencia.");
-        Solicitacao.MarcarEmAndamento();
     }
 
     /// Chamado explicitamente pelo solicitante (nunca automaticamente).
-    /// É o ponto central de privacy by design deste módulo: sem essa
-    /// chamada, o voluntário nunca tem acesso aos dados reais do aluno.
     public void AutorizarRevelacaoIdentidade()
     {
         if (Status != StatusCorrespondencia.AceitaPeloVoluntario)
@@ -61,13 +58,15 @@ public class Correspondencia
     {
         if (Status != StatusCorrespondencia.AceitaPeloVoluntario)
             throw new InvalidOperationException("Correspondência precisa estar aceita para ser concluída.");
+
+        Solicitacao?.Concluir(); // valida primeiro; se falhar, o status da correspondência não muda
         Status = StatusCorrespondencia.Concluida;
     }
 
     public void Cancelar()
-{
-    if (Status == StatusCorrespondencia.Concluida)
-        throw new InvalidOperationException("Nao e possivel cancelar uma correspondencia ja concluida.");
-    Status = StatusCorrespondencia.Cancelada;
-}
+    {
+        if (Status == StatusCorrespondencia.Concluida)
+            throw new InvalidOperationException("Não é possível cancelar uma correspondência já concluída.");
+        Status = StatusCorrespondencia.Cancelada;
+    }
 }

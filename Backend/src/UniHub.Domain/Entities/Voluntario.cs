@@ -12,7 +12,7 @@ public class Voluntario
 
     public string CodigoPublico { get; private set; } = GerarCodigoPublico();
 
-    public List<string> AreasDeAtuacao { get; set; } = new(); // ex: "Aulas de Reforço", "Doação de Roupas"
+    public List<CategoriaApoio> AreasDeAtuacao { get; set; } = new();
     public bool Disponivel { get; set; } = true;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
