@@ -47,6 +47,11 @@ public class AuthService
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
         }
+
+        if (!usuario.IsActive)
+        {
+            throw new UnauthorizedAccessException("Sua conta está suspensa. Procure a administração.");
+        }
         
         return usuario;
     }
@@ -61,7 +66,8 @@ public class AuthService
         {
             new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, usuario.EmailInstitucional),
-            new Claim(JwtRegisteredClaimNames.Name, usuario.NomeCompleto)
+            new Claim(JwtRegisteredClaimNames.Name, usuario.NomeCompleto),
+            new Claim("role", usuario.Role.ToString())
         };
 
         var key = new SymmetricSecurityKey(secretKey);

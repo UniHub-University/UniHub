@@ -37,4 +37,12 @@ public class ProdutoRepository : IProdutoRepository
                SET ""QuantidadeDisponivel"" = ""QuantidadeDisponivel"" + {quantidade}
                WHERE ""Id"" = {produtoId}");
     }
+
+    public async Task<bool> InativarAsync(Guid produtoId)
+    {
+        var linhas = await _context.Set<Produto>()
+            .Where(p => p.Id == produtoId)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.Status, ProdutoStatus.Inativo));
+        return linhas == 1;
+    }
 }
