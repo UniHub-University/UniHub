@@ -12,7 +12,7 @@ using UniHub.Infrastructure.Data;
 namespace Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261009212432_AdicionaModuloAcaoSolidaria")]
+    [Migration("20261009214035_AdicionaModuloAcaoSolidaria")]
     partial class AdicionaModuloAcaoSolidaria
     {
         /// <inheritdoc />

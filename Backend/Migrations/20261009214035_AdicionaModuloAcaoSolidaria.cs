@@ -97,21 +97,17 @@ namespace Backend.Migrations
                 table: "Correspondencias",
                 newName: "IX_Correspondencias_SolicitacaoId");
 
-            migrationBuilder.AlterColumn<int[]>(
-                name: "AreasDeAtuacao",
-                table: "Voluntarios",
-                type: "integer[]",
-                nullable: false,
-                oldClrType: typeof(List<string>),
-                oldType: "text[]");
+            migrationBuilder.Sql(
+                @"ALTER TABLE ""Voluntarios"" 
+                ALTER COLUMN ""AreasDeAtuacao"" TYPE integer[] 
+                USING ""AreasDeAtuacao""::integer[];"
+                );
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Categoria",
-                table: "SolicitacoesApoio",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "text");
+            migrationBuilder.Sql(
+                @"ALTER TABLE ""SolicitacoesApoio"" 
+                ALTER COLUMN ""Categoria"" TYPE integer 
+                USING ""Categoria""::integer;"
+                );
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Voluntarios",
