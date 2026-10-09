@@ -26,17 +26,20 @@ public class SolicitacaoApoioController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Criar([FromBody] CriarSolicitacaoApoioDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Descricao) || string.IsNullOrWhiteSpace(dto.Categoria))
-            return BadRequest(new { mensagem = "Categoria e descrição são obrigatórias." });
+        if (string.IsNullOrWhiteSpace(dto.Descricao))
+            return BadRequest(new { mensagem = "A descrição é obrigatória." });
 
-        var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Enum.IsDefined(typeof(CategoriaApoio), dto.Categoria))
+            return BadRequest(new { mensagem = "Categoria inválida." });
+
+        var usuarioIdClaim = User.FindFirst("sub")?.Value;
         if (string.IsNullOrEmpty(usuarioIdClaim) || !Guid.TryParse(usuarioIdClaim, out var usuarioId))
             return Unauthorized(new { mensagem = "Usuário não autenticado ou token inválido." });
 
         var solicitacao = new SolicitacaoApoio
         {
             SolicitanteId = usuarioId,
-            Categoria = dto.Categoria.Trim(),
+            Categoria = dto.Categoria,
             Descricao = dto.Descricao.Trim()
         };
 
@@ -56,13 +59,12 @@ public class SolicitacaoApoioController : ControllerBase
     }
 
     /// <summary>
-    /// Lista pública de solicitações abertas. Exibe apenas o código público e nunca a identidade.
+    /// Lista as solicitações abertas. Exibe apenas o código público, nunca a identidade.
     /// </summary>
     [HttpGet]
-    [AllowAnonymous]
     public async Task<IActionResult> ObterAbertas()
     {
-        // Regra LGPD: Sem .Include(s => s.Solicitante)
+        // Regra LGPD: sem .Include(s => s.Solicitante)
         var solicitacoes = await _context.SolicitacoesApoio
             .AsNoTracking()
             .Where(s => s.Status == StatusSolicitacao.Aberta)
@@ -84,7 +86,6 @@ public class SolicitacaoApoioController : ControllerBase
     /// Obtém os detalhes públicos de uma solicitação pelo ID.
     /// </summary>
     [HttpGet("{id:guid}")]
-    [AllowAnonymous]
     public async Task<IActionResult> ObterPorId(Guid id)
     {
         var solicitacao = await _context.SolicitacoesApoio
@@ -112,7 +113,7 @@ public class SolicitacaoApoioController : ControllerBase
     [HttpPatch("{id:guid}/cancelar")]
     public async Task<IActionResult> Cancelar(Guid id)
     {
-        var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var usuarioIdClaim = User.FindFirst("sub")?.Value;
         if (string.IsNullOrEmpty(usuarioIdClaim) || !Guid.TryParse(usuarioIdClaim, out var usuarioId))
             return Unauthorized();
 
@@ -120,7 +121,6 @@ public class SolicitacaoApoioController : ControllerBase
         if (solicitacao == null)
             return NotFound(new { mensagem = "Solicitação não encontrada." });
 
-        // Validação de posse
         if (solicitacao.SolicitanteId != usuarioId)
             return Forbid();
 

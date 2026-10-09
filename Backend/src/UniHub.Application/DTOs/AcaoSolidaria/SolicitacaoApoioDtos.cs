@@ -4,7 +4,7 @@ using UniHub.Domain.Entities;
 namespace UniHub.Application.DTOs.AcaoSolidaria;
 
 public record CriarSolicitacaoApoioDto(
-    string Categoria,
+    CategoriaApoio Categoria,
     string Descricao
 );
 
@@ -12,7 +12,7 @@ public record CriarSolicitacaoApoioDto(
 public record SolicitacaoApoioRespostaDto(
     Guid Id,
     string CodigoPublico,
-    string Categoria,
+    CategoriaApoio Categoria,
     string Descricao,
     StatusSolicitacao Status,
     DateTime CreatedAt
