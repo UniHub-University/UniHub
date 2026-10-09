@@ -35,8 +35,15 @@ public class AdminController : ControllerBase
     [HttpPatch("usuarios/{id:guid}/suspender")]
     public async Task<IActionResult> SuspenderConta(Guid id)
     {
-        var sucesso = await _usuarioRepository.SuspenderAsync(id);
 
+        // Impede que um administrador suspenda a própria conta
+        var adminId = Guid.Parse(User.FindFirst("sub")?.Value ?? Guid.Empty.ToString());
+        
+        if (adminId == id)
+            return BadRequest(new { mensagem = "Um administrador não pode suspender a própria conta." });
+
+        var sucesso = await _usuarioRepository.SuspenderAsync(id);
+        
         if (!sucesso)
         {
             return NotFound(new { mensagem = "Usuário não encontrado no sistema." });
