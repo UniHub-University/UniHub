@@ -19,6 +19,12 @@ public class AppDbContext : DbContext
     public DbSet<HorarioVenda> HorariosVenda { get; set; }
     public DbSet<LocalVenda> LocaisVenda { get; set; }
 
+    public DbSet<SolicitacaoApoio> SolicitacoesApoio { get; set; }
+    public DbSet<Correspondencia> Correspondencias { get; set; }
+    public DbSet<Voluntario> Voluntarios { get; set; }
+    public DbSet<Doacao> Doacoes { get; set; }
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -46,5 +52,42 @@ public class AppDbContext : DbContext
             .HasMany(v => v.Locais)
             .WithOne(l => l.Vendedor)
             .HasForeignKey(l => l.VendedorId);
+
+        //4. --- Modulo Acao Solidaria ---
+
+        // Nome de tabela fixado: o SQL do SolicitacaoApoioRepository usa "SolicitacoesApoio"
+        modelBuilder.Entity<SolicitacaoApoio>()
+            .ToTable("SolicitacoesApoio");
+
+        modelBuilder.Entity<SolicitacaoApoio>()
+            .HasOne(s => s.Solicitante)
+            .WithMany(u => u.Solicitacoes)
+            .HasForeignKey(s => s.SolicitanteId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Correspondencia>()
+            .HasOne(c => c.Solicitacao)
+            .WithMany(s => s.Correspondencias)
+            .HasForeignKey(c => c.SolicitacaoId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Correspondencia>()
+            .HasOne(c => c.Voluntario)
+            .WithMany(v => v.Correspondencias)
+            .HasForeignKey(c => c.VoluntarioId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Doacao>()
+            .HasOne(d => d.Solicitacao)
+            .WithMany(s => s.Doacoes)
+            .HasForeignKey(d => d.SolicitacaoId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Doacao>()
+            .HasOne(d => d.Voluntario)
+            .WithMany()
+            .HasForeignKey(d => d.VoluntarioId)
+            .OnDelete(DeleteBehavior.Restrict);
+    
     }
 }
