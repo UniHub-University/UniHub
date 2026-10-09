@@ -5,6 +5,7 @@ using UniHub.Application.DTOs;
 using UniHub.Application.Interfaces;
 using UniHub.Domain.Entities;
 using UniHub.Infrastructure.Data;
+using System.Text.RegularExpressions;
 
 namespace UniHub.Application.Services;
 
@@ -113,29 +114,80 @@ public class VendedorService
             return new InfoVendedorResultDto(false, "Usuário não possui um perfil de vendedor válido.");
 
         // Valida que as URLs recebidas realmente vieram do Cloudinary configurado.
+        // Valores null ou strings vazias não passam por essa validação,
+        // pois não representam uma URL que será utilizada como imagem.
         if (!string.IsNullOrWhiteSpace(dto.FotoUrl) && !_imageStorage.UrlPertenceAoProvedor(dto.FotoUrl))
             return new InfoVendedorResultDto(false, "A URL da foto não pertence ao provedor de imagens configurado.");
 
         if (!string.IsNullOrWhiteSpace(dto.CardapioUrl) && !_imageStorage.UrlPertenceAoProvedor(dto.CardapioUrl))
             return new InfoVendedorResultDto(false, "A URL do cardápio não pertence ao provedor de imagens configurado.");
 
-        // Se a foto ou cardapio mudaram, remove a imagem antiga do provedor
-        // para nao deixar imagens orfas consumindo a cota gratuita.
+        // Atualização da foto do vendedor:
+        //
+        // 1. dto.FotoUrl == null:
+        //    Se o campo foi omitido do JSON ou enviado explicitamente como null,
+        //    mantém a foto atual. Nenhuma remoção ou alteração é realizada.
+        //
+        // 2. dto.FotoUrl contém uma nova URL válida do Cloudinary:
+        //    Remove a foto antiga do Cloudinary e substitui a URL salva
+        //    pela nova URL recebida.
+        //
+        // 3. dto.FotoUrl == "" (string vazia):
+        //    Indica que o vendedor deseja remover a foto atual.
+        //    Remove a imagem antiga do Cloudinary e salva null no banco,
+        //    deixando o perfil sem foto.
+        //
+        // 4. dto.FotoUrl contém a mesma URL já armazenada:
+        //    Não faz nada, evitando remover ou substituir a imagem atual.
+        //
+        // A condição abaixo ignora null e URLs iguais à atual.
+        // A string vazia, por ser diferente de null, permite solicitar a remoção.
         if (dto.FotoUrl is not null && dto.FotoUrl != vendedor.FotoUrl)
         {
             await RemoverImagemAntigaAsync(vendedor.FotoUrl);
+
+            // Se a URL recebida for vazia ou contiver apenas espaços,
+            // salva null para representar a ausência de foto.
+            // Caso contrário, salva a nova URL do Cloudinary.
             vendedor.FotoUrl = string.IsNullOrWhiteSpace(dto.FotoUrl) ? null : dto.FotoUrl;
         }
 
+        // Atualização do cardápio:
+        //
+        // A regra é a mesma aplicada à foto do vendedor:
+        // - null: mantém o cardápio atual;
+        // - nova URL válida do Cloudinary: remove o arquivo antigo e salva a nova URL;
+        // - "" (string vazia): remove o arquivo atual e salva null no banco;
+        // - mesma URL já armazenada: não realiza nenhuma alteração.
         if (dto.CardapioUrl is not null && dto.CardapioUrl != vendedor.CardapioUrl)
         {
             await RemoverImagemAntigaAsync(vendedor.CardapioUrl);
+
+            // Uma string vazia ou composta apenas por espaços remove o cardápio.
+            // Uma nova URL válida substitui a URL anteriormente armazenada.
             vendedor.CardapioUrl = string.IsNullOrWhiteSpace(dto.CardapioUrl) ? null : dto.CardapioUrl;
         }
 
         if (dto.DescricaoNegocio is not null)
         {
             vendedor.DescricaoNegocio = dto.DescricaoNegocio;
+        }
+
+        // Validação e persistência da Chave PIX
+        if (dto.ChavePix is not null) // Verifica se o campo foi enviado na requisição
+        {
+            // Se foi enviada uma string vazia, o vendedor está removendo a chave
+            if (string.IsNullOrWhiteSpace(dto.ChavePix))
+            {
+                vendedor.ChavePix = null;
+            }
+            else
+            {
+                if (!FormatoPixValido(dto.ChavePix))
+                    return new InfoVendedorResultDto(false, "Formato de chave PIX inválido. Utilize CPF, CNPJ, E-mail, Telefone ou Chave Aleatória.");
+                
+                vendedor.ChavePix = dto.ChavePix.Trim();
+            }
         }
 
         await _context.SaveChangesAsync();
@@ -151,5 +203,31 @@ public class VendedorService
         {
             await _imageStorage.DeleteAsync(publicId);
         }
+    }
+
+    private bool FormatoPixValido(string chavePix)
+    {
+        if (string.IsNullOrWhiteSpace(chavePix)) return false;
+
+        // Limpa a chave de possíveis formatações (pontos, traços, barras, parênteses)
+        // Mantém letras, números, @, + e - (úteis para email, telefone e EVP)
+        var chaveLimpa = Regex.Replace(chavePix, @"[^\w\-\.@+]", "");
+
+        // 1. CPF (11 dígitos numéricos)
+        if (Regex.IsMatch(chaveLimpa, @"^\d{11}$")) return true;
+
+        // 2. CNPJ (14 dígitos numéricos)
+        if (Regex.IsMatch(chaveLimpa, @"^\d{14}$")) return true;
+
+        // 3. Telefone (Padrão E.164: começa opcionalmente com + seguido de 10 a 14 dígitos)
+        if (Regex.IsMatch(chaveLimpa, @"^\+?[1-9]\d{9,13}$")) return true;
+
+        // 4. E-mail (Validação básica de formato)
+        if (Regex.IsMatch(chaveLimpa, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) return true;
+
+        // 5. Chave Aleatória / EVP (Formato UUID)
+        if (Guid.TryParse(chavePix, out _)) return true;
+
+        return false;
     }
 }

@@ -50,23 +50,25 @@ public class ItensBazarController : ControllerBase
 
     // READ: GET /api/itens-bazar
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ItemBazarRespostaDto>>> ObterTodos()
+    public async Task<ActionResult<IEnumerable<ItemBazarResumoDto>>> ObterTodos()
     {
         var itens = await _context.ItensBazar.AsNoTracking().ToListAsync();
-        var resposta = itens.Select(MapearParaDto);
-        return Ok(resposta);    }
+        var resposta = itens.Select(MapearParaResumoDto);
+        return Ok(resposta);
+    }
 
     // READ: GET /api/itens-bazar/{id}
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ItemBazarRespostaDto>> ObterPorId(Guid id)
     {
-        var item = await _context.ItensBazar.FindAsync(id);
+        var item = await _context.ItensBazar.Include(i => i.Vendedor).FirstOrDefaultAsync(i => i.Id == id);
 
         if (item == null)
             return NotFound(new { mensagem = "Item do bazar não encontrado." });
 
         return Ok(MapearParaDto(item));
     }
+
 
        // UPDATE: PUT /api/itens-bazar/{id}
     [HttpPut("{id:guid}")]
@@ -113,6 +115,20 @@ public class ItensBazarController : ControllerBase
 
         return NoContent();
     }
+    
+    private static ItemBazarResumoDto MapearParaResumoDto(ItemBazar item) =>
+        new(
+            item.Id, 
+            item.Nome, 
+            item.Descricao, 
+            item.Preco,
+            item.QuantidadeDisponivel, 
+            item.Categoria, 
+            item.Condicao,
+            item.Status, 
+            item.DataPublicacao, 
+            item.VendedorId
+    );
 
     private static ItemBazarRespostaDto MapearParaDto(ItemBazar item) =>
         new(
@@ -125,6 +141,7 @@ public class ItensBazarController : ControllerBase
             item.Condicao,
             item.Status,
             item.DataPublicacao,
-            item.VendedorId
+            item.VendedorId,
+            item.Vendedor?.ChavePix // Adicionado: pega o PIX caso o vendedor esteja carregado
         );
 }
