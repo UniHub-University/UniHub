@@ -50,19 +50,17 @@ public class ItensBazarController : ControllerBase
 
     // READ: GET /api/itens-bazar
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ItemBazarRespostaDto>>> ObterTodos()
+    public async Task<ActionResult<IEnumerable<ItemBazarResumoDto>>> ObterTodos()
     {
-        // Adicionado Include(i => i.Vendedor)
-        var itens = await _context.ItensBazar.Include(i => i.Vendedor).AsNoTracking().ToListAsync();
-
-        var resposta = itens.Select(MapearParaDto);
-        return Ok(resposta);    }
+        var itens = await _context.ItensBazar.AsNoTracking().ToListAsync();
+        var resposta = itens.Select(MapearParaResumoDto);
+        return Ok(resposta);
+    }
 
     // READ: GET /api/itens-bazar/{id}
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ItemBazarRespostaDto>> ObterPorId(Guid id)
     {
-        // Trocamos FindAsync por FirstOrDefaultAsync para permitir o Include
         var item = await _context.ItensBazar.Include(i => i.Vendedor).FirstOrDefaultAsync(i => i.Id == id);
 
         if (item == null)
@@ -70,6 +68,7 @@ public class ItensBazarController : ControllerBase
 
         return Ok(MapearParaDto(item));
     }
+
 
        // UPDATE: PUT /api/itens-bazar/{id}
     [HttpPut("{id:guid}")]
@@ -116,6 +115,20 @@ public class ItensBazarController : ControllerBase
 
         return NoContent();
     }
+    
+    private static ItemBazarResumoDto MapearParaResumoDto(ItemBazar item) =>
+        new(
+            item.Id, 
+            item.Nome, 
+            item.Descricao, 
+            item.Preco,
+            item.QuantidadeDisponivel, 
+            item.Categoria, 
+            item.Condicao,
+            item.Status, 
+            item.DataPublicacao, 
+            item.VendedorId
+    );
 
     private static ItemBazarRespostaDto MapearParaDto(ItemBazar item) =>
         new(

@@ -22,6 +22,19 @@ public record AtualizarItemBazarDto(
     ProdutoStatus Status
 );
 
+public record ItemBazarResumoDto(
+    Guid Id,
+    string Nome,
+    string? Descricao,
+    decimal Preco,
+    int QuantidadeDisponivel,
+    string Categoria,
+    CondicaoItem Condicao,
+    ProdutoStatus Status,
+    DateTime DataPublicacao,
+    Guid VendedorId
+);
+
 public record ItemBazarRespostaDto(
     Guid Id,
     string Nome,
@@ -35,3 +48,4 @@ public record ItemBazarRespostaDto(
     Guid VendedorId,
     string? ChavePix // Adicionado para exibir ao comprador (Sprint 3)
 );
+
