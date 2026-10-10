@@ -140,11 +140,13 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Swagger habilitado tambem em producao para validacao/testes online da API
+// durante a Sprint 3 (frontend ainda nao desenvolvido). O time testa via
+// Swagger + "Authorize" com token obtido no Google OAuth Playground.
+// TODO: considerar restringir/desligar apos a entrega, quando o front assumir.
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 app.UseCors("PermitirFrontend");
 
