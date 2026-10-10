@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+**/out/
+**/publish/
+appsettings.Development.json
+appsettings.Production.json
+**/*.user
+.env
+secrets.json
+.git/
+.gitignore
+.vs/
+.vscode/
+.idea/
+*.md
