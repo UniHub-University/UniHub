@@ -1,0 +1,27 @@
+# Render Blueprint — define o servico da API UniHub como codigo.
+services:
+  - type: web
+    name: unihub-api
+    runtime: docker
+    plan: free
+    dockerfilePath: Backend/Dockerfile
+    dockerContext: Backend
+    region: oregon
+    branch: main
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection   # Neon, com pooling + SSL
+        sync: false
+      - key: JwtSettings__SecureKey                  # >= 32 caracteres
+        sync: false
+      - key: Cloudinary__CloudName
+        sync: false
+      - key: Cloudinary__ApiKey
+        sync: false
+      - key: Cloudinary__ApiSecret
+        sync: false
+      - key: Cors__AllowedOrigins__0                 # dominio real do front
+        value: https://unihub-app.vercel.app

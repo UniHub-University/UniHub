@@ -15,8 +15,16 @@ using UniHub.Infrastructure.Repositories;
 using UniHub.Application.Interfaces.AcaoSolidaria;
 using UniHub.Infrastructure.Repositories.AcaoSolidaria;
 
-
 var builder = WebApplication.CreateBuilder(args);
+
+// Render (e containers em geral) definem a porta de escuta via variavel PORT
+// e esperam a app escutando em 0.0.0.0. Localmente PORT nao existe, entao o
+// launchSettings continua valendo e o fluxo de desenvolvimento nao muda.
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
 
 builder.Services.AddControllers();
 
@@ -26,9 +34,18 @@ builder.Services.Configure<CloudinarySettings>(
 builder.Services.AddSingleton<IImageStorageService, CloudinaryImageStorageService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-           .EnableSensitiveDataLogging() // mostra os valores reais dos parametros no log
-           .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information));
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+
+    // EnableSensitiveDataLogging expoe valores reais dos parametros (inclusive
+    // dados pessoais) no log -- util para depurar localmente, mas um risco de
+    // vazamento (e de violacao da LGPD) em producao. Fica restrito a Development.
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging()
+               .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
+    }
+});
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<VendedorService>();
@@ -39,7 +56,6 @@ builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
 builder.Services.AddScoped<PedidoService>();
 builder.Services.AddScoped<ProdutoService>();
 builder.Services.AddScoped<ISolicitacaoApoioRepository, SolicitacaoApoioRepository>();
-
 
 // --- INÍCIO DA CONFIGURAÇÃO JWT ---
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -101,9 +117,21 @@ builder.Services.AddCors(options =>
         }
         else
         {
-            // Em produção, usa o WithOrigins para travar a API apenas para o domínio oficial
-            // Colocamos URLs de exemplo que a equipe do Front poderá ajustar depois
-            policy.WithOrigins("https://unihub.com.br", "https://unihub-app.vercel.app") 
+            // Em producao, trava a API apenas para o(s) dominio(s) oficial(is) do
+            // frontend. As origens vem da configuracao "Cors:AllowedOrigins"
+            // (definida via variavel de ambiente Cors__AllowedOrigins__0,
+            // Cors__AllowedOrigins__1, ...), com fallback para os dominios de
+            // exemplo caso nada seja configurado.
+            var allowedOrigins = builder.Configuration
+                .GetSection("Cors:AllowedOrigins")
+                .Get<string[]>();
+
+            if (allowedOrigins is null || allowedOrigins.Length == 0)
+            {
+                allowedOrigins = ["https://unihub.com.br", "https://unihub-app.vercel.app"];
+            }
+
+            policy.WithOrigins(allowedOrigins)
                   .AllowAnyMethod()
                   .AllowAnyHeader();
         }
@@ -125,5 +153,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Health check leve e publico. Serve a dois propositos:
+// 1. Render usa para saber se o servico subiu com sucesso.
+// 2. Pode ser pingado por um cron (ex: cron-job.org) a cada ~10min para evitar
+//    o spin down do plano free (15min de inatividade) e para "aquecer" o Neon
+//    antes do teste de concorrencia, mitigando o cold start.
+app.MapGet("/health", () => Results.Ok(new { status = "ok", time = DateTime.UtcNow }))
+   .AllowAnonymous();
 
 app.Run();

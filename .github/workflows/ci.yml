@@ -1,0 +1,39 @@
+name: CI
+on:
+  push:
+    branches: [main]
+    paths: ["Backend/**", ".github/workflows/ci.yml"]
+  pull_request:
+    paths: ["Backend/**", ".github/workflows/ci.yml"]
+
+jobs:
+  build:
+    name: Build (.NET 10)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Restore
+        working-directory: Backend
+        run: dotnet restore Backend.csproj
+      - name: Build (Release)
+        working-directory: Backend
+        run: dotnet build Backend.csproj -c Release --no-restore
+      - name: Verifica migrations pendentes
+        working-directory: Backend
+        run: |
+          dotnet tool install --global dotnet-ef
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet ef migrations has-pending-model-changes || {
+            echo "::error::Modelo alterado sem migration. Rode 'dotnet ef migrations add <Nome>'."
+            exit 1
+          }
+
+  docker:
+    name: Build da imagem Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f Backend/Dockerfile -t unihub-api:ci Backend
