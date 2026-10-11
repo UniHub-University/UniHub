@@ -25,8 +25,6 @@ public class AppDbContext : DbContext
     public DbSet<Voluntario> Voluntarios { get; set; }
     public DbSet<Doacao> Doacoes { get; set; }
 
-    public DbSet<Denuncia> Denuncias { get; set; }
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

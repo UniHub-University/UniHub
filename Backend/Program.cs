@@ -40,6 +40,9 @@ builder.Services.AddScoped<PedidoService>();
 builder.Services.AddScoped<ProdutoService>();
 builder.Services.AddScoped<ISolicitacaoApoioRepository, SolicitacaoApoioRepository>();
 
+builder.Services.AddScoped<IDenunciaRepository, DenunciaRepository>();
+
+
 
 // --- INÍCIO DA CONFIGURAÇÃO JWT ---
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
