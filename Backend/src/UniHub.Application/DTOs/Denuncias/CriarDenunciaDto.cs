@@ -5,14 +5,16 @@ namespace UniHub.Application.DTOs.Denuncias
 {
     public class CriarDenunciaDto
     {
-        [Required(ErrorMessage = "O ID do alvo (produto ou usuário) é obrigatório.")]
-        public Guid AlvoId {get; set;}
+        [Required(ErrorMessage = "O ID do usuário denunciado é obrigatório.")]
+        public Guid DenunciadoId {get; set;}
 
-        [Required(ErrorMessage = "O tipo de alvo é obrigatório (ex.: Produto, Usuario).")]
-        public string TipoAlvo {get; set;}
+        public Guid? ProdutoId {get; set;} // opcional, pois a denúnicia pode ser apenas sobre o comportamento do usuário
 
-        [Required(ErrorMessage = "O motivo da denúncia é obrigatório.")]
-        [StringLength(500, MinimumLength = 10, ErrorMessage = "O motivo deve ter entre 10 e 500 caracteres.")]
-        public string Motivo {get; set;}
+        [Required(ErrorMessage = "O motivo da denúncia é obrigatório (ex.: Fraude, Assédio, etc.).")]
+        public string Motivo {get; set;} = string.Empty;
+
+        [Required(ErrorMessage = "A descrição detalhada da denúncia é obrigatória.")]
+        [StringLength(500, MinimumLength = 10, ErrorMessage = "A descrição deve ter entre 10 e 500 caracteres.")]
+        public string Descricao { get; set; } = string.Empty;
     }
 }

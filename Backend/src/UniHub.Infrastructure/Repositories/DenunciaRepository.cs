@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
 using UniHub.Application.Interfaces;
 using UniHub.Domain.Entities;
-using UniHub.Infraestructure.Data;
+using UniHub.Infrastructure.Data;
 
-namespace uniHub.Infrastructure.Repositories
+namespace UniHub.Infrastructure.Repositories
 {
     public class DenunciaRepository : IDenunciaRepository
     {

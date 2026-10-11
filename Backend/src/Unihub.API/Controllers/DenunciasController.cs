@@ -12,7 +12,7 @@ namespace UniHub.API.Controllers
     [ApiController]
     [Route("api/denuncias")]
     [Authorize] // apenas usuários logados podem denunciar
-    public class DenunciaController : ControllerBase
+    public class DenunciasController : ControllerBase
     {
         private readonly IDenunciaRepository _denunciaRepository;
 
@@ -39,11 +39,13 @@ namespace UniHub.API.Controllers
             var denuncia = new Denuncia
             {
                 DenuncianteId = usuarioLogadoId, // pego com segurança do Token
-                AlvoId = dto.AlvoId,
-                TipoAlvo = dto.TipoAlvo,
-                Motivo = dto.Motivo,
-                Status = "Pendente",
-                DataCriacao = DateTime.UtcNow
+                DenunciadoId = dto.DenunciadoId,
+                ProdutoId = dto.ProdutoId,
+                Descricao = dto.Descricao,
+
+                //Converte a string enviada para o Enum DenunciaMotivo
+                Motivo = Enum.Parse<DenunciaMotivo>(dto.Motivo, ignoreCase: true),
+
             };
 
             await _denunciaRepository.CriarAsync(denuncia);
