@@ -48,31 +48,22 @@ namespace UniHub.API.Controllers
             {
                 return NotFound(new {mensagem = "O usuário denunciado não foi encontrado no sistema."});
             }
-            
+
+            //Converte a string enviada para o Enum DenunciaMotivo
+            if (!Enum.TryParse<DenunciaMotivo>(dto.Motivo, ignoreCase: true, out var motivo))
+                return BadRequest(new { mensagem = "Motivo inválido. Use: ConteudoOfensivo, ComportamentoInadequado, "
+                                +"Assedio, Fraude, ProdutoInadequado ou Outro." });
+
             // Mapeia o DTO 
             var denuncia = new Denuncia
             {
-                DenuncianteId = usuarioLogadoId, // pego com segurança do Token
+                DenuncianteId = usuarioLogadoId,
                 DenunciadoId = dto.DenunciadoId,
                 ProdutoId = dto.ProdutoId,
                 Descricao = dto.Descricao,
-
-                //Converte a string enviada para o Enum DenunciaMotivo
-               if (!Enum.TryParse<DenunciaMotivo>(dto.Motivo, ignoreCase: true, out var motivo))
-    return BadRequest(new { mensagem = "Motivo inválido. Use: ConteudoOfensivo, ComportamentoInadequado, Assedio, Fraude, ProdutoInadequado ou Outro." });
-
-var denuncia = new Denuncia
-{
-    DenuncianteId = usuarioLogadoId,
-    DenunciadoId = dto.DenunciadoId,
-    ProdutoId = dto.ProdutoId,
-    Descricao = dto.Descricao,
-    Motivo = motivo
-};
-
-
+                Motivo = motivo
             };
-
+    
             await _denunciaRepository.CriarAsync(denuncia);
 
             return StatusCode(201, new {mensagem = "Denúncia registrada com sucesso para análise da administração."});
