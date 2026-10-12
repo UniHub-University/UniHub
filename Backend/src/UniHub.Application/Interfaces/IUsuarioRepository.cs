@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using UniHub.Domain.Entities;
 
 namespace UniHub.Application.Interfaces
 {
@@ -7,7 +8,7 @@ namespace UniHub.Application.Interfaces
     {
         Task<bool> SuspenderAsync(Guid id);
         Task<bool> ReativarAsync(Guid id);
-        Task<Usuario> ObterPorIdAsync(Guid id);
+        Task<Usuario?> ObterPorIdAsync(Guid id);
     }
 
     
