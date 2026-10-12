@@ -28,7 +28,7 @@ namespace UniHub.API.Controllers
             //validacao automatica do ModelState ocorre aqui por conta do [ApiController] e as DataAnnotations do DTO
 
             //Extrai o ID do usuário logado de dentro do token JWT (autenticação)
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+           var userIdString = User.FindFirst("sub")?.Value;
                 ?? User.FindFirst("id")?.Value 
                 ?? User.FindFirst("userId")?.Value 
                 ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
