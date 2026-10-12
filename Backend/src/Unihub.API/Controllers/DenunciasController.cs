@@ -46,7 +46,18 @@ namespace UniHub.API.Controllers
                 Descricao = dto.Descricao,
 
                 //Converte a string enviada para o Enum DenunciaMotivo
-                Motivo = Enum.Parse<DenunciaMotivo>(dto.Motivo, ignoreCase: true),
+               if (!Enum.TryParse<DenunciaMotivo>(dto.Motivo, ignoreCase: true, out var motivo))
+    return BadRequest(new { mensagem = "Motivo inválido. Use: ConteudoOfensivo, ComportamentoInadequado, Assedio, Fraude, ProdutoInadequado ou Outro." });
+
+var denuncia = new Denuncia
+{
+    DenuncianteId = usuarioLogadoId,
+    DenunciadoId = dto.DenunciadoId,
+    ProdutoId = dto.ProdutoId,
+    Descricao = dto.Descricao,
+    Motivo = motivo
+};
+
 
             };
 
