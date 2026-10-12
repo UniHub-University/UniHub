@@ -21,7 +21,6 @@ namespace UniHub.API.Controllers
         {
             _denunciaRepository = denunciaRepository;
             _usuarioRepository = usuarioRepository;
-
         }
 
         [HttpPost]
