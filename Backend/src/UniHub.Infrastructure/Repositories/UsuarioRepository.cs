@@ -49,5 +49,10 @@ namespace UniHub.Infrastructure.Repositories
 
             return true;
         }
+
+        public async Task<Usuario> ObterPorIdAsync(Guid id)
+        {
+            return await _context.Usuarios.FindAsync(id);
+        }
     }
 }

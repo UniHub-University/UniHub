@@ -15,10 +15,12 @@ namespace UniHub.API.Controllers
     public class DenunciasController : ControllerBase
     {
         private readonly IDenunciaRepository _denunciaRepository;
+        private readonly IUsuarioRepository _usuarioRepository;
 
-        public DenunciasController(IDenunciaRepository denunciaRepository)
+        public DenunciasController(IDenunciaRepository denunciaRepository, IUsuarioRepository usuarioRepository)
         {
             _denunciaRepository = denunciaRepository;
+            _usuarioRepository = usuarioRepository;
 
         }
 
@@ -37,6 +39,20 @@ namespace UniHub.API.Controllers
             {
                 return Unauthorized(new { mensagem = "Usuário inválido ou não autenticado. Verifique as Claims do Token." });
             }
+
+            // Impedir auto-denúncia
+            if(dto.DenunciadoId == usuarioLogadoId)
+            {
+                return BadRequest(new { mensagem = "Você não pode denunciar a si mesmo."});
+            }
+
+            // Validar se o denunciado existe no banco para evitar erro de Foreign Key 500
+            var denunciado = await _usuarioRepository.ObterPorIdAsync(dto.DenunciadoId);
+            if (denunciado == null)
+            {
+                return NotFound(new {mensagem = "O usuário denunciado não foi encontrado no sistema."});
+            }
+            
             // Mapeia o DTO 
             var denuncia = new Denuncia
             {

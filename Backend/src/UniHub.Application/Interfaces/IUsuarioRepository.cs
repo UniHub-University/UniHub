@@ -7,5 +7,8 @@ namespace UniHub.Application.Interfaces
     {
         Task<bool> SuspenderAsync(Guid id);
         Task<bool> ReativarAsync(Guid id);
+        Task<Usuario> ObterPorIdAsync(Guid id);
     }
+
+    
 }
