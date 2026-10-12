@@ -30,7 +30,7 @@ namespace UniHub.API.Controllers
             //validacao automatica do ModelState ocorre aqui por conta do [ApiController] e as DataAnnotations do DTO
 
             //Extrai o ID do usuário logado de dentro do token JWT (autenticação)
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+           var userIdString = User.FindFirst("sub")?.Value;
                 ?? User.FindFirst("id")?.Value 
                 ?? User.FindFirst("userId")?.Value 
                 ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
@@ -62,7 +62,18 @@ namespace UniHub.API.Controllers
                 Descricao = dto.Descricao,
 
                 //Converte a string enviada para o Enum DenunciaMotivo
-                Motivo = Enum.Parse<DenunciaMotivo>(dto.Motivo, ignoreCase: true),
+               if (!Enum.TryParse<DenunciaMotivo>(dto.Motivo, ignoreCase: true, out var motivo))
+    return BadRequest(new { mensagem = "Motivo inválido. Use: ConteudoOfensivo, ComportamentoInadequado, Assedio, Fraude, ProdutoInadequado ou Outro." });
+
+var denuncia = new Denuncia
+{
+    DenuncianteId = usuarioLogadoId,
+    DenunciadoId = dto.DenunciadoId,
+    ProdutoId = dto.ProdutoId,
+    Descricao = dto.Descricao,
+    Motivo = motivo
+};
+
 
             };
 
