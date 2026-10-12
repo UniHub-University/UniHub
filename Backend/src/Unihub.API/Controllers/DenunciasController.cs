@@ -30,7 +30,6 @@ namespace UniHub.API.Controllers
 
             //Extrai o ID do usuário logado de dentro do token JWT (autenticação)
            var userIdString = User.FindFirst("sub")?.Value;
-                ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
 
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid usuarioLogadoId))
             {
