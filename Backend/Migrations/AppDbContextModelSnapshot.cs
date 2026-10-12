@@ -73,6 +73,45 @@ namespace Backend.Migrations
                     b.ToTable("Correspondencias");
                 });
 
+            modelBuilder.Entity("UniHub.Domain.Entities.Denuncia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CriadaEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DenunciadoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DenuncianteId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Motivo")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("ProdutoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DenunciadoId");
+
+                    b.HasIndex("DenuncianteId");
+
+                    b.HasIndex("ProdutoId");
+
+                    b.ToTable("Denuncias");
+                });
+
             modelBuilder.Entity("UniHub.Domain.Entities.Doacao", b =>
                 {
                     b.Property<Guid>("Id")
@@ -457,6 +496,32 @@ namespace Backend.Migrations
                     b.Navigation("Solicitacao");
 
                     b.Navigation("Voluntario");
+                });
+
+            modelBuilder.Entity("UniHub.Domain.Entities.Denuncia", b =>
+                {
+                    b.HasOne("UniHub.Domain.Entities.Usuario", "Denunciado")
+                        .WithMany()
+                        .HasForeignKey("DenunciadoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("UniHub.Domain.Entities.Usuario", "Denunciante")
+                        .WithMany()
+                        .HasForeignKey("DenuncianteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("UniHub.Domain.Entities.Produto", "Produto")
+                        .WithMany()
+                        .HasForeignKey("ProdutoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Denunciado");
+
+                    b.Navigation("Denunciante");
+
+                    b.Navigation("Produto");
                 });
 
             modelBuilder.Entity("UniHub.Domain.Entities.Doacao", b =>

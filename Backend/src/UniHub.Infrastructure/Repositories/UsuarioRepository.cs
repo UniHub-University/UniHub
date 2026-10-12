@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using UniHub.Application.Interfaces;
 using UniHub.Infrastructure.Data;
+using UniHub.Domain.Entities;
 
 namespace UniHub.Infrastructure.Repositories
 {
@@ -48,6 +49,11 @@ namespace UniHub.Infrastructure.Repositories
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<Usuario?> ObterPorIdAsync(Guid id)
+        {
+            return await _context.Usuarios.FindAsync(id);
         }
     }
 }

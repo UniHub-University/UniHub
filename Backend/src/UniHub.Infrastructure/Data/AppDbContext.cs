@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
 
     public DbSet<HorarioVenda> HorariosVenda { get; set; }
     public DbSet<LocalVenda> LocaisVenda { get; set; }
+    public DbSet<Denuncia> Denuncias { get; set; }
 
     public DbSet<SolicitacaoApoio> SolicitacoesApoio { get; set; }
     public DbSet<Correspondencia> Correspondencias { get; set; }
@@ -35,19 +36,19 @@ public class AppDbContext : DbContext
             .WithOne(v => v.Usuario)
             .HasForeignKey<Vendedor>(v => v.UsuarioId);
 
-        // 1. Relação N:N (Muitos-para-Muitos) entre Usuario e RestricaoAlimentar
+        // Relação N:N (Muitos-para-Muitos) entre Usuario e RestricaoAlimentar
         modelBuilder.Entity<Usuario>()
             .HasMany(u => u.RestricoesAlimentares) 
             .WithMany(r => r.Usuarios)
             .UsingEntity(j => j.ToTable("UsuarioRestricaoAlimentar"));
 
-        // 2. Relação 1:N (Um-para-Muitos) entre Vendedor e HorarioVenda
+        // Relação 1:N (Um-para-Muitos) entre Vendedor e HorarioVenda
         modelBuilder.Entity<Vendedor>()
             .HasMany(v => v.Horarios)
             .WithOne(h => h.Vendedor)
             .HasForeignKey(h => h.VendedorId);
 
-        // 3. Relação 1:N (Um-para-Muitos) entre Vendedor e LocalVenda
+        // Relação 1:N (Um-para-Muitos) entre Vendedor e LocalVenda
         modelBuilder.Entity<Vendedor>()
             .HasMany(v => v.Locais)
             .WithOne(l => l.Vendedor)
@@ -89,5 +90,26 @@ public class AppDbContext : DbContext
             .HasForeignKey(d => d.VoluntarioId)
             .OnDelete(DeleteBehavior.Restrict);
     
+        // Relação 1:N (Um-para-Muitos) entre Denunciante e Denúncias
+        modelBuilder.Entity<Denuncia>()
+            .HasOne(d => d.Denunciante)
+            .WithMany()
+            .HasForeignKey(d => d.DenuncianteId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Relação 1:N (Um-para-Muitos) entre Denunciado e Denúncias
+        modelBuilder.Entity<Denuncia>()
+            .HasOne(d => d.Denunciado)
+            .WithMany()
+            .HasForeignKey(d => d.DenunciadoId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Relação 1:N (Um-para-Muitos) OPCIONAL entre Produto e Denuncia
+        modelBuilder.Entity<Denuncia>()
+            .HasOne(d => d.Produto)
+            .WithMany()
+            .HasForeignKey(d => d.ProdutoId)
+            .OnDelete(DeleteBehavior.Restrict);
+
     }
 }
