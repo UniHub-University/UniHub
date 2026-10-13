@@ -49,7 +49,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<VendedorService>();
-builder.Services.AddScoped<VoluntarioService>()
+builder.Services.AddScoped<VoluntarioService>();
 
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
