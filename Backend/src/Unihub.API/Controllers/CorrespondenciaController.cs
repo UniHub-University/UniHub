@@ -35,7 +35,7 @@ public class CorrespondenciaController : ControllerBase
         var sugestoes = await _context.SolicitacoesApoio
             .AsNoTracking()
             .Where(s => s.Status == StatusSolicitacao.Aberta
-                     && s.SolicitanteId != usuarioId
+                     && s.SolicitanteId != voluntario.UsuarioId
                      && areas.Contains(s.Categoria))
             .OrderBy(s => s.CreatedAt)
             .Select(s => new SolicitacaoApoioRespostaDto(
