@@ -30,7 +30,6 @@ public class CorrespondenciaController : ControllerBase
         if (voluntario is null)
             return BadRequest(new { mensagem = "Usuario precisa ser voluntario para ver sugestoes." });
 
-        var usuarioId = ObterUsuarioIdLogado();
         var areas = voluntario.AreasDeAtuacao;
 
         var sugestoes = await _context.SolicitacoesApoio
