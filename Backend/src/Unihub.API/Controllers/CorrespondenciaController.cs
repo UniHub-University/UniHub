@@ -30,13 +30,12 @@ public class CorrespondenciaController : ControllerBase
         if (voluntario is null)
             return BadRequest(new { mensagem = "Usuario precisa ser voluntario para ver sugestoes." });
 
-        var usuarioId = ObterUsuarioIdLogado();
         var areas = voluntario.AreasDeAtuacao;
 
         var sugestoes = await _context.SolicitacoesApoio
             .AsNoTracking()
             .Where(s => s.Status == StatusSolicitacao.Aberta
-                     && s.SolicitanteId != usuarioId
+                     && s.SolicitanteId != voluntario.UsuarioId
                      && areas.Contains(s.Categoria))
             .OrderBy(s => s.CreatedAt)
             .Select(s => new SolicitacaoApoioRespostaDto(
@@ -50,17 +49,18 @@ public class CorrespondenciaController : ControllerBase
     [HttpPost("aceitar")]
     public async Task<ActionResult<CorrespondenciaRespostaDto>> Aceitar([FromBody] AceitarSolicitacaoDto dto)
     {
+        if (dto.SolicitacaoId == Guid.Empty)
+            return BadRequest(new { mensagem = "O ID da solicitação é obrigatório." });
+
         var voluntario = await ObterVoluntarioLogado();
         if (voluntario is null)
             return BadRequest(new { mensagem = "Usuario precisa ser voluntario para aceitar solicitacoes." });
-
-        var usuarioId = ObterUsuarioIdLogado();
 
         var solicitacao = await _context.SolicitacoesApoio.FindAsync(dto.SolicitacaoId);
         if (solicitacao is null)
             return NotFound(new { mensagem = "Solicitacao nao encontrada." });
 
-        if (solicitacao.SolicitanteId == usuarioId)
+        if (solicitacao.SolicitanteId == voluntario.UsuarioId)
             return BadRequest(new { mensagem = "Voce nao pode atender a propria solicitacao." });
 
         // a trava: so deixa passar quem chegar primeiro, mesmo com dois clicando ao mesmo tempo
@@ -70,25 +70,33 @@ public class CorrespondenciaController : ControllerBase
         if (!venceu)
             return Conflict(new { mensagem = "Esta solicitacao nao esta mais disponivel." });
 
-        var correspondencia = new Correspondencia
+        try
         {
-            SolicitacaoId = dto.SolicitacaoId,
-            VoluntarioId = voluntario.Id
-        };
-        correspondencia.Aceitar();
+            var correspondencia = new Correspondencia
+            {
+                SolicitacaoId = dto.SolicitacaoId,
+                VoluntarioId = voluntario.Id
+            };
+            correspondencia.Aceitar();
 
-        _context.Correspondencias.Add(correspondencia);
-        await _context.SaveChangesAsync();
-        await transacao.CommitAsync();
+            _context.Correspondencias.Add(correspondencia);
+            await _context.SaveChangesAsync();
+            await transacao.CommitAsync();
 
-        return Ok(new CorrespondenciaRespostaDto(
-            correspondencia.Id,
-            solicitacao.CodigoPublico,
-            solicitacao.Categoria,
-            correspondencia.Status,
-            correspondencia.CreatedAt,
-            correspondencia.AceitaEm,
-            correspondencia.IdentidadeRevelada));
+            return Ok(new CorrespondenciaRespostaDto(
+                correspondencia.Id,
+                solicitacao.CodigoPublico,
+                solicitacao.Categoria,
+                correspondencia.Status,
+                correspondencia.CreatedAt,
+                correspondencia.AceitaEm,
+                correspondencia.IdentidadeRevelada));
+        }
+        catch (InvalidOperationException ex)
+        {
+            // transacao sofre rollback automatico pelo 'await using' ao sair sem commit
+            return Conflict(new { mensagem = ex.Message });
+        }
     }
 
     // POST /api/correspondencias/{id}/concluir

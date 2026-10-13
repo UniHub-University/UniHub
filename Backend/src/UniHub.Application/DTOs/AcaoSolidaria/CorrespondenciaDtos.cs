@@ -1,9 +1,11 @@
+using System.ComponentModel.DataAnnotations;
 using UniHub.Domain.Entities;
 
 namespace UniHub.Application.DTOs.AcaoSolidaria;
 
 public class AceitarSolicitacaoDto
 {
+    [Required(ErrorMessage = "O ID da solicitação é obrigatório.")]
     public Guid SolicitacaoId { get; set; }
 }
 
