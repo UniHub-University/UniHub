@@ -72,7 +72,33 @@ public class CorrespondenciaController : ControllerBase
         if (!venceu)
             return Conflict(new { mensagem = "Esta solicitacao nao esta mais disponivel." });
 
+        try
+    {
         var correspondencia = new Correspondencia
+        {
+            SolicitacaoId = dto.SolicitacaoId,
+            VoluntarioId = voluntario.Id
+        };
+        correspondencia.Aceitar();
+
+        _context.Correspondencias.Add(correspondencia);
+        await _context.SaveChangesAsync();
+        await transacao.CommitAsync();
+
+        return Ok(new CorrespondenciaRespostaDto(
+            correspondencia.Id,
+            solicitacao.CodigoPublico,
+            solicitacao.Categoria,
+            correspondencia.Status,
+            correspondencia.CreatedAt,
+            correspondencia.AceitaEm,
+            correspondencia.IdentidadeRevelada));
+    }
+    catch (InvalidOperationException ex)
+    {
+        // transacao sofre rollback automatico pelo 'await using' ao sair sem commit
+        return Conflict(new { mensagem = ex.Message });
+    }
         {
             SolicitacaoId = dto.SolicitacaoId,
             VoluntarioId = voluntario.Id
