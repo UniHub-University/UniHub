@@ -50,6 +50,9 @@ public class CorrespondenciaController : ControllerBase
     [HttpPost("aceitar")]
     public async Task<ActionResult<CorrespondenciaRespostaDto>> Aceitar([FromBody] AceitarSolicitacaoDto dto)
     {
+       if (dto.SolicitacaoId == Guid.Empty)
+           return BadRequest(new { mensagem = "O ID da solicitação é obrigatório." });
+        
         var voluntario = await ObterVoluntarioLogado();
         if (voluntario is null)
             return BadRequest(new { mensagem = "Usuario precisa ser voluntario para aceitar solicitacoes." });
