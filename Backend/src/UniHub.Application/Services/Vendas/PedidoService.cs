@@ -5,7 +5,8 @@ using UniHub.Domain.Entities;
 namespace UniHub.Application.Services.Vendas;
 
 // Aqui ocorre a orquestracao da criacao de pedidos.
-// A Resolucao da concorrencia se da no repositorio (IPedidoRepository), este servico apenas reage ao resultado.
+// A Resolucao da concorrencia se da no repositorio (IPedidoRepository), este servico apenas
+// reage ao resultado.
 
 public class PedidoService
 {
@@ -33,7 +34,8 @@ public class PedidoService
             Itens = new List<ItemPedido>()
         };
 
-        // tenta reservar cada item. Se algum item falhar por falta de estoque, interrompe e devolve os itens já decrementados com sucesso
+        // tenta reservar cada item. Se algum item falhar por falta de estoque,
+        // interrompe e devolve os itens já decrementados com sucesso
 
         var decrementados = new List<(Guid ProdutoId, int Quantidade)>();
 
@@ -49,7 +51,8 @@ public class PedidoService
             var sucesso = await _produtoRepository.TryDecrementarEstoqueAsync(item.ProdutoId, item.Quantidade);
             if (!sucesso)
             {
-                // caso de duas pessoas tentando comprar o último item do estoque ao mesmo tempo quem faz a solicitação por ultimo, cai aqui
+                // caso de duas pessoas tentando comprar o último item do estoque ao mesmo tempo
+                // quem faz a solicitação por ultimo, cai aqui
                 await RollbackAsync(decrementados);
                 return new PedidoResultDto(false, $"Estoque insuficiente para '{produto.Nome}'.", null);
 
@@ -69,11 +72,13 @@ public class PedidoService
 
     }
 
-    // Historico de pedidos:  private const int PageSizePadrao = 10;
+    // Historico de pedidos:
+    private const int PageSizePadrao = 10;
     private const int PageSizeMaximo = 50;
 
     // Devolve a pagina do historico do comprador autenticado (compradorId vem do
-    // token no Controller, nunca da requisicao) e os valores de page/pageSize efetivamente usados, para o Controller montar a resposta paginada.
+    // token no Controller, nunca da requisicao) e os valores de page/pageSize
+    // efetivamente usados, para o Controller montar a resposta paginada.
     public async Task<(List<HistoricoPedidoDto> Pedidos, int Total, int Page, int PageSize)> GetHistoricoAsync(
         Guid compradorId, int page, int pageSize)
     {
