@@ -7,6 +7,102 @@ um PR.**
 
 ---
 
+## 0. Princípios fundamentais (ler antes de tudo)
+
+Estes princípios reduzem os erros mais comuns de IA e de desenvolvimento neste
+projeto. Aplique-os em toda tarefa.
+
+### 0.1. Pense antes de codar
+Não presuma. Não esconda confusão. Exponha os trade-offs.
+- Declare suposições explicitamente. Se estiver incerto, **pergunte**.
+- Se há mais de uma interpretação, apresente-as — **não escolha em silêncio**.
+- Se existe uma abordagem mais simples, diga. Questione quando fizer sentido.
+- Se algo está confuso, **pare**. Aponte o que não está claro e pergunte.
+
+### 0.2. Simplicidade primeiro
+O mínimo de código que resolve o problema. Nada especulativo.
+- Nenhuma funcionalidade além do que foi pedido.
+- Prefira reaproveitar os padrões que já existem no projeto a inventar novos.
+- Não adicione abstração "para o futuro" sem necessidade concreta.
+
+### 0.3. Valide antes de entregar
+Neste projeto, erros recorrentes só aparecem em build/runtime — não na leitura.
+- **Sempre** rode `dotnet build` antes de abrir ou atualizar um PR.
+- Confirme que os arquivos citados foram realmente commitados.
+- Antes de dizer "pronto", verifique contra o que foi de fato pedido.
+
+### 0.4. Respeite o que já funciona
+- Não "padronize" ou refatore código fora do escopo da tarefa sem alinhar
+  (ver Débitos técnicos conhecidos — seção 12).
+- Mudanças em `AppDbContext`, `Program.cs` e migrations são sensíveis:
+  coordene (ver seções 6 e 9) antes de agir.
+
+---
+
+## 0.5. Fluxo obrigatório: planejar antes de implementar
+
+Antes de escrever código para qualquer task/user story, crie e refine um
+**plano em markdown**. Isto não é opcional — um plano ruim gera retrabalho caro;
+um plano revisado é barato de corrigir.
+
+### Passo a passo
+1. **Crie o arquivo** `Documentos/plans/<id-ou-nome-da-task>.md` (ex.:
+   `Documentos/plans/BRV-128-campanhas-sazonais.md`), usando o template abaixo.
+2. **Refine o plano em conversa** com a IA (ou com o squad) até ficar claro:
+   questione suposições, levante trade-offs, confirme o escopo. **Não escolha
+   em silêncio** (ver princípio 0.1).
+3. **Só então implemente**, seguindo o plano aprovado.
+4. **Mantenha o `.md` atualizado** se o plano mudar durante a implementação.
+5. Ao concluir, o `.md` fica arquivado em `Documentos/plans/` como registro da decisão
+   (útil se outra pessoa/IA assumir a task depois).
+
+### Quando aplicar
+- **Sempre** para features e user stories (qualquer coisa com lógica de negócio nova).
+- **Pode pular** para correções triviais (typo, ajuste de texto, bump de versão) —
+  bom senso.
+
+### Template do plano (`Documentos/plans/<task>.md`)
+
+```markdown
+# Plano — <ID/Nome da task>
+
+## Objetivo
+<O que esta task entrega e por quê. 1-3 frases.>
+
+## Escopo
+- **Inclui:** <o que será feito>
+- **NÃO inclui:** <o que fica de fora, para evitar escopo inchado>
+
+## Decisões de design
+- **Entidades/Domain:** <entidades novas ou alteradas>
+- **Endpoints/API:** <rotas novas, verbos, contratos>
+- **Banco/Migrations:** <muda schema? precisa de migration? coordenar com o Guardião>
+- **Impacto em concorrência/LGPD:** <toca estoque? expõe dados sensíveis?>
+- **Trade-offs considerados:** <alternativas avaliadas e por que a escolhida>
+
+## Passos de implementação
+1. <camada Domain>
+2. <camada Application: interface, service, DTOs>
+3. <camada Infrastructure: repositório>
+4. <camada API: controller, DI no Program.cs>
+5. <frontend, se aplicável>
+
+## Critérios de aceite
+- [ ] <condição 1 — comportamento verificável>
+- [ ] <condição 2>
+- [ ] `dotnet build` limpo
+- [ ] (se mexe em schema) migration testada em branch do Neon
+
+## Pendências / dúvidas em aberto
+<Perguntas que precisam de decisão humana antes/durante a implementação.>
+```
+
+> Este fluxo complementa o planejamento de sprint (board/YouTrack): o board diz
+> **o que** fazer e quando; o `.md` de plano diz **como** fazer aquela task
+> específica, com o nível de detalhe técnico que a implementação exige.
+
+---
+
 ## 1. O que é o projeto
 
 UniHub é um ecossistema digital universitário (UNIFESP) com três módulos:
@@ -124,6 +220,8 @@ foi avaliado e **descartado** (gerava falso conflito). Mantenha esse padrão.
 - **Pull Requests obrigatórios**, com revisão antes de merge na `main`. Nunca commitar
   direto na `main`.
 - **Branches de feature** por tarefa; nomes descritivos (`feat/...`, `fix/...`).
+- **Mensagens de commit** no padrão convencional: `feat:`, `fix:`, `chore:`, `docs:`,
+  `test:`.
 - **Antes de abrir/atualizar PR:** rodar `dotnet build` localmente. Build quebrado é
   recorrente e o CI pega, mas valide antes.
 - **Atualizar branch defasada:** usar `git fetch` + `git rebase origin/main`. Após
@@ -185,8 +283,74 @@ dotnet ef database update   # só o Guardião de Migrations, idealmente
 dotnet run                  # Swagger em /swagger (Development)
 ```
 
+## 14. Glossário de domínio
+
+Termos do negócio (todos em português no código). Útil para entender rapidamente
+cada entidade, especialmente no módulo de Ação Solidária, que tem termos não óbvios.
+
+### Usuários e papéis
+- **Usuario** — entidade central; autentica via Google (`@unifesp.br`). Tem `Role`
+  (`UserRole`: `Aluno=0`, `Voluntario=1`, `Admin=2`) e `IsActive` (conta suspensa
+  pela Moderação fica `false`).
+- **Vendedor** — perfil opcional de um `Usuario` (relação 1:0..1). Quem publica
+  produtos. Tem `ChavePix`, dados da loja e logística.
+- **Voluntario** — perfil opcional de um `Usuario` (relação 1:0..1). Quem atende
+  solicitações na Ação Solidária. Tem `AreasDeAtuacao` (lista de `CategoriaApoio`)
+  e `Disponivel` (pausar/retomar atuação).
+  > Obs.: ser Vendedor/Voluntário é representado pela existência do perfil, NÃO por
+  > um valor de `UserRole` — evita inconsistência entre o enum e o perfil.
+
+### Comércio (Alimentação e Bazar)
+- **Produto** — classe **abstrata** (Table-Per-Hierarchy no EF). Subtipos: `Alimento`
+  (Alimentação) e `ItemBazar` (Bazar). `QuantidadeDisponivel` é o campo sensível à
+  concorrência (ver seção 7). Tem `ProdutoStatus` (`Disponivel`, `Esgotado`, `Inativo`).
+- **Pedido / ItemPedido** — a transação de compra. `Pedido` tem `PedidoStatus`
+  (começa em `Reservado`). `ItemPedido` guarda o produto, a quantidade e o
+  `PrecoUnitarioNaCompra` (preço "congelado" no momento da compra).
+
+### Ação Solidária (o módulo mais sensível — ver LGPD, seção 8)
+- **SolicitacaoApoio** — pedido de ajuda feito por um aluno (o *solicitante*). Tem
+  `CodigoPublico` pseudonimizado (ex.: `SOL-A1B2C3`), uma `CategoriaApoio` e
+  `StatusSolicitacao` (`Aberta`, `EmAndamento`, `Concluida`, `Cancelada`).
+- **Voluntario** — ver acima; é quem pode atender uma solicitação.
+- **Correspondencia** — o **"match"** entre um Voluntário e uma Solicitação. Tem
+  `StatusCorrespondencia` (`Sugerida` → `AceitaPeloVoluntario` → `Concluida`/`Cancelada`)
+  e o flag `IdentidadeRevelada`. É aqui que mora a regra de privacidade: o método
+  `AutorizarRevelacaoIdentidade()` só é chamado pelo próprio solicitante, nunca
+  automaticamente.
+- **Doacao** — registro de uma doação concreta feita em resposta a uma solicitação
+  (pode haver mais de uma por solicitação). Tem `StatusDoacao`
+  (`Pendente`, `Concluida`, `Cancelada`).
+- **CategoriaApoio** — enum das categorias de apoio (ex.: `AulasDeReforco`,
+  `DoacaoDeRoupas`, `DoacaoDeAlimentos`, `MaterialAcademico`, `Outros`). Usado tanto
+  na Solicitação quanto nas áreas de atuação do Voluntário (para o "match").
+
+### Moderação
+- **Denuncia** — reporte feito por um usuário sobre outro usuário (e opcionalmente um
+  produto). Tem `DenunciaMotivo` e `DenunciaStatus` (`Aberta`, `EmAnalise`,
+  `Resolvida`, `Rejeitada`). O Admin gerencia (painel de moderação planejado).
+
+### Conceitos transversais
+- **CodigoPublico** — pseudônimo público e imutável, gerado uma vez
+  (`SolicitacaoApoio` e `Voluntario`). Permite exibir/referenciar sem revelar a
+  identidade real — base do *privacy by design*.
+- **Guardião de Migrations** — papel rotativo por sprint: a pessoa que centraliza
+  toda geração/aplicação de migration (ver seção 6).
+
 ---
 
-**Resumo em uma frase:** respeite as camadas, use o claim `"sub"`, nunca versione
-segredos, coordene migrations com o Guardião, proteja a identidade na Ação Solidária,
-e valide com `dotnet build` antes de todo PR.
+## 15. Mantenha este documento vivo
+
+Este `AGENTS.md` é a fonte de verdade compartilhada do time — qualquer IA (Kiro,
+Codex, Cursor, etc.) e qualquer desenvolvingedor o lê para se alinhar. Ele só é
+útil se estiver atualizado:
+- **Toda convenção nova entra aqui no mesmo PR** que a introduz.
+- Decisões voláteis (sprint atual, prioridades) ficam nos documentos de planejamento,
+  não aqui.
+- Trate-o como código: revisado e versionado.
+
+---
+
+**Resumo em uma frase:** planeje antes de codar, respeite as camadas, use o claim
+`"sub"`, nunca versione segredos, coordene migrations com o Guardião, proteja a
+identidade na Ação Solidária, e valide com `dotnet build` antes de todo PR.
