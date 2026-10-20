@@ -46,14 +46,14 @@ Antes de escrever código para qualquer task/user story, crie e refine um
 um plano revisado é barato de corrigir.
 
 ### Passo a passo
-1. **Crie o arquivo** `docs/plans/<id-ou-nome-da-task>.md` (ex.:
-   `docs/plans/BRV-128-campanhas-sazonais.md`), usando o template abaixo.
+1. **Crie o arquivo** `Documentos/plans/<id-ou-nome-da-task>.md` (ex.:
+   `Documentos/plans/BRV-128-campanhas-sazonais.md`), usando o template abaixo.
 2. **Refine o plano em conversa** com a IA (ou com o squad) até ficar claro:
    questione suposições, levante trade-offs, confirme o escopo. **Não escolha
    em silêncio** (ver princípio 0.1).
 3. **Só então implemente**, seguindo o plano aprovado.
 4. **Mantenha o `.md` atualizado** se o plano mudar durante a implementação.
-5. Ao concluir, o `.md` fica arquivado em `docs/plans/` como registro da decisão
+5. Ao concluir, o `.md` fica arquivado em `Documentos/plans/` como registro da decisão
    (útil se outra pessoa/IA assumir a task depois).
 
 ### Quando aplicar
@@ -61,7 +61,7 @@ um plano revisado é barato de corrigir.
 - **Pode pular** para correções triviais (typo, ajuste de texto, bump de versão) —
   bom senso.
 
-### Template do plano (`docs/plans/<task>.md`)
+### Template do plano (`Documentos/plans/<task>.md`)
 
 ```markdown
 # Plano — <ID/Nome da task>
