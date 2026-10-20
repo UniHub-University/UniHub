@@ -1,0 +1,91 @@
+/* Tela de boas-vindas (BRV-116) — cores da identidade visual UniHub. */
+
+.boasvindas {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-color: var(--cor-creme);
+  /* Leve textura radial para dar profundidade ao fundo creme. */
+  background-image: radial-gradient(
+    circle at 50% 0%,
+    rgba(177, 149, 99, 0.18),
+    transparent 60%
+  );
+}
+
+.boasvindas__cartao {
+  width: 100%;
+  max-width: 420px;
+  background-color: var(--cor-superficie);
+  border: 1px solid rgba(177, 149, 99, 0.35);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 40px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.boasvindas__logo {
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.boasvindas__titulo {
+  font-family: var(--fonte-titulo);
+  font-size: 2.6rem;
+  line-height: 1;
+  letter-spacing: -0.5px;
+  color: var(--cor-verde);
+}
+
+.boasvindas__subtitulo {
+  font-family: var(--fonte-corpo);
+  font-size: 1rem;
+  color: var(--cor-tan);
+  margin: 6px 0 0;
+}
+
+.boasvindas__descricao {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--cor-verde);
+  opacity: 0.85;
+  margin: 22px 0 26px;
+}
+
+.boasvindas__descricao strong {
+  color: var(--cor-verde);
+  font-weight: 600;
+}
+
+.boasvindas__login {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.boasvindas__status {
+  margin: 16px 0 0;
+  font-size: 0.9rem;
+  color: var(--cor-tan);
+}
+
+.boasvindas__erro {
+  margin: 16px 0 0;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  color: var(--cor-erro);
+  background-color: rgba(155, 44, 44, 0.08);
+  border: 1px solid rgba(155, 44, 44, 0.25);
+  border-radius: 10px;
+}
+
+.boasvindas__rodape {
+  margin: 28px 0 0;
+  font-size: 0.78rem;
+  color: var(--cor-tan);
+}
