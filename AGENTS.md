@@ -39,6 +39,70 @@ Neste projeto, erros recorrentes só aparecem em build/runtime — não na leitu
 
 ---
 
+## 0.5. Fluxo obrigatório: planejar antes de implementar
+
+Antes de escrever código para qualquer task/user story, crie e refine um
+**plano em markdown**. Isto não é opcional — um plano ruim gera retrabalho caro;
+um plano revisado é barato de corrigir.
+
+### Passo a passo
+1. **Crie o arquivo** `docs/plans/<id-ou-nome-da-task>.md` (ex.:
+   `docs/plans/BRV-128-campanhas-sazonais.md`), usando o template abaixo.
+2. **Refine o plano em conversa** com a IA (ou com o squad) até ficar claro:
+   questione suposições, levante trade-offs, confirme o escopo. **Não escolha
+   em silêncio** (ver princípio 0.1).
+3. **Só então implemente**, seguindo o plano aprovado.
+4. **Mantenha o `.md` atualizado** se o plano mudar durante a implementação.
+5. Ao concluir, o `.md` fica arquivado em `docs/plans/` como registro da decisão
+   (útil se outra pessoa/IA assumir a task depois).
+
+### Quando aplicar
+- **Sempre** para features e user stories (qualquer coisa com lógica de negócio nova).
+- **Pode pular** para correções triviais (typo, ajuste de texto, bump de versão) —
+  bom senso.
+
+### Template do plano (`docs/plans/<task>.md`)
+
+```markdown
+# Plano — <ID/Nome da task>
+
+## Objetivo
+<O que esta task entrega e por quê. 1-3 frases.>
+
+## Escopo
+- **Inclui:** <o que será feito>
+- **NÃO inclui:** <o que fica de fora, para evitar escopo inchado>
+
+## Decisões de design
+- **Entidades/Domain:** <entidades novas ou alteradas>
+- **Endpoints/API:** <rotas novas, verbos, contratos>
+- **Banco/Migrations:** <muda schema? precisa de migration? coordenar com o Guardião>
+- **Impacto em concorrência/LGPD:** <toca estoque? expõe dados sensíveis?>
+- **Trade-offs considerados:** <alternativas avaliadas e por que a escolhida>
+
+## Passos de implementação
+1. <camada Domain>
+2. <camada Application: interface, service, DTOs>
+3. <camada Infrastructure: repositório>
+4. <camada API: controller, DI no Program.cs>
+5. <frontend, se aplicável>
+
+## Critérios de aceite
+- [ ] <condição 1 — comportamento verificável>
+- [ ] <condição 2>
+- [ ] `dotnet build` limpo
+- [ ] (se mexe em schema) migration testada em branch do Neon
+
+## Pendências / dúvidas em aberto
+<Perguntas que precisam de decisão humana antes/durante a implementação.>
+```
+
+> Este fluxo complementa o planejamento de sprint (board/YouTrack): o board diz
+> **o que** fazer e quando; o `.md` de plano diz **como** fazer aquela task
+> específica, com o nível de detalhe técnico que a implementação exige.
+
+---
+
 ## 1. O que é o projeto
 
 UniHub é um ecossistema digital universitário (UNIFESP) com três módulos:
@@ -156,6 +220,8 @@ foi avaliado e **descartado** (gerava falso conflito). Mantenha esse padrão.
 - **Pull Requests obrigatórios**, com revisão antes de merge na `main`. Nunca commitar
   direto na `main`.
 - **Branches de feature** por tarefa; nomes descritivos (`feat/...`, `fix/...`).
+- **Mensagens de commit** no padrão convencional: `feat:`, `fix:`, `chore:`, `docs:`,
+  `test:`.
 - **Antes de abrir/atualizar PR:** rodar `dotnet build` localmente. Build quebrado é
   recorrente e o CI pega, mas valide antes.
 - **Atualizar branch defasada:** usar `git fetch` + `git rebase origin/main`. Após
@@ -273,6 +339,18 @@ cada entidade, especialmente no módulo de Ação Solidária, que tem termos nã
 
 ---
 
-**Resumo em uma frase:** pense antes de codar, respeite as camadas, use o claim
+## 15. Mantenha este documento vivo
+
+Este `AGENTS.md` é a fonte de verdade compartilhada do time — qualquer IA (Kiro,
+Codex, Cursor, etc.) e qualquer desenvolvingedor o lê para se alinhar. Ele só é
+útil se estiver atualizado:
+- **Toda convenção nova entra aqui no mesmo PR** que a introduz.
+- Decisões voláteis (sprint atual, prioridades) ficam nos documentos de planejamento,
+  não aqui.
+- Trate-o como código: revisado e versionado.
+
+---
+
+**Resumo em uma frase:** planeje antes de codar, respeite as camadas, use o claim
 `"sub"`, nunca versione segredos, coordene migrations com o Guardião, proteja a
 identidade na Ação Solidária, e valide com `dotnet build` antes de todo PR.
