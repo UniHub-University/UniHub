@@ -1,45 +1,65 @@
-/* Tela de boas-vindas (BRV-116) — cores da identidade visual UniHub. */
+/* ---------------------------------------------------------------------------
+   Tela de boas-vindas (BRV-116) — redesign em duas colunas.
+   Cores e fontes vêm da identidade visual (variáveis em index.css).
+   --------------------------------------------------------------------------- */
 
 .boasvindas {
   min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr; /* hero um pouco maior que o painel */
+}
+
+/* ============================ Coluna esquerda ============================ */
+
+.boasvindas__hero {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
-  background-color: var(--cor-creme);
-  /* Leve textura radial para dar profundidade ao fundo creme. */
-  background-image: radial-gradient(
-    circle at 50% 0%,
-    rgba(177, 149, 99, 0.18),
-    transparent 60%
-  );
+  padding: 56px 48px;
+  background-color: var(--cor-verde);
+  color: var(--cor-creme);
+  overflow: hidden;
 }
 
-.boasvindas__cartao {
-  width: 100%;
-  max-width: 420px;
-  background-color: var(--cor-superficie);
-  border: 1px solid rgba(177, 149, 99, 0.35);
-  border-radius: var(--raio);
-  box-shadow: var(--sombra);
-  padding: 40px 32px;
-  text-align: center;
+/* Textura sutil de círculos no fundo verde, com os tons da paleta. */
+.boasvindas__hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(177, 149, 99, 0.25), transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(254, 246, 199, 0.12), transparent 45%);
+  pointer-events: none;
+}
+
+.boasvindas__hero-conteudo {
+  position: relative;
+  max-width: 460px;
+  animation: bv-surgir 0.6s ease both;
+}
+
+.boasvindas__marca {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 18px;
+  margin-bottom: 28px;
 }
 
 .boasvindas__logo {
   object-fit: contain;
-  margin-bottom: 8px;
+  background-color: var(--cor-creme);
+  border-radius: 20px;
+  padding: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
 }
 
 .boasvindas__titulo {
   font-family: var(--fonte-titulo);
-  font-size: 2.6rem;
+  font-size: 3rem;
   line-height: 1;
   letter-spacing: -0.5px;
-  color: var(--cor-verde);
+  color: var(--cor-creme);
 }
 
 .boasvindas__subtitulo {
@@ -49,16 +69,128 @@
   margin: 6px 0 0;
 }
 
-.boasvindas__descricao {
+.boasvindas__pitch {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: rgba(254, 246, 199, 0.92);
+  margin: 0 0 34px;
+}
+
+/* ------------------------------ Módulos ------------------------------ */
+
+.boasvindas__modulos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.boasvindas__modulo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  background-color: rgba(254, 246, 199, 0.08);
+  border: 1px solid rgba(177, 149, 99, 0.3);
+  border-radius: var(--raio);
+  animation: bv-surgir 0.6s ease both;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+/* Entrada escalonada: cada módulo aparece um pouquinho depois do anterior. */
+.boasvindas__modulo:nth-child(1) { animation-delay: 0.1s; }
+.boasvindas__modulo:nth-child(2) { animation-delay: 0.2s; }
+.boasvindas__modulo:nth-child(3) { animation-delay: 0.3s; }
+
+.boasvindas__modulo:hover {
+  transform: translateX(4px);
+  background-color: rgba(254, 246, 199, 0.14);
+}
+
+.boasvindas__modulo-icone {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  font-size: 1.3rem;
+  color: var(--cor-verde);
+  background-color: var(--cor-tan);
+  border-radius: 12px;
+}
+
+.boasvindas__modulo-titulo {
+  margin: 0;
+  font-weight: 600;
+  color: var(--cor-creme);
+}
+
+.boasvindas__modulo-descricao {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: rgba(254, 246, 199, 0.75);
+}
+
+/* ============================ Coluna direita ============================ */
+
+.boasvindas__painel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  background-color: var(--cor-creme);
+  background-image: radial-gradient(
+    circle at 50% 0%,
+    rgba(177, 149, 99, 0.16),
+    transparent 60%
+  );
+}
+
+.boasvindas__cartao {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--cor-superficie);
+  border: 1px solid rgba(177, 149, 99, 0.35);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 40px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: bv-surgir 0.6s ease 0.15s both;
+}
+
+.boasvindas__selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  margin-bottom: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--cor-verde);
+  background-color: rgba(177, 149, 99, 0.18);
+  border-radius: 999px;
+}
+
+.boasvindas__cartao-titulo {
+  font-family: var(--fonte-titulo);
+  font-size: 1.7rem;
+  color: var(--cor-verde);
+}
+
+.boasvindas__cartao-texto {
   font-size: 0.95rem;
   line-height: 1.5;
   color: var(--cor-verde);
   opacity: 0.85;
-  margin: 22px 0 26px;
+  margin: 10px 0 26px;
 }
 
-.boasvindas__descricao strong {
-  color: var(--cor-verde);
+.boasvindas__cartao-texto strong {
   font-weight: 600;
 }
 
@@ -69,13 +201,25 @@
 }
 
 .boasvindas__status {
-  margin: 16px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 18px 0 0;
   font-size: 0.9rem;
   color: var(--cor-tan);
 }
 
+.boasvindas__spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(177, 149, 99, 0.35);
+  border-top-color: var(--cor-verde);
+  border-radius: 50%;
+  animation: bv-girar 0.7s linear infinite;
+}
+
 .boasvindas__erro {
-  margin: 16px 0 0;
+  margin: 18px 0 0;
   padding: 10px 14px;
   font-size: 0.9rem;
   color: var(--cor-erro);
@@ -88,4 +232,76 @@
   margin: 28px 0 0;
   font-size: 0.78rem;
   color: var(--cor-tan);
+}
+
+/* ============================== Animações ============================== */
+
+@keyframes bv-surgir {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bv-girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Acessibilidade: desliga animações para quem prefere menos movimento. */
+@media (prefers-reduced-motion: reduce) {
+  .boasvindas__hero-conteudo,
+  .boasvindas__modulo,
+  .boasvindas__cartao {
+    animation: none;
+  }
+  .boasvindas__spinner {
+    animation-duration: 1.5s;
+  }
+  .boasvindas__modulo {
+    transition: none;
+  }
+}
+
+/* ============================ Responsividade ============================ */
+
+/* Tablet / mobile: empilha as colunas (hero em cima, login embaixo). */
+@media (max-width: 900px) {
+  .boasvindas {
+    grid-template-columns: 1fr;
+  }
+
+  .boasvindas__hero {
+    padding: 48px 28px 40px;
+  }
+
+  .boasvindas__painel {
+    padding: 40px 24px 56px;
+  }
+
+  .boasvindas__titulo {
+    font-size: 2.4rem;
+  }
+
+  .boasvindas__pitch {
+    font-size: 1rem;
+    margin-bottom: 26px;
+  }
+}
+
+@media (max-width: 480px) {
+  .boasvindas__marca {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .boasvindas__cartao {
+    padding: 32px 22px;
+  }
 }
