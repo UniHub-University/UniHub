@@ -1,26 +1,51 @@
 // Tela inicial de boas-vindas do UniHub (BRV-116).
 //
-// Fluxo de login:
+// Layout em duas colunas:
+//  - Esquerda (hero): marca, tagline, proposta de valor e os 3 módulos.
+//  - Direita (ação): cartão de login com o botão do Google.
+// No mobile, as colunas se empilham (hero em cima, login embaixo).
+//
+// IMPORTANTE: o redesign é puramente visual. A LÓGICA de login é idêntica à
+// versão anterior — mesmo fluxo, mesmo contrato com a API:
 //  1. O usuário clica no botão do Google (<GoogleLogin>).
 //  2. O Google devolve um "credential" = ID token (JWT do Google).
 //  3. Enviamos esse idToken para POST /api/auth/google-login.
-//  4. A API valida que o e-mail é @unifesp.br, cria/retoma o usuário e devolve
-//     o JWT do UniHub. Guardamos esse JWT (via AuthContext/authStorage) e
-//     redirecionamos para uma rota protegida.
-//
-// Observações:
-//  - A API espera o corpo { idToken: "..." }.
-//  - O campo do token na resposta pode vir como "token" (camelCase) ou "Token";
-//    tratamos ambos para não quebrar caso a serialização do backend mude.
+//  4. A API valida o e-mail @unifesp.br e devolve o JWT do UniHub, que guardamos
+//     (via AuthContext/authStorage) antes de redirecionar.
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
+import {
+  FaBowlFood,
+  FaBookOpen,
+  FaHandHoldingHeart,
+  FaGraduationCap,
+} from 'react-icons/fa6';
 
 import { api, ApiError } from '../services/api.js';
 import { useAuth } from '../auth/AuthContext.jsx';
 import logoUniHub from '../assets/logo-unihub.png';
 import './BoasVindas.css';
+
+// Módulos exibidos no hero. Centralizados numa constante para facilitar manutenção.
+const MODULOS = [
+  {
+    icone: FaBowlFood,
+    titulo: 'Alimentação',
+    descricao: 'Reserve lanches e evite filas no intervalo.',
+  },
+  {
+    icone: FaBookOpen,
+    titulo: 'Bazar Acadêmico',
+    descricao: 'Compre e venda materiais entre estudantes.',
+  },
+  {
+    icone: FaHandHoldingHeart,
+    titulo: 'Ação Solidária',
+    descricao: 'Conecte-se a voluntários com privacidade.',
+  },
+];
 
 export default function BoasVindas() {
   const navigate = useNavigate();
@@ -75,44 +100,84 @@ export default function BoasVindas() {
 
   return (
     <main className="boasvindas">
-      <section className="boasvindas__cartao">
-        <img
-          className="boasvindas__logo"
-          src={logoUniHub}
-          alt="UniHub"
-          width={140}
-          height={140}
-        />
+      {/* -------- Coluna esquerda: hero / marca -------- */}
+      <section className="boasvindas__hero">
+        <div className="boasvindas__hero-conteudo">
+          <div className="boasvindas__marca">
+            <img
+              className="boasvindas__logo"
+              src={logoUniHub}
+              alt="UniHub"
+              width={96}
+              height={96}
+            />
+            <div>
+              <h1 className="boasvindas__titulo">UniHub</h1>
+              <p className="boasvindas__subtitulo">Troca e conexão para estudantes.</p>
+            </div>
+          </div>
 
-        <h1 className="boasvindas__titulo">UniHub</h1>
-        <p className="boasvindas__subtitulo">Troca e conexão para estudantes.</p>
-
-        <p className="boasvindas__descricao">
-          Entre com seu e-mail institucional <strong>@unifesp.br</strong> para
-          acessar os módulos de Alimentação, Bazar Acadêmico e Ação Solidária.
-        </p>
-
-        <div className="boasvindas__login">
-          <GoogleLogin
-            onSuccess={aoLogarComGoogle}
-            onError={aoFalharLoginGoogle}
-            text="signin_with"
-            shape="pill"
-            locale="pt-BR"
-          />
-        </div>
-
-        {carregando && <p className="boasvindas__status">Entrando…</p>}
-
-        {erro && (
-          <p className="boasvindas__erro" role="alert">
-            {erro}
+          <p className="boasvindas__pitch">
+            O ecossistema digital da UNIFESP que reúne, num só lugar, o que antes
+            ficava espalhado em grupos de WhatsApp.
           </p>
-        )}
 
-        <p className="boasvindas__rodape">
-          Acesso restrito à comunidade acadêmica da UNIFESP.
-        </p>
+          <ul className="boasvindas__modulos">
+            {MODULOS.map(({ icone: Icone, titulo, descricao }) => (
+              <li key={titulo} className="boasvindas__modulo">
+                <span className="boasvindas__modulo-icone" aria-hidden="true">
+                  <Icone />
+                </span>
+                <div>
+                  <p className="boasvindas__modulo-titulo">{titulo}</p>
+                  <p className="boasvindas__modulo-descricao">{descricao}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* -------- Coluna direita: ação / login -------- */}
+      <section className="boasvindas__painel">
+        <div className="boasvindas__cartao">
+          <span className="boasvindas__selo">
+            <FaGraduationCap aria-hidden="true" /> Acesso institucional
+          </span>
+
+          <h2 className="boasvindas__cartao-titulo">Entre na plataforma</h2>
+          <p className="boasvindas__cartao-texto">
+            Use seu e-mail <strong>@unifesp.br</strong> para acessar todos os módulos.
+          </p>
+
+          <div className="boasvindas__login">
+            <GoogleLogin
+              onSuccess={aoLogarComGoogle}
+              onError={aoFalharLoginGoogle}
+              text="signin_with"
+              shape="pill"
+              locale="pt-BR"
+              width="280"
+            />
+          </div>
+
+          {carregando && (
+            <p className="boasvindas__status" role="status">
+              <span className="boasvindas__spinner" aria-hidden="true" />
+              Entrando…
+            </p>
+          )}
+
+          {erro && (
+            <p className="boasvindas__erro" role="alert">
+              {erro}
+            </p>
+          )}
+
+          <p className="boasvindas__rodape">
+            Acesso restrito à comunidade acadêmica da UNIFESP.
+          </p>
+        </div>
       </section>
     </main>
   );
