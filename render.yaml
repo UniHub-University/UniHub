@@ -23,5 +23,7 @@ services:
         sync: false
       - key: Cloudinary__ApiSecret
         sync: false
-      - key: Cors__AllowedOrigins__0                 # dominio real do front
-        value: https://unihub-app.vercel.app
+      - key: Cors__AllowedOrigins__0                 # dev local (Vite)
+        value: http://localhost:5173
+      - key: Cors__AllowedOrigins__1                 # dominio real do front (producao)
+        value: https://unihub-unifesp.vercel.app
