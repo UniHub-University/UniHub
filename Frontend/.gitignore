@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Variáveis de ambiente (segredos / config local — nunca versionar)
+.env
+.env.local
+.env.*.local

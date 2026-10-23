@@ -1,16 +1,16 @@
-# React + Vite
+# assets
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Coloque aqui os recursos estáticos importados pelo código (logo, ícones, imagens).
 
-Currently, two official plugins are available:
+## logo-unihub.png (necessário)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+A tela de boas-vindas (`src/pages/BoasVindas.jsx`) importa `logo-unihub.png`.
+Salve neste diretório a logo do UniHub (a versão com o símbolo verde, da pasta
+`Documentos/Identidade Visual`) com exatamente este nome:
 
-## React Compiler
+```
+src/assets/logo-unihub.png
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Formatos aceitos: PNG com fundo transparente (recomendado) ou SVG. Se usar SVG,
+ajuste a importação em `BoasVindas.jsx` para `logo-unihub.svg`.

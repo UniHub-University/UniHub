@@ -283,7 +283,77 @@ dotnet ef database update   # só o Guardião de Migrations, idealmente
 dotnet run                  # Swagger em /swagger (Development)
 ```
 
-## 14. Glossário de domínio
+## 14. Frontend (React + Vite)
+
+O frontend consome a API REST. Os padrões abaixo foram estabelecidos na primeira
+tela (login, BRV-116) e **devem ser seguidos** pelas próximas telas, para o front
+crescer consistente.
+
+### Stack e libs
+- **React 19 + Vite**, JavaScript (não TypeScript).
+- **Roteamento:** `react-router-dom`.
+- **Login Google:** `@react-oauth/google`.
+- **Ícones:** `react-icons`.
+- **Estado de autenticação:** Context API (`AuthContext`), sem Redux.
+
+### Estrutura de pastas (`Frontend/src/`)
+```
+src/
+├── auth/            ← autenticação: AuthContext, RotaProtegida, authStorage
+├── config/          ← leitura centralizada de env (env.js)
+├── services/        ← wrapper de chamadas à API (api.js)
+├── pages/           ← telas (uma pasta/arquivo por tela: .jsx + .css)
+├── assets/          ← imagens/logos
+├── App.jsx          ← rotas
+├── main.jsx         ← providers (GoogleOAuth, Router, Auth)
+└── index.css        ← tema global
+```
+
+### Regras essenciais
+
+- **Toda chamada à API passa pelo wrapper `services/api.js`.** Não usar `fetch`
+  direto nas telas. O wrapper injeta `Authorization: Bearer <jwt>` automaticamente,
+  prefixa a `VITE_API_BASE_URL`, trata 204 e padroniza erros via `ApiError`.
+  - Rotas públicas (ex.: login): passar `{ autenticado: false }`.
+- **Variáveis de ambiente só via `config/env.js`.** Nunca ler `import.meta.env`
+  espalhado pelo código. Variáveis do Vite exigem o prefixo `VITE_`:
+  - `VITE_API_BASE_URL` — URL da API (local `http://localhost:5206`, prod = Render).
+  - `VITE_GOOGLE_CLIENT_ID` — Client ID do Google OAuth.
+- **Autenticação via `useAuth()`** (do `AuthContext`). Expõe `usuario`,
+  `estaAutenticado`, `login()`, `logout()`. A persistência fica isolada em
+  `authStorage.js` (hoje `localStorage`; se mudar para cookie, só esse arquivo muda).
+- **Rotas que exigem login** são envolvidas por `<RotaProtegida>` (redireciona
+  para `/` quem não está autenticado).
+- **Segredos / config local:** `.env.local` NÃO é versionado (coberto pelo
+  `.gitignore`). Só o `.env.example` entra no repo. O `VITE_GOOGLE_CLIENT_ID`,
+  apesar de ficar exposto no browser por natureza, mora em env para não travar
+  em um ambiente só.
+- **Contrato de login:** o front envia `POST /api/auth/google-login` com
+  `{ idToken }` e recebe `{ Mensagem, Usuario, Token }`. O código lê tanto
+  `Token`/`Usuario` quanto `token`/`usuario` (resiste a serialização camelCase).
+- **Identidade visual:** paleta verde `#2A4515` / tan `#B19563` / creme `#FEF6C7`,
+  fontes Playfair Display + Inter. Reusar o tema de `index.css`.
+
+### Fluxo de branches do Frontend (branch de integração por sprint)
+
+Para evitar muitos merges pequenos direto na `main`, o squad de frontend usa uma
+**branch de integração por sprint**: `feat/frontend-sprint<N>`.
+
+- **Branches-guia** (fundação: auth, api, estrutura) podem ir **direto para a `main`**
+  primeiro, para servir de base a todos.
+- As **demais features de front da sprint** têm como base a `feat/frontend-sprint<N>`
+  (PRs miram nela, não na `main`).
+- No **fim da sprint**, a `feat/frontend-sprint<N>` é unificada na `main` num PR único.
+- ⚠️ Manter a branch de integração **sincronizada** com a `main` (rebase/merge
+  periódico) para não divergir das branches-guia que foram direto para a main.
+
+### Validação (adaptação do checklist para front)
+- `npm run lint` limpo.
+- Fluxo validado manualmente no `npm run dev`.
+- Nenhum segredo versionado (`.env.local` ignorado).
+- Branch rebaseada sobre a base correta antes do PR.
+
+## 15. Glossário de domínio
 
 Termos do negócio (todos em português no código). Útil para entender rapidamente
 cada entidade, especialmente no módulo de Ação Solidária, que tem termos não óbvios.
@@ -339,7 +409,7 @@ cada entidade, especialmente no módulo de Ação Solidária, que tem termos nã
 
 ---
 
-## 15. Mantenha este documento vivo
+## 16. Mantenha este documento vivo
 
 Este `AGENTS.md` é a fonte de verdade compartilhada do time — qualquer IA (Kiro,
 Codex, Cursor, etc.) e qualquer desenvolvingedor o lê para se alinhar. Ele só é

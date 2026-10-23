@@ -1,0 +1,60 @@
+/* ---------------------------------------------------------------------------
+   Tema global do UniHub — baseado na identidade visual (paleta TAN Ashford).
+   Fontes: Playfair Display (títulos, aproxima a serifada display da logo)
+           + Inter (corpo), carregadas no index.html via Google Fonts.
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* Paleta oficial */
+  --cor-verde: #2a4515;       /* texto principal, logo, botões */
+  --cor-verde-escuro: #1f340f;/* hover de botões */
+  --cor-tan: #b19563;         /* texto secundário / detalhes */
+  --cor-creme: #fef6c7;       /* fundo */
+  --cor-superficie: #fffdf2;  /* cartões / superfícies claras */
+  --cor-erro: #9b2c2c;
+
+  --fonte-titulo: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --fonte-corpo: 'Inter', system-ui, -apple-system, sans-serif;
+
+  --raio: 14px;
+  --sombra: 0 10px 30px rgba(42, 69, 21, 0.12);
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--fonte-corpo);
+  background-color: var(--cor-creme);
+  color: var(--cor-verde);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  color: var(--cor-verde);
+  margin: 0;
+}
+
+button {
+  font-family: var(--fonte-corpo);
+  cursor: pointer;
+}
+
+a {
+  color: var(--cor-verde);
+}
