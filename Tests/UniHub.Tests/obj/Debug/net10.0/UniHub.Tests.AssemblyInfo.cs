@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UniHub.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+441b6bd14e5c3b088240a3fe39345fb6b02f3e7a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a5a1ffd4278c2bfda8f84806aae99d6cd0e343e9")]
 [assembly: System.Reflection.AssemblyProductAttribute("UniHub.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UniHub.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
