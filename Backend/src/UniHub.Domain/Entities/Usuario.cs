@@ -58,8 +58,27 @@ public class Usuario
     /// pois normalmente vem do provedor de login/autenticacao
     public void AtualizarDados(string nome, string telefone, string foto)
     {
-        NomeCompleto = nome;
-        Telefone = telefone;
+        var nomeNormalizado = nome?.Trim() ?? string.Empty;
+
+        if (nomeNormalizado.Length < 2 || nomeNormalizado.Length > 150)
+        {
+            throw new ArgumentException(
+                "O nome deve ter entre 2 e 150 caracteres.",
+                nameof(nome));
+        }
+
+        var telefoneNormalizado = string.IsNullOrWhiteSpace(telefone)
+            ? string.Empty
+            : new string(telefone.Where(char.IsDigit).ToArray());
+
+        if (telefoneNormalizado.Length is not (0 or 10 or 11))
+        {
+            throw new ArgumentException(
+                "O telefone deve conter 10 ou 11 dígitos, incluindo o DDD.",
+                nameof(telefone));
+        }
+        NomeCompleto = nomeNormalizado;
+        Telefone = telefoneNormalizado;
         FotoPerfilUrl = foto;
     }
 
