@@ -1,16 +1,27 @@
 import { Routes, Route } from 'react-router-dom';
 
 import BoasVindas from './pages/BoasVindas.jsx';
+import HistoricoPedidos from './pages/HistoricoPedidos.jsx';
 import RotaProtegida from './auth/RotaProtegida.jsx';
 
 // Mapa de rotas da aplicação.
 // "/"      -> tela inicial de boas-vindas + login (pública) — BRV-116 (sua entrega)
+// "/pedidos" -> histórico de pedidos do usuário (protegida) — BRV-89
 // "/home"  -> tela principal da plataforma (protegida). Placeholder por enquanto;
 //             a tela real (anúncios, módulos) será criada por outra pessoa do squad.
 function App() {
   return (
     <Routes>
       <Route path="/" element={<BoasVindas />} />
+
+      <Route
+        path="/pedidos"
+        element={
+          <RotaProtegida>
+            <HistoricoPedidos />
+          </RotaProtegida>
+        }
+      />
 
       <Route
         path="/home"
