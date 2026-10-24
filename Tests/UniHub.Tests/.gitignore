@@ -1,0 +1,15 @@
+# Artefatos de build do .NET (gerados por `dotnet build`/`dotnet test`).
+# Nao versionar: sao derivados do codigo-fonte e regenerados em qualquer maquina.
+[Bb]in/
+[Oo]bj/
+
+# Resultados de teste
+[Tt]est[Rr]esult*/
+TestResults/
+
+# Cobertura de codigo
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+*.coveragexml
