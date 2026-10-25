@@ -6,6 +6,7 @@ namespace UniHub.Tests.Domain;
 
 // Agrupa os testes da entidade Correspondencia.
 // Convenção de nome do teste: Metodo_Cenario_ResultadoEsperado
+[Trait("Categoria", "Unit")]
 public class CorrespondenciaTests
 {
     // ---------- Caminho feliz ----------

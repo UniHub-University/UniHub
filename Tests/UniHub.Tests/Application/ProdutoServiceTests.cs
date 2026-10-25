@@ -18,6 +18,7 @@ namespace UniHub.Tests.Application;
 /// id correto e propaga o resultado (true/false). Se amanhã entrar regra de
 /// negócio no service, estes testes já cercam o comportamento atual.
 /// </summary>
+[Trait("Categoria", "Unit")]
 public class ProdutoServiceTests
 {
     private readonly IProdutoRepository _produtoRepo = Substitute.For<IProdutoRepository>();

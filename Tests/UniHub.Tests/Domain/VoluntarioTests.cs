@@ -3,6 +3,7 @@ using Xunit;
 
 namespace UniHub.Tests.Domain;
 
+[Trait("Categoria", "Unit")]
 public class VoluntarioTests
 {
     [Fact]

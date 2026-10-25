@@ -28,6 +28,7 @@ namespace UniHub.Tests.Integracao;
 /// limpeza no finally (cria IDs únicos, apaga tudo no fim). É uma exceção
 /// consciente ao padrão de rollback — inevitável para provar concorrência.
 /// </summary>
+[Trait("Categoria", "Integracao")]
 public class ConcorrenciaEstoqueIntegracaoTests : IntegracaoTestBase
 {
     // Estoque = 1, 10 compradores simultâneos de 1 unidade cada.

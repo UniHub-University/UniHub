@@ -27,6 +27,7 @@ namespace UniHub.Tests.Integracao;
 /// dentro de uma única transação. Fica como pendência de um teste de concorrência
 /// dedicado.
 /// </summary>
+[Trait("Categoria", "Integracao")]
 public class VoluntarioServiceIntegracaoTests : IntegracaoTestBase
 {
     private static Usuario NovoUsuario(bool ativo = true) => new()

@@ -10,6 +10,7 @@ using Xunit;
 
 namespace UniHub.Tests.Application;
 
+[Trait("Categoria", "Unit")]
 public class PedidoServiceTests
 {
     private readonly IProdutoRepository _produtoRepo = Substitute.For<IProdutoRepository>();

@@ -24,6 +24,7 @@ namespace UniHub.Tests.Application;
 /// (ex.: IGoogleTokenValidator), o que é mudança de código de produção no fluxo
 /// de autenticação e deve passar por alinhamento/PR próprio com o squad.
 /// </summary>
+[Trait("Categoria", "Unit")]
 public class AuthServiceTests
 {
     // Chave de teste (>= 32 bytes, exigência do HmacSha256). NÃO é um segredo real.

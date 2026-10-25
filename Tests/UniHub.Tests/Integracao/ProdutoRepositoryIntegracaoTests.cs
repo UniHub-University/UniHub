@@ -6,6 +6,7 @@ using Xunit;
 
 namespace UniHub.Tests.Integracao;
 
+[Trait("Categoria", "Integracao")]
 public class ProdutoRepositoryIntegracaoTests : IntegracaoTestBase
 {
     [Fact]

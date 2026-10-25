@@ -28,6 +28,7 @@ namespace UniHub.Tests.Integracao;
 /// (isso é coberto por ChavePixValidatorTests). Aqui só exercitamos a integração
 /// do service com o validator: inválida -> falha; válida -> persiste.
 /// </summary>
+[Trait("Categoria", "Integracao")]
 public class VendedorServiceIntegracaoTests : IntegracaoTestBase
 {
     // Mock do armazenamento de imagem. Por padrão aceita qualquer URL como

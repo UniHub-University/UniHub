@@ -3,6 +3,7 @@ using Xunit;
 
 namespace UniHub.Tests.Validacoes;
 
+[Trait("Categoria", "Unit")]
 public class ChavePixValidatorTests
 {
     // ---------- Chaves VÁLIDAS (um teste, vários dados) ----------
