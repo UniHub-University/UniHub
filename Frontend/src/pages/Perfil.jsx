@@ -20,6 +20,13 @@ const formularioInicial = {
   nomeCompleto: '',
   telefone: '',
 };
+const TAMANHO_MAXIMO_FOTO = 3 * 1024 * 1024;
+
+const TIPOS_DE_IMAGEM_PERMITIDOS = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+];
 
 function obterSomenteDigitos(valor) {
   return valor.replace(/\D/g, '').slice(0, 11);
@@ -67,6 +74,9 @@ export default function Perfil() {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
   const [mensagemSucesso, setMensagemSucesso] = useState('');
+  const [fotoSelecionada, setFotoSelecionada] = useState(null);
+  const [previewFoto, setPreviewFoto] = useState('');
+
 
   useEffect(() => {
     async function carregarPerfil() {
@@ -93,6 +103,35 @@ export default function Perfil() {
 
     carregarPerfil();
   }, []);
+
+  function selecionarFoto(evento) {
+    const arquivo = evento.target.files?.[0];
+
+    if (!arquivo) {
+      return;
+    }
+
+    if (!TIPOS_DE_IMAGEM_PERMITIDOS.includes(arquivo.type)) {
+      setErro('Formato não permitido. Use JPG, JPEG, PNG ou WEBP.');
+      setFotoSelecionada(null);
+      setPreviewFoto('');
+      evento.target.value = '';
+      return;
+    }
+
+    if (arquivo.size > TAMANHO_MAXIMO_FOTO) {
+      setErro('A imagem deve ter no máximo 3 MB.');
+      setFotoSelecionada(null);
+      setPreviewFoto('');
+      evento.target.value = '';
+      return;
+    }
+
+    setErro('');
+    setMensagemSucesso('');
+    setFotoSelecionada(arquivo);
+    setPreviewFoto(URL.createObjectURL(arquivo));
+  }
 
   function alterarCampo(evento) {
     const { name, value } = evento.target;
@@ -123,10 +162,28 @@ export default function Perfil() {
     setSalvando(true);
 
     try {
+      let fotoUrl = perfil?.fotoPerfilUrl ?? null;
+
+      if (fotoSelecionada) {
+        const dadosImagem = new FormData();
+        dadosImagem.append('arquivo', fotoSelecionada);
+
+        const respostaUpload = await api.post(
+          '/api/upload/imagem?pasta=perfis',
+          dadosImagem,
+        );
+
+        fotoUrl = respostaUpload?.url ?? respostaUpload?.Url;
+
+        if (!fotoUrl) {
+          throw new Error('A API não retornou a URL da imagem.');
+        }
+      }
+      
       const dadosAtualizados = {
         nomeCompleto: formulario.nomeCompleto.trim(),
         telefone: obterSomenteDigitos(formulario.telefone),
-        fotoUrl: perfil?.fotoPerfilUrl ?? null,
+        fotoUrl,
       };
 
       await api.put('/api/perfil', dadosAtualizados);
@@ -135,6 +192,7 @@ export default function Perfil() {
         ...perfil,
         nomeCompleto: dadosAtualizados.nomeCompleto,
         telefone: dadosAtualizados.telefone,
+        fotoPerfilUrl: dadosAtualizados.fotoUrl,
       };
 
       setPerfil(perfilAtualizado);
@@ -143,8 +201,12 @@ export default function Perfil() {
         telefone: perfilAtualizado.telefone,
       });
       setMensagemSucesso('Perfil atualizado com sucesso.');
+      setFotoSelecionada(null);
+      setPreviewFoto('');
     } catch (e) {
       if (e instanceof ApiError) {
+        setErro(e.message);
+      } else if (e instanceof Error) {
         setErro(e.message);
       } else {
         setErro('Não foi possível atualizar o perfil.');
@@ -177,10 +239,10 @@ export default function Perfil() {
       <section className="perfil__cartao" aria-labelledby="perfil-titulo">
         <header className="perfil__cabecalho">
           <div className="perfil__foto-container">
-            {perfil?.fotoPerfilUrl ? (
+            {previewFoto || perfil?.fotoPerfilUrl ? (
               <img
                 className="perfil__foto"
-                src={perfil.fotoPerfilUrl}
+                src={previewFoto || perfil.fotoPerfilUrl}
                 alt={`Foto de perfil de ${perfil.nomeCompleto}`}
               />
             ) : (
@@ -213,6 +275,19 @@ export default function Perfil() {
         )}
 
         <form className="perfil__formulario" onSubmit={salvarPerfil}>
+          <div className="perfil__campo">
+            <label htmlFor="fotoPerfil">Foto de perfil</label>
+            <input
+              id="fotoPerfil"
+              name="fotoPerfil"
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp"
+              onChange={selecionarFoto}
+              disabled={salvando}
+            />
+            <small>Escolha uma imagem de até 3 MB.</small>
+          </div>
+          
           <div className="perfil__campo">
             <label htmlFor="nomeCompleto">Nome completo</label>
             <input
