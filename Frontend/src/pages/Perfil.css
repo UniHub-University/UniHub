@@ -1,0 +1,232 @@
+.perfil {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px 24px;
+  background-color: var(--cor-creme);
+}
+
+.perfil__cartao {
+  width: 100%;
+  max-width: 720px;
+  padding: 36px;
+  background-color: var(--cor-superficie);
+  border: 1px solid rgba(177, 149, 99, 0.35);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+}
+
+.perfil__cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.perfil__foto-container {
+  flex-shrink: 0;
+}
+
+.perfil__foto {
+  width: 112px;
+  height: 112px;
+  display: block;
+  object-fit: cover;
+  border: 3px solid var(--cor-tan);
+  border-radius: 50%;
+  background-color: var(--cor-creme);
+}
+
+.perfil__foto--vazia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cor-superficie);
+  background-color: var(--cor-verde);
+  font-family: var(--fonte-titulo);
+  font-size: 2.5rem;
+}
+
+.perfil__titulo {
+  font-size: 2.25rem;
+  line-height: 1.15;
+}
+
+.perfil__subtitulo {
+  margin: 8px 0 0;
+  color: var(--cor-tan);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.perfil__formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.perfil__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.perfil__campo label {
+  color: var(--cor-verde);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.perfil__campo input {
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 13px;
+  border: 1px solid rgba(177, 149, 99, 0.65);
+  border-radius: 10px;
+  background-color: var(--cor-superficie);
+  color: var(--cor-verde);
+  font-family: var(--fonte-corpo);
+  font-size: 1rem;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.perfil__campo input:focus {
+  border-color: var(--cor-verde);
+  box-shadow: 0 0 0 3px rgba(42, 69, 21, 0.12);
+}
+
+.perfil__campo input:disabled {
+  cursor: not-allowed;
+  background-color: rgba(177, 149, 99, 0.1);
+  opacity: 0.8;
+}
+
+.perfil__campo input[readonly] {
+  cursor: default;
+}
+
+.perfil__campo small {
+  color: var(--cor-tan);
+  font-size: 0.8rem;
+}
+
+.perfil__informacoes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 4px;
+  padding: 18px;
+  border: 1px solid rgba(177, 149, 99, 0.3);
+  border-radius: 10px;
+  background-color: rgba(177, 149, 99, 0.08);
+}
+
+.perfil__informacoes p {
+  margin: 0;
+  color: var(--cor-verde);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.perfil__informacoes strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--cor-tan);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.perfil__botao {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 4px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 10px;
+  background-color: var(--cor-verde);
+  color: var(--cor-superficie);
+  font-size: 1rem;
+  font-weight: 600;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.perfil__botao:hover:not(:disabled) {
+  background-color: var(--cor-verde-escuro);
+  transform: translateY(-1px);
+}
+
+.perfil__botao:focus-visible {
+  outline: 3px solid rgba(177, 149, 99, 0.7);
+  outline-offset: 3px;
+}
+
+.perfil__botao:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.perfil__mensagem {
+  margin: 0 0 20px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.perfil__mensagem--erro {
+  border: 1px solid rgba(155, 44, 44, 0.3);
+  background-color: rgba(155, 44, 44, 0.08);
+  color: var(--cor-erro);
+}
+
+.perfil__mensagem--sucesso {
+  border: 1px solid rgba(42, 69, 21, 0.3);
+  background-color: rgba(42, 69, 21, 0.08);
+  color: var(--cor-verde);
+}
+
+.perfil__status {
+  margin: 48px 0 0;
+  color: var(--cor-tan);
+  font-size: 1rem;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .perfil {
+    padding: 24px 16px;
+  }
+
+  .perfil__cartao {
+    padding: 24px 18px;
+  }
+
+  .perfil__cabecalho {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .perfil__foto {
+    width: 96px;
+    height: 96px;
+  }
+
+  .perfil__titulo {
+    font-size: 1.9rem;
+  }
+
+  .perfil__informacoes {
+    grid-template-columns: 1fr;
+  }
+}
