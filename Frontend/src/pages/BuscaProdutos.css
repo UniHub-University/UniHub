@@ -1,0 +1,182 @@
+/* ---------------------------------------------------------------------------
+   Tela de busca e filtro de produtos (BRV-6).
+   Cores e fontes vêm da identidade visual (variáveis em index.css).
+   --------------------------------------------------------------------------- */
+
+.busca {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+
+.busca__cabecalho {
+  margin-bottom: 24px;
+}
+
+.busca__titulo {
+  font-family: var(--fonte-titulo);
+  font-size: 2.2rem;
+  line-height: 1.1;
+}
+
+.busca__subtitulo {
+  margin: 6px 0 0;
+  font-size: 0.98rem;
+  color: var(--cor-tan);
+}
+
+/* =============================== Filtros =============================== */
+
+.busca__filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  align-items: end;
+  padding: 20px;
+  margin-bottom: 28px;
+  background-color: var(--cor-superficie);
+  border: 1px solid rgba(177, 149, 99, 0.35);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+}
+
+/* O campo de palavra-chave ocupa a largura toda em telas largas. */
+.busca__campo--termo {
+  grid-column: 1 / -1;
+}
+
+.busca__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.busca__campo label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--cor-verde);
+}
+
+.busca__campo input,
+.busca__campo select {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--fonte-corpo);
+  font-size: 0.95rem;
+  color: var(--cor-verde);
+  background-color: var(--cor-creme);
+  border: 1px solid rgba(177, 149, 99, 0.5);
+  border-radius: 10px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.busca__campo input:focus,
+.busca__campo select:focus {
+  outline: none;
+  border-color: var(--cor-verde);
+  box-shadow: 0 0 0 3px rgba(42, 69, 21, 0.14);
+}
+
+.busca__acoes {
+  display: flex;
+  gap: 10px;
+}
+
+/* =============================== Botões =============================== */
+
+.busca__botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--cor-creme);
+  background-color: var(--cor-verde);
+  border: 1px solid var(--cor-verde);
+  border-radius: 10px;
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.busca__botao:hover:not(:disabled) {
+  background-color: var(--cor-verde-escuro);
+}
+
+.busca__botao:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.busca__botao--secundario {
+  color: var(--cor-verde);
+  background-color: transparent;
+}
+
+.busca__botao--secundario:hover:not(:disabled) {
+  background-color: rgba(42, 69, 21, 0.08);
+}
+
+/* =========================== Status / estados =========================== */
+
+.busca__status {
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+  color: var(--cor-tan);
+}
+
+.busca__erro {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  color: var(--cor-erro);
+  background-color: rgba(155, 44, 44, 0.08);
+  border: 1px solid rgba(155, 44, 44, 0.25);
+  border-radius: 10px;
+}
+
+.busca__vazio {
+  padding: 40px 20px;
+  text-align: center;
+  font-size: 1rem;
+  color: var(--cor-tan);
+}
+
+/* =============================== Resultados =============================== */
+
+.busca__grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+/* =============================== Paginação =============================== */
+
+.busca__paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 32px;
+}
+
+.busca__pagina-info {
+  font-size: 0.9rem;
+  color: var(--cor-verde);
+}
+
+/* ============================ Responsividade ============================ */
+
+@media (max-width: 600px) {
+  .busca {
+    padding: 28px 16px 48px;
+  }
+
+  .busca__titulo {
+    font-size: 1.8rem;
+  }
+
+  .busca__acoes {
+    grid-column: 1 / -1;
+  }
+}
