@@ -1,3 +1,17 @@
+// Página de perfil do usuário autenticado (BRV-115).
+//
+// Responsabilidades:
+//  - Buscar os dados do usuário por GET /api/perfil.
+//  - Exibir nome, e-mail, telefone, foto, papel e indicadores de perfil.
+//  - Permitir a edição do nome e telefone.
+//  - Validar os campos antes do envio.
+//  - Enviar as alterações por PUT /api/perfil.
+//  - Exibir estados de carregamento, erro, salvamento e sucesso.
+//
+// O usuário é identificado pelo JWT enviado automaticamente pelo wrapper api.
+// O e-mail institucional é somente para leitura.
+
+
 import { useEffect, useState } from 'react';
 import { api, ApiError } from '../services/api.js';
 import './Perfil.css';
