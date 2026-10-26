@@ -22,8 +22,11 @@ resultados e badge de condição no card. Entrega complementar à BRV-147.
     `Home.jsx` e `DetalheBazar.jsx`) para `services/rotulosProduto.js`.
   - Extração da lista de navegação (`LINKS_NAV`) para `components/navegacao.js`,
     compartilhada entre header e rodapé.
-  - Complementos na Home: ordenação por `dataPublicacao` desc, contador de
+  - Complementos no feed: ordenação por `dataPublicacao` desc, contador de
     resultados e badge de condição no card.
+  - **Separação Home × Bazar:** a Home passa a ser uma vitrine de pré-visualização
+    (os 6 anúncios mais recentes, sem busca, com "Ver todos no Bazar"); o feed
+    completo com busca migra para a aba Bazar (`/bazar`). Nova aba "Home" no header.
 - **NÃO inclui:**
   - Rodapé na tela pública de login (`BoasVindas`).
   - Testes automatizados / Vitest (follow-up).
@@ -65,8 +68,15 @@ resultados e badge de condição no card. Entrega complementar à BRV-147.
    e `rotuloCondicao`; `Home.jsx` e `DetalheBazar.jsx` refatorados para importá-los.
 4. **Complementos na Home:** `ordenarPorMaisRecente` (por `dataPublicacao` desc,
    com fallback estável), contador de resultados reativo à busca e badge de
-   condição no card (estilos em `Home.css` alinhados ao badge de categoria).
-5. **Validação:** `npm install`, `npm run lint` e `npm run build`.
+   condição no card (estilos alinhados ao badge de categoria).
+5. **Separação Home × Bazar:** o feed completo (antiga `Home.jsx`) migra para
+   `pages/Bazar.jsx` (`.bazar*` + busca) na rota `/bazar`; a nova `pages/Home.jsx`
+   vira a vitrine (6 mais recentes via `slice`, sem busca, "Ver todos no Bazar").
+   Card extraído para `components/CardAnuncio.jsx` + `.css` (compartilhado) e a
+   ordenação para `services/anunciosUtils.js`. `navegacao.js` ganha a aba "Home"
+   e aponta "Bazar" para `/bazar`; `App.jsx` adiciona a rota `/bazar`; o "voltar"
+   do `DetalheBazar` passa a apontar para `/bazar`.
+6. **Validação:** `npm install`, `npm run lint` e `npm run build`.
 
 ## Critérios de aceite
 - [x] Rodapé global com "UniHub" centralizado em destaque, `mailto:time.unihub@gmail.com`,
@@ -75,18 +85,22 @@ resultados e badge de condição no card. Entrega complementar à BRV-147.
 - [x] Rodapé NÃO aparece na tela de login pública.
 - [x] Rótulos de status/condição vêm de `services/rotulosProduto.js` único; sem
       duplicação em Home e DetalheBazar; comportamento visual inalterado.
-- [x] Home ordena por `dataPublicacao` desc, exibe contador de resultados reativo
-      à busca e mostra badge de condição no card.
+- [x] Feed do Bazar ordena por `dataPublicacao` desc, exibe contador de resultados
+      reativo à busca e mostra badge de condição no card.
 - [x] Estados carregando/erro/vazio/busca-sem-resultado continuam corretos.
+- [x] Aba "Home" (`/home`) mostra a vitrine dos 6 anúncios mais recentes, sem
+      busca, com link "Ver todos no Bazar"; aba "Bazar" (`/bazar`) tem o feed
+      completo com busca; o login redireciona para `/home`.
 - [x] `npm run build` e `npm run lint` limpos.
 
 ## Pendências / dúvidas em aberto
-- **Alimentação na Home (follow-up):** o feed hoje só traz o Bazar porque o
-  endpoint `GET /api/alimentos` NÃO existe no backend (só há `ItensBazarController`).
-  Para a Home exibir também os alimentos mais recentes, é necessário primeiro criar
-  esse endpoint (backend, fora do escopo desta issue) e depois agregar a fonte em
-  `services/anuncios.js` — a Home e os complementos (ordenação/contador/badge) já
-  ficam prontos para unificar as duas fontes sem retrabalho na UI.
+- **Alimentação na vitrine/Home (follow-up):** hoje a vitrine da Home e o feed do
+  Bazar só trazem itens do Bazar porque o endpoint `GET /api/alimentos` NÃO existe
+  no backend (só há `ItensBazarController`). A ideia é a Home mostrar os mais
+  recentes **independente da categoria**; para isso, é necessário primeiro criar o
+  endpoint de Alimentação (backend, fora do escopo desta issue) e depois agregar a
+  fonte em `services/anuncios.js`. A vitrine já usa `ordenarPorMaisRecente` + corte,
+  então passa a unificar as fontes sem retrabalho de UI assim que o endpoint existir.
 - **Testes automatizados (follow-up):** Vitest + React Testing Library para cobrir
   `anuncios.js`, a lógica de busca/ordenação da Home e o `Rodape` (previsto para a
   Sprint 4, seção 12 do AGENTS.md).
