@@ -1,13 +1,15 @@
 import { Routes, Route } from 'react-router-dom';
 
 import BoasVindas from './pages/BoasVindas.jsx';
+import BuscaProdutos from './pages/BuscaProdutos.jsx';
 import RotaProtegida from './auth/RotaProtegida.jsx';
 import Perfil from './pages/Perfil.jsx';
 
 // Mapa de rotas da aplicação.
-// "/"      -> tela inicial de boas-vindas + login (pública) — BRV-116 (sua entrega)
-// "/home"  -> tela principal da plataforma (protegida). Placeholder por enquanto;
-//             a tela real (anúncios, módulos) será criada por outra pessoa do squad.
+// "/"         -> tela inicial de boas-vindas + login (pública) — BRV-116 (sua entrega)
+// "/home"     -> tela principal da plataforma (protegida). Placeholder por enquanto;
+//                a tela real (anúncios, módulos) será criada por outra pessoa do squad.
+// "/produtos" -> busca e filtro de produtos (protegida) — BRV-6.
 function App() {
   return (
     <Routes>
@@ -31,6 +33,15 @@ function App() {
         }
       />
 
+
+      <Route
+        path="/produtos"
+        element={
+          <RotaProtegida>
+            <BuscaProdutos />
+          </RotaProtegida>
+        }
+      />
     </Routes>
   );
 }
