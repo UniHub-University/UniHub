@@ -10,15 +10,10 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../auth/AuthContext.jsx';
+import { LINKS_NAV } from './navegacao.js';
+import Rodape from './Rodape.jsx';
 import logoUniHub from '../assets/logo-unihub.png';
 import './LayoutApp.css';
-
-const LINKS_NAV = [
-  { para: '/home', rotulo: 'Bazar' },
-  { para: '/alimentacao', rotulo: 'Alimentação' },
-  { para: '/solidariedade', rotulo: 'Ação Solidária' },
-  { para: '/perfil', rotulo: 'Perfil' },
-];
 
 export default function LayoutApp() {
   const navigate = useNavigate();
@@ -74,6 +69,8 @@ export default function LayoutApp() {
       <main className="layout__conteudo">
         <Outlet />
       </main>
+
+      <Rodape />
     </div>
   );
 }

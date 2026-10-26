@@ -2,30 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { obterItemBazar } from '../services/anuncios.js';
 import { ApiError } from '../services/api.js';
+import { rotuloStatus, rotuloCondicao } from '../services/rotulosProduto.js';
 import './DetalheBazar.css';
 
 const moeda = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
   currency: 'BRL',
 });
-
-const condicoes = {
-  0: 'Novo',
-  1: 'Seminovo',
-  2: 'Usado',
-  Novo: 'Novo',
-  SeminNovo: 'Seminovo',
-  Usado: 'Usado',
-};
-
-const estados = {
-  0: 'Disponível',
-  1: 'Esgotado',
-  2: 'Inativo',
-  Disponivel: 'Disponível',
-  Esgotado: 'Esgotado',
-  Inativo: 'Inativo',
-};
 
 function ConsultaDetalhe({ id }) {
   const [item, setItem] = useState(null);
@@ -71,7 +54,7 @@ function ConsultaDetalhe({ id }) {
 
   return (
     <section className="detalhe-bazar" aria-labelledby="titulo-detalhe">
-      <Link to="/home">← Voltar ao feed</Link>
+      <Link to="/bazar">← Voltar ao Bazar</Link>
       <h1 id="titulo-detalhe">Detalhes do anúncio</h1>
 
       {carregando ? (
@@ -97,9 +80,9 @@ function ConsultaDetalhe({ id }) {
             <dt>Categoria</dt>
             <dd>{item.categoria || 'Não informada'}</dd>
             <dt>Condição</dt>
-            <dd>{condicoes[item.condicao] ?? 'Não informada'}</dd>
+            <dd>{rotuloCondicao(item.condicao) ?? 'Não informada'}</dd>
             <dt>Status</dt>
-            <dd>{estados[item.status] ?? 'Não informado'}</dd>
+            <dd>{rotuloStatus(item.status) || 'Não informado'}</dd>
             <dt>Quantidade disponível</dt>
             <dd>{item.quantidadeDisponivel ?? 'Não informada'}</dd>
           </dl>

@@ -1,48 +1,29 @@
-// Home / Feed de anúncios.
+// Home — pré-visualização rápida dos anúncios mais recentes (BRV-148).
 //
-// Substitui o PlaceholderHome. Lista os anúncios do Bazar consumindo o único
-// endpoint de produtos existente hoje (GET /api/itens-bazar) e trata os três
-// estados essenciais: carregando, erro e vazio. Inclui uma busca textual
-// client-side (a lista ainda não é paginada no backend — débito conhecido).
+// A ideia da Home é dar um panorama: os produtos mais recentes publicados,
+// independentemente da categoria, como uma vitrine de entrada. O feed completo
+// (com busca) vive na aba Bazar (/bazar).
+//
+// Hoje só existe o endpoint do Bazar (GET /api/itens-bazar); quando surgirem os
+// endpoints de Alimentação/Ação Solidária, esta pré-visualização pode agregar
+// as outras fontes sem mudar a estrutura da tela (ver plano BRV-148).
 
-import { useEffect, useMemo, useState } from 'react';
-
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { listarItensBazar } from '../services/anuncios.js';
 import { ApiError } from '../services/api.js';
+import { ordenarPorMaisRecente } from '../services/anunciosUtils.js';
+import CardAnuncio from '../components/CardAnuncio.jsx';
 import './Home.css';
 
-
-// Formata o preço (number) no padrão brasileiro de moeda.
-const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
-  style: 'currency',
-  currency: 'BRL',
-});
-
-function formatarPreco(valor) {
-  if (typeof valor !== 'number' || Number.isNaN(valor)) return '—';
-  return formatadorMoeda.format(valor);
-}
-
-// Traduz o status numérico/string do produto para um rótulo amigável.
-function rotuloStatus(status) {
-  const mapa = {
-    0: 'Disponível',
-    1: 'Esgotado',
-    2: 'Inativo',
-    Disponivel: 'Disponível',
-    Esgotado: 'Esgotado',
-    Inativo: 'Inativo',
-  };
-  return mapa[status] ?? String(status ?? '');
-}
+// Quantidade de anúncios exibidos na vitrine de pré-visualização.
+const QTD_PREVIA = 6;
 
 export default function Home() {
-  const [itens, setItens] = useState([]);
+  const [recentes, setRecentes] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
-  const [busca, setBusca] = useState('');
 
   useEffect(() => {
     let ativo = true;
@@ -52,7 +33,9 @@ export default function Home() {
       setErro('');
       try {
         const dados = await listarItensBazar();
-        if (ativo) setItens(dados);
+        if (ativo) {
+          setRecentes(ordenarPorMaisRecente(dados).slice(0, QTD_PREVIA));
+        }
       } catch (e) {
         if (!ativo) return;
         setErro(
@@ -71,96 +54,45 @@ export default function Home() {
     };
   }, []);
 
-  // Filtro textual client-side por nome, descrição e categoria.
-  const itensFiltrados = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
-    if (!termo) return itens;
-    return itens.filter((item) => {
-      const alvo = [item.nome, item.descricao, item.categoria]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      return alvo.includes(termo);
-    });
-  }, [itens, busca]);
-
   return (
     <section className="home">
       <header className="home__cabecalho">
-        <div>
-          <h1 className="home__titulo">Anúncios da comunidade</h1>
-          <p className="home__subtitulo">
-            Explore os anúncios do Bazar Acadêmico.
-            Os produtos de Alimentação serão integrados em breve.
+        <h1 className="home__titulo">Bem-vindo ao UniHub</h1>
+        <p className="home__subtitulo">
+          Dá uma olhada nos anúncios mais recentes da comunidade.
         </p>
-        </div>
-
-        <input
-          type="search"
-          className="home__busca"
-          placeholder="Buscar anúncios…"
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          aria-label="Buscar anúncios"
-        />
       </header>
 
-      {carregando && <p className="home__status">Carregando anúncios…</p>}
+      <div className="home__secao">
+        <div className="home__secao-topo">
+          <h2 className="home__secao-titulo">Adicionados recentemente</h2>
+          <Link className="home__ver-todos" to="/bazar">
+            Ver todos no Bazar →
+          </Link>
+        </div>
 
-      {!carregando && erro && (
-        <p className="home__erro" role="alert">
-          {erro}
-        </p>
-      )}
+        {carregando && <p className="home__status">Carregando anúncios…</p>}
 
-      {!carregando && !erro && itens.length === 0 && (
-        <p className="home__status">
-          Ainda não há anúncios publicados. Volte em breve!
-        </p>
-      )}
+        {!carregando && erro && (
+          <p className="home__erro" role="alert">
+            {erro}
+          </p>
+        )}
 
-      {!carregando && !erro && itens.length > 0 && itensFiltrados.length === 0 && (
-        <p className="home__status">
-          Nenhum anúncio encontrado para “{busca}”.
-        </p>
-      )}
+        {!carregando && !erro && recentes.length === 0 && (
+          <p className="home__status">
+            Ainda não há anúncios publicados. Volte em breve!
+          </p>
+        )}
 
-      {!carregando && !erro && itensFiltrados.length > 0 && (
-        <ul className="home__grade">
-          {itensFiltrados.map((item) => (
-            <li key={item.id} className="cartao-anuncio">
-              <div className="cartao-anuncio__topo">
-                <h2 className="cartao-anuncio__nome">
-                    <Link
-                        className="cartao-anuncio__link"
-                        to={`/bazar/${item.id}`}
-                    >
-                        {item.nome}
-                    </Link>
-                </h2>
-                {item.categoria && (
-                  <span className="cartao-anuncio__categoria">
-                    {item.categoria}
-                  </span>
-                )}
-              </div>
-
-              {item.descricao && (
-                <p className="cartao-anuncio__descricao">{item.descricao}</p>
-              )}
-
-              <div className="cartao-anuncio__rodape">
-                <span className="cartao-anuncio__preco">
-                  {formatarPreco(item.preco)}
-                </span>
-                <span className="cartao-anuncio__status">
-                  {rotuloStatus(item.status)}
-                </span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+        {!carregando && !erro && recentes.length > 0 && (
+          <ul className="home__grade">
+            {recentes.map((item) => (
+              <CardAnuncio key={item.id} item={item} />
+            ))}
+          </ul>
+        )}
+      </div>
     </section>
   );
 }
