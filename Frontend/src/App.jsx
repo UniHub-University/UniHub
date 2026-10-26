@@ -5,16 +5,20 @@ import DetalheBazar from './pages/DetalheBazar.jsx';
 import Home from './pages/Home.jsx';
 import Bazar from './pages/Bazar.jsx';
 import EmBreve from './pages/EmBreve.jsx';
+import Perfil from './pages/Perfil.jsx';
+import BuscaProdutos from './pages/BuscaProdutos.jsx';
 import LayoutApp from './components/LayoutApp.jsx';
 import RotaProtegida from './auth/RotaProtegida.jsx';
 
 // Mapa de rotas da aplicação.
-// "/"      -> tela inicial de boas-vindas + login (pública) — BRV-116 (sua entrega)
-//Área autenticada (BRV-147/BRV-148): todas as rotas protegidas compartilham o
-// LayoutApp (header + navegação + rodapé). A Home é uma vitrine com os anúncios
-// mais recentes; o Bazar é o feed completo com busca; as demais áreas ainda não
-// têm tela/endpoint e usam o placeholder "em breve" até o squad as desenvolver.
-
+// "/"      -> tela inicial de boas-vindas + login (pública) — BRV-116
+// Área autenticada: todas as rotas protegidas compartilham o LayoutApp
+// (header + navegação + rodapé) — BRV-147/BRV-148.
+// "/home"       -> vitrine dos anúncios mais recentes
+// "/bazar"      -> feed completo com busca (+ /bazar/:id detalhe)
+// "/produtos"   -> busca e filtro de produtos — BRV-6
+// "/perfil"     -> perfil do usuário — BRV-115
+// "/alimentacao", "/solidariedade" -> placeholder "em breve"
 function App() {
   return (
     <Routes>
@@ -30,12 +34,10 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/bazar" element={<Bazar />} />
         <Route path="/bazar/:id" element={<DetalheBazar />} />
+        <Route path="/produtos" element={<BuscaProdutos />} />
+        <Route path="/perfil" element={<Perfil />} />
         <Route path="/alimentacao" element={<EmBreve titulo="Alimentação" />} />
-        <Route
-          path="/solidariedade"
-          element={<EmBreve titulo="Ação Solidária" />}
-        />
-        <Route path="/perfil" element={<EmBreve titulo="Perfil" />} />
+        <Route path="/solidariedade" element={<EmBreve titulo="Ação Solidária" />} />
       </Route>
     </Routes>
   );
