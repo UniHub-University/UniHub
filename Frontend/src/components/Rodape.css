@@ -1,0 +1,90 @@
+/* Rodapé global das telas protegidas (BRV-148) — tema UniHub. */
+
+.rodape {
+  margin-top: auto; /* empurra o rodapé para o fim em páginas curtas */
+  background-color: var(--cor-verde);
+  color: var(--cor-creme);
+  border-top: 1px solid rgba(177, 149, 99, 0.35);
+}
+
+.rodape__conteudo {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.rodape__marca {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--cor-creme);
+}
+
+.rodape__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.rodape__link {
+  color: var(--cor-creme);
+  font-size: 0.95rem;
+  text-decoration: none;
+  opacity: 0.9;
+  transition: opacity 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.rodape__link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.rodape__link:focus-visible {
+  outline: 2px solid var(--cor-creme);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.rodape__contato {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--cor-creme);
+}
+
+.rodape__email {
+  color: var(--cor-tan);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.rodape__email:hover {
+  text-decoration: underline;
+}
+
+.rodape__email:focus-visible {
+  outline: 2px solid var(--cor-creme);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.rodape__direitos {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(254, 246, 199, 0.7);
+}
+
+@media (max-width: 640px) {
+  .rodape__conteudo {
+    padding: 28px 16px;
+  }
+}
