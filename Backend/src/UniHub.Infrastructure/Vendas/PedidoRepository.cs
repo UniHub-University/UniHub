@@ -25,4 +25,27 @@ public class PedidoRepository : IPedidoRepository
         await _context.Set<Pedido>()
             .Include(p => p.Itens)
             .FirstOrDefaultAsync(p => p.Id == id);
+
+    // Historico de pedidos: so os pedidos do comprador informado, do mais
+    // recente para o mais antigo, consulta somente leitura, por isso AsNoTracking.
+    public async Task<(IReadOnlyList<Pedido> Pedidos, int Total)> GetByCompradorAsync(
+        Guid compradorId, int page, int pageSize)
+    {
+        var pedidosDoComprador = _context.Set<Pedido>()
+            .AsNoTracking()
+            .Where(p => p.CompradorId == compradorId);
+
+        var total = await pedidosDoComprador.CountAsync();
+
+        var pedidos = await pedidosDoComprador
+            .Include(p => p.Itens)
+                .ThenInclude(i => i.Produto)
+            .OrderByDescending(p => p.CreatedAt)
+            .ThenByDescending(p => p.Id) // desempate: paginas estaveis se dois pedidos tiverem o mesmo CreatedAt
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (pedidos, total);
+    }
 }
