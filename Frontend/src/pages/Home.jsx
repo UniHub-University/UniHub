@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 
 import { listarItensBazar } from '../services/anuncios.js';
 import { ApiError } from '../services/api.js';
+import { rotuloStatus, rotuloCondicao } from '../services/rotulosProduto.js';
 import './Home.css';
 
 
@@ -25,17 +26,14 @@ function formatarPreco(valor) {
   return formatadorMoeda.format(valor);
 }
 
-// Traduz o status numérico/string do produto para um rótulo amigável.
-function rotuloStatus(status) {
-  const mapa = {
-    0: 'Disponível',
-    1: 'Esgotado',
-    2: 'Inativo',
-    Disponivel: 'Disponível',
-    Esgotado: 'Esgotado',
-    Inativo: 'Inativo',
-  };
-  return mapa[status] ?? String(status ?? '');
+// Ordena por data de publicação (mais recente primeiro). Itens sem data válida
+// vão para o fim, preservando uma ordem estável entre eles.
+function ordenarPorMaisRecente(itens) {
+  return [...itens].sort((a, b) => {
+    const dataA = new Date(a?.dataPublicacao ?? 0).getTime() || 0;
+    const dataB = new Date(b?.dataPublicacao ?? 0).getTime() || 0;
+    return dataB - dataA;
+  });
 }
 
 export default function Home() {
@@ -71,18 +69,26 @@ export default function Home() {
     };
   }, []);
 
-  // Filtro textual client-side por nome, descrição e categoria.
+  // Filtro textual client-side por nome, descrição e categoria, já ordenado
+  // pelos anúncios mais recentes (dataPublicacao desc).
   const itensFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
-    if (!termo) return itens;
-    return itens.filter((item) => {
-      const alvo = [item.nome, item.descricao, item.categoria]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      return alvo.includes(termo);
-    });
+    const base = termo
+      ? itens.filter((item) => {
+          const alvo = [item.nome, item.descricao, item.categoria]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+          return alvo.includes(termo);
+        })
+      : itens;
+    return ordenarPorMaisRecente(base);
   }, [itens, busca]);
+
+  // Texto do contador de resultados (reflete a lista filtrada e exibida).
+  const totalExibido = itensFiltrados.length;
+  const textoContador =
+    totalExibido === 1 ? '1 anúncio' : `${totalExibido} anúncios`;
 
   return (
     <section className="home">
@@ -126,40 +132,56 @@ export default function Home() {
       )}
 
       {!carregando && !erro && itensFiltrados.length > 0 && (
-        <ul className="home__grade">
-          {itensFiltrados.map((item) => (
-            <li key={item.id} className="cartao-anuncio">
-              <div className="cartao-anuncio__topo">
-                <h2 className="cartao-anuncio__nome">
-                    <Link
+        <>
+          <p className="home__contador" aria-live="polite">
+            {textoContador}
+          </p>
+
+          <ul className="home__grade">
+            {itensFiltrados.map((item) => {
+              const condicao = rotuloCondicao(item.condicao);
+              return (
+                <li key={item.id} className="cartao-anuncio">
+                  <div className="cartao-anuncio__topo">
+                    <h2 className="cartao-anuncio__nome">
+                      <Link
                         className="cartao-anuncio__link"
                         to={`/bazar/${item.id}`}
-                    >
+                      >
                         {item.nome}
-                    </Link>
-                </h2>
-                {item.categoria && (
-                  <span className="cartao-anuncio__categoria">
-                    {item.categoria}
-                  </span>
-                )}
-              </div>
+                      </Link>
+                    </h2>
+                    <div className="cartao-anuncio__tags">
+                      {item.categoria && (
+                        <span className="cartao-anuncio__categoria">
+                          {item.categoria}
+                        </span>
+                      )}
+                      {condicao && (
+                        <span className="cartao-anuncio__condicao">
+                          {condicao}
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-              {item.descricao && (
-                <p className="cartao-anuncio__descricao">{item.descricao}</p>
-              )}
+                  {item.descricao && (
+                    <p className="cartao-anuncio__descricao">{item.descricao}</p>
+                  )}
 
-              <div className="cartao-anuncio__rodape">
-                <span className="cartao-anuncio__preco">
-                  {formatarPreco(item.preco)}
-                </span>
-                <span className="cartao-anuncio__status">
-                  {rotuloStatus(item.status)}
-                </span>
-              </div>
-            </li>
-          ))}
-        </ul>
+                  <div className="cartao-anuncio__rodape">
+                    <span className="cartao-anuncio__preco">
+                      {formatarPreco(item.preco)}
+                    </span>
+                    <span className="cartao-anuncio__status">
+                      {rotuloStatus(item.status)}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
     </section>
   );
