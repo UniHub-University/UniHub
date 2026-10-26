@@ -1,0 +1,183 @@
+/* Home / Feed de anúncios — tema UniHub. */
+
+.home {
+  font-family: var(--fonte-corpo);
+  color: #243322;
+}
+
+.home__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.home__titulo {
+  font-family: var(--fonte-corpo);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  color: var(--cor-verde);
+}
+
+.home__subtitulo {
+  max-width: 540px;
+  margin: 12px 0 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #596452;
+}
+
+.home__busca {
+  flex: 0 1 320px;
+  width: 100%;
+  min-width: 0;
+  padding: 14px 18px;
+  border: 1px solid #d5d9cc;
+  border-radius: 12px;
+  font: inherit;
+  color: #243322;
+  background: #fffdf7;
+}
+
+.home__busca:focus-visible {
+  outline: 3px solid var(--cor-verde);
+  outline-offset: 3px;
+}
+
+.home__status,
+.home__erro {
+  margin: 24px 0;
+  padding: 24px;
+  border-radius: 14px;
+  line-height: 1.6;
+  background: #fffdf7;
+  color: #52604e;
+}
+
+.home__erro {
+  color: var(--cor-erro);
+  border: 1px solid #e4bdbd;
+}
+
+.home__grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  gap: 24px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cartao-anuncio {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid #e2dfd2;
+  border-radius: 18px;
+  background: #fffdf7;
+  box-shadow: 0 4px 16px rgba(35, 51, 30, 0.04);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.cartao-anuncio:hover {
+  border-color: #8b9c7c;
+  box-shadow: 0 8px 24px rgba(35, 51, 30, 0.09);
+}
+
+.cartao-anuncio__topo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cartao-anuncio__nome {
+  margin: 0;
+  font-family: var(--fonte-corpo);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: #243322;
+  overflow-wrap: anywhere;
+}
+
+.cartao-anuncio__categoria {
+  max-width: 100%;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: #edf1e7;
+  color: #425637;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.cartao-anuncio__descricao {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  margin: 0;
+  color: #596452;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.cartao-anuncio__rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid #eeeee5;
+}
+
+.cartao-anuncio__preco {
+  color: var(--cor-verde);
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.cartao-anuncio__status {
+  font-size: 0.8rem;
+  color: #596452;
+}
+
+.cartao-anuncio__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cartao-anuncio__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+}
+
+.cartao-anuncio__link:focus-visible {
+  outline: 2px solid var(--cor-verde);
+  outline-offset: 4px;
+}
+
+.cartao-anuncio:focus-within {
+  outline: 2px solid var(--cor-verde);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cartao-anuncio {
+    transition: none;
+  }
+}

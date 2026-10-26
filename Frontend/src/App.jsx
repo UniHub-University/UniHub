@@ -1,41 +1,41 @@
 import { Routes, Route } from 'react-router-dom';
 
 import BoasVindas from './pages/BoasVindas.jsx';
+import DetalheBazar from './pages/DetalheBazar.jsx';
+import Home from './pages/Home.jsx';
+import EmBreve from './pages/EmBreve.jsx';
+import LayoutApp from './components/LayoutApp.jsx';
 import RotaProtegida from './auth/RotaProtegida.jsx';
 
 // Mapa de rotas da aplicação.
 // "/"      -> tela inicial de boas-vindas + login (pública) — BRV-116 (sua entrega)
-// "/home"  -> tela principal da plataforma (protegida). Placeholder por enquanto;
-//             a tela real (anúncios, módulos) será criada por outra pessoa do squad.
+//Área autenticada (BRV-147): todas as rotas protegidas compartilham o
+// LayoutApp (header + navegação). A Home exibe o feed de anúncios do Bazar;
+// as demais áreas ainda não têm tela/endpoint e usam o placeholder "em breve"
+// até que o squad as desenvolva.
+
 function App() {
   return (
     <Routes>
       <Route path="/" element={<BoasVindas />} />
 
       <Route
-        path="/home"
         element={
           <RotaProtegida>
-            <PlaceholderHome />
+            <LayoutApp />
           </RotaProtegida>
         }
-      />
+      >
+        <Route path="/home" element={<Home />} />
+        <Route path="/alimentacao" element={<EmBreve titulo="Alimentação" />} />
+        <Route path="/bazar/:id" element={<DetalheBazar />} />
+        <Route
+          path="/solidariedade"
+          element={<EmBreve titulo="Ação Solidária" />}
+        />
+        <Route path="/perfil" element={<EmBreve titulo="Perfil" />} />
+      </Route>
     </Routes>
-  );
-}
-
-// Placeholder temporário da tela principal. Serve apenas para o fluxo de login
-// ter um destino válido enquanto a tela real (home/feed) não é desenvolvida.
-// Quem assumir a home substitui este componente pela página de verdade.
-function PlaceholderHome() {
-  return (
-    <main style={{ padding: '48px', fontFamily: 'var(--fonte-corpo)' }}>
-      <h1>Bem-vindo ao UniHub 🎉</h1>
-      <p style={{ color: 'var(--cor-tan)' }}>
-        Login realizado com sucesso. Esta é a tela principal (placeholder) — em
-        breve ela exibirá os anúncios e os módulos da plataforma.
-      </p>
-    </main>
   );
 }
 
