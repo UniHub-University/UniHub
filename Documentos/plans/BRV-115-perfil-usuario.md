@@ -80,53 +80,53 @@ Entregar uma página autenticada para o usuário visualizar seus dados principai
 
 ## Critérios de aceite
 
-- [ ] Usuário não autenticado não acessa `/perfil` e é redirecionado para `/`.
+- [x] Usuário não autenticado não acessa `/perfil` e é redirecionado para `/`.
 
-- [ ] Usuário autenticado consegue abrir `/perfil`.
+- [x] Usuário autenticado consegue abrir `/perfil`.
 
 - [ ] A página `/home` possui um link ou botão que aponta para `/perfil` usando o React Router; a implementação desse link fica sob responsabilidade de Pedro e Maria.
 
-- [ ] A página exibe os dados retornados por `GET /api/perfil`, exceto a data de cadastro.
+- [x] A página exibe os dados retornados por `GET /api/perfil`, exceto a data de cadastro.
 
-- [ ] Nome completo e telefone aparecem como campos editáveis.
+- [x] Nome completo e telefone aparecem como campos editáveis.
 
-- [ ] Nome é obrigatório e aceita entre 2 e 150 caracteres.
+- [x] Nome é obrigatório e aceita entre 2 e 150 caracteres.
 
-- [ ] Telefone vazio é aceito.
+- [x] Telefone vazio é aceito.
 
-- [ ] Telefone preenchido deve conter 10 ou 11 dígitos, incluindo DDD.
+- [x] Telefone preenchido deve conter 10 ou 11 dígitos, incluindo DDD.
 
-- [ ] Telefone é persistido somente com dígitos.
+- [x] Telefone é persistido somente com dígitos.
 
-- [ ] Máscara de telefone aparece somente na interface.
+- [x] Máscara de telefone aparece somente na interface.
 
-- [ ] Frontend impede o envio quando os dados são inválidos.
+- [x] Frontend impede o envio quando os dados são inválidos.
 
-- [ ] Backend rejeita dados inválidos mesmo que a validação do frontend seja ignorada.
+- [x] Backend rejeita dados inválidos mesmo que a validação do frontend seja ignorada.
 
-- [ ] E-mail institucional aparece como somente leitura.
+- [x] E-mail institucional aparece como somente leitura.
 
-- [ ] Foto atual é exibida quando houver uma URL válida.
+- [x] Foto atual é exibida quando houver uma URL válida.
 
-- [ ] Usuário consegue selecionar uma nova imagem, enviá-la para a pasta `perfis` e salvar a URL no perfil.
+- [x] Usuário consegue selecionar uma nova imagem, enviá-la para a pasta `perfis` e salvar a URL no perfil.
 
-- [ ] Erros de formato, tamanho, upload ou atualização da foto são exibidos sem perder os demais dados do formulário.
+- [x] Erros de formato, tamanho, upload ou atualização da foto são exibidos sem apagar os demais dados preenchidos no formulário.
 
-- [ ] O formulário envia apenas os dados permitidos para `PUT /api/perfil`.
+- [x] O formulário envia apenas os dados permitidos para `PUT /api/perfil`.
 
-- [ ] Após salvar com sucesso, a interface informa o resultado e reflete os dados atualizados.
+- [x] Após salvar com sucesso, a interface informa o resultado e reflete os dados atualizados.
 
-- [ ] Erros de API e falhas de rede são exibidos sem quebrar a página.
+- [x] Erros de API e falhas de rede são exibidos sem quebrar a página.
 
-- [ ] A tela possui estado de carregamento durante a consulta e o salvamento.
+- [x] A tela possui estado de carregamento durante a consulta e o salvamento.
 
-- [ ] Nenhum `usuarioId` vindo da interface é usado para determinar o perfil consultado ou alterado.
+- [x] Nenhum `usuarioId` vindo da interface é usado para determinar o perfil consultado ou alterado.
 
-- [ ] `npm run lint` limpo.
+- [x] `npm run lint` limpo.
 
-- [ ] `npm run build` limpo.
+- [x] `npm run build` limpo.
 
-- [ ] `dotnet build` limpo, quando executado em ambiente com o SDK .NET instalado.
+- [x] `dotnet build` limpo, quando executado em ambiente com o SDK .NET instalado.
 
 ## Pendências / dúvidas em aberto
 
