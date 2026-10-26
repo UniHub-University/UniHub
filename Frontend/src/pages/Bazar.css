@@ -1,0 +1,78 @@
+/* Bazar / Feed de anúncios — tema UniHub. */
+
+.bazar {
+  font-family: var(--fonte-corpo);
+  color: #243322;
+}
+
+.bazar__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.bazar__titulo {
+  font-family: var(--fonte-corpo);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  color: var(--cor-verde);
+}
+
+.bazar__subtitulo {
+  max-width: 540px;
+  margin: 12px 0 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #596452;
+}
+
+.bazar__busca {
+  flex: 0 1 320px;
+  width: 100%;
+  min-width: 0;
+  padding: 14px 18px;
+  border: 1px solid #d5d9cc;
+  border-radius: 12px;
+  font: inherit;
+  color: #243322;
+  background: #fffdf7;
+}
+
+.bazar__busca:focus-visible {
+  outline: 3px solid var(--cor-verde);
+  outline-offset: 3px;
+}
+
+.bazar__status,
+.bazar__erro {
+  margin: 24px 0;
+  padding: 24px;
+  border-radius: 14px;
+  line-height: 1.6;
+  background: #fffdf7;
+  color: #52604e;
+}
+
+.bazar__erro {
+  color: var(--cor-erro);
+  border: 1px solid #e4bdbd;
+}
+
+.bazar__contador {
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+  color: #596452;
+}
+
+.bazar__grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  gap: 24px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}

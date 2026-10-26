@@ -54,7 +54,7 @@ function ConsultaDetalhe({ id }) {
 
   return (
     <section className="detalhe-bazar" aria-labelledby="titulo-detalhe">
-      <Link to="/home">← Voltar ao feed</Link>
+      <Link to="/bazar">← Voltar ao Bazar</Link>
       <h1 id="titulo-detalhe">Detalhes do anúncio</h1>
 
       {carregando ? (
