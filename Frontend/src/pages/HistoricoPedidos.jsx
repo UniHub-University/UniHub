@@ -1,151 +1,159 @@
-/* ---------------------------------------------------------------------------
-   Tela de histórico de pedidos (BRV-89).
-   Usa as variáveis de cor e fonte da identidade visual (definidas em index.css).
-   --------------------------------------------------------------------------- */
+// Tela de histórico de pedidos do usuário autenticado (BRV-89).
+//
+// Fluxo:
+//  1. Ao abrir (ou ao trocar de página), chama GET /api/pedidos?page=N&pageSize=10.
+//     O api.js já envia o JWT; a API descobre o usuário pelo token (claim "sub").
+//  2. A resposta vem no formato paginado combinado com o squad:
+//     { items, page, pageSize, totalItems, totalPages }.
+//  3. Mostramos os pedidos (mais recentes primeiro) e os botões de página.
+//
+// Rota protegida: o acesso sem login é barrado pela <RotaProtegida> no App.jsx.
 
-.historico {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 40px 20px 64px;
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+
+import { api, ApiError } from '../services/api.js';
+import { useAuth } from '../auth/AuthContext.jsx';
+import './HistoricoPedidos.css';
+
+const TAMANHO_PAGINA = 10;
+
+// A API devolve o status como número (enum PedidoStatus do backend).
+const STATUS = {
+  0: 'Reservado',
+  1: 'Confirmado',
+  2: 'Concluído',
+  3: 'Cancelado',
+};
+
+function formatarMoeda(valor) {
+  return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-.historico__topo {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 28px;
+function formatarData(iso) {
+  return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 }
 
-.historico__voltar {
-  font-size: 0.95rem;
-  color: var(--cor-tan);
-}
+export default function HistoricoPedidos() {
+  const { logout } = useAuth();
+  const [pagina, setPagina] = useState(1);
+  const [dados, setDados] = useState(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
 
-.historico__aviso {
-  padding: 24px;
-  text-align: center;
-  background-color: var(--cor-superficie);
-  border-radius: var(--raio);
-  color: var(--cor-tan);
-}
+  useEffect(() => {
+    // "cancelado" evita atualizar o estado se o usuário trocar de página (ou sair
+    // da tela) antes da resposta chegar.
+    let cancelado = false;
 
-.historico__aviso--erro {
-  color: var(--cor-erro);
-}
+    api
+      .get(`/api/pedidos?page=${pagina}&pageSize=${TAMANHO_PAGINA}`)
+      .then((resposta) => {
+        if (cancelado) return;
+        setDados(resposta);
+        setErro('');
+      })
+      .catch((e) => {
+        if (cancelado) return;
+        // Token inválido ou expirado: sai da sessão (a RotaProtegida leva ao login).
+        if (e instanceof ApiError && e.status === 401) {
+          logout();
+          return;
+        }
+        setErro(e instanceof ApiError ? e.message : 'Erro ao carregar o histórico.');
+      })
+      .finally(() => {
+        if (!cancelado) setCarregando(false);
+      });
 
-.historico__lista {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
+    return () => {
+      cancelado = true;
+    };
+  }, [pagina, logout]);
 
-/* ------------------------------ Cartão do pedido ------------------------------ */
-
-.pedido {
-  padding: 20px;
-  background-color: var(--cor-superficie);
-  border-radius: var(--raio);
-  box-shadow: var(--sombra);
-}
-
-.pedido__cabecalho {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.pedido__data {
-  display: block;
-  margin-top: 4px;
-  font-size: 0.85rem;
-  color: var(--cor-tan);
-}
-
-.pedido__status {
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  background-color: var(--cor-creme);
-  color: var(--cor-verde);
-}
-
-/* 0 Reservado, 1 Confirmado, 2 Concluído, 3 Cancelado */
-.pedido__status--2 {
-  background-color: var(--cor-verde);
-  color: var(--cor-creme);
-}
-
-.pedido__status--3 {
-  background-color: var(--cor-erro);
-  color: var(--cor-creme);
-}
-
-.pedido__itens {
-  margin: 0;
-  padding: 12px 0;
-  list-style: none;
-  border-top: 1px solid rgba(177, 149, 99, 0.35);
-  border-bottom: 1px solid rgba(177, 149, 99, 0.35);
-}
-
-.pedido__itens li {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 4px 0;
-  font-size: 0.95rem;
-}
-
-.pedido__itens li span:last-child {
-  color: var(--cor-tan);
-  white-space: nowrap;
-}
-
-.pedido__total {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-/* -------------------------------- Paginação -------------------------------- */
-
-.historico__paginacao {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 28px;
-}
-
-.historico__paginacao button {
-  padding: 8px 18px;
-  border: none;
-  border-radius: var(--raio);
-  background-color: var(--cor-verde);
-  color: var(--cor-creme);
-  font-weight: 600;
-}
-
-.historico__paginacao button:hover:not(:disabled) {
-  background-color: var(--cor-verde-escuro);
-}
-
-.historico__paginacao button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-@media (max-width: 520px) {
-  .historico__topo {
-    flex-direction: column;
-    align-items: flex-start;
+  function irParaPagina(numero) {
+    setCarregando(true);
+    setPagina(numero);
   }
+
+  const pedidos = dados?.items ?? [];
+  const totalPaginas = dados?.totalPages ?? 0;
+
+  return (
+    <main className="historico">
+      <header className="historico__topo">
+        <h1>Meus pedidos</h1>
+        <Link to="/home" className="historico__voltar">
+          Voltar ao início
+        </Link>
+      </header>
+
+      {carregando && <p className="historico__aviso">Carregando seus pedidos...</p>}
+
+      {!carregando && erro && (
+        <p className="historico__aviso historico__aviso--erro" role="alert">
+          {erro}
+        </p>
+      )}
+
+      {!carregando && !erro && pedidos.length === 0 && (
+        <p className="historico__aviso">Você ainda não fez nenhum pedido.</p>
+      )}
+
+      {!carregando && !erro && pedidos.length > 0 && (
+        <>
+          <ul className="historico__lista">
+            {pedidos.map((pedido) => (
+              <li key={pedido.pedidoId} className="pedido">
+                <div className="pedido__cabecalho">
+                  <div>
+                    <strong>Pedido #{pedido.pedidoId.slice(0, 8).toUpperCase()}</strong>
+                    <span className="pedido__data">{formatarData(pedido.createdAt)}</span>
+                  </div>
+                  <span className={`pedido__status pedido__status--${pedido.status}`}>
+                    {STATUS[pedido.status] ?? 'Desconhecido'}
+                  </span>
+                </div>
+
+                <ul className="pedido__itens">
+                  {pedido.itens.map((item) => (
+                    <li key={item.produtoId}>
+                      <span>
+                        {item.quantidade}x {item.produtoNome}
+                      </span>
+                      <span>{formatarMoeda(item.precoUnitarioNaCompra)} cada</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="pedido__total">
+                  Total <strong>{formatarMoeda(pedido.total)}</strong>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <nav className="historico__paginacao" aria-label="Paginação do histórico">
+            <button
+              type="button"
+              onClick={() => irParaPagina(pagina - 1)}
+              disabled={pagina <= 1}
+            >
+              Anterior
+            </button>
+            <span>
+              Página {dados.page} de {totalPaginas}
+            </span>
+            <button
+              type="button"
+              onClick={() => irParaPagina(pagina + 1)}
+              disabled={pagina >= totalPaginas}
+            >
+              Próxima
+            </button>
+          </nav>
+        </>
+      )}
+    </main>
+  );
 }
