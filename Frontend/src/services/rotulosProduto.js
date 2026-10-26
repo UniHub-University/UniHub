@@ -21,7 +21,7 @@ const CONDICAO = {
   1: 'Seminovo',
   2: 'Usado',
   Novo: 'Novo',
-  SeminNovo: 'Seminovo',
+  Seminovo: 'Seminovo',
   Usado: 'Usado',
 };
 
