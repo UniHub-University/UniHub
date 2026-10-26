@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import BoasVindas from './pages/BoasVindas.jsx';
 import BuscaProdutos from './pages/BuscaProdutos.jsx';
 import RotaProtegida from './auth/RotaProtegida.jsx';
+import Perfil from './pages/Perfil.jsx';
 
 // Mapa de rotas da aplicação.
 // "/"         -> tela inicial de boas-vindas + login (pública) — BRV-116 (sua entrega)
@@ -22,6 +23,16 @@ function App() {
           </RotaProtegida>
         }
       />
+      
+      <Route
+        path="/perfil"
+        element={
+          <RotaProtegida>
+            <Perfil />
+          </RotaProtegida>
+        }
+      />
+
 
       <Route
         path="/produtos"

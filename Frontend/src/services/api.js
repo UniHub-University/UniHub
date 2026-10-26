@@ -23,8 +23,13 @@ export class ApiError extends Error {
 }
 
 async function request(caminho, { method = 'GET', body, autenticado = true } = {}) {
-  const headers = { 'Content-Type': 'application/json' };
+  const enviandoFormulario = body instanceof FormData;
+  const headers = {};
 
+  if (!enviandoFormulario) {
+    headers['Content-Type'] = 'application/json';
+  }
+  
   if (autenticado) {
     const token = obterToken();
     if (token) {
@@ -37,7 +42,12 @@ async function request(caminho, { method = 'GET', body, autenticado = true } = {
     resposta = await fetch(`${API_BASE_URL}${caminho}`, {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body:
+        body === undefined
+          ? undefined
+          : enviandoFormulario
+            ? body
+            : JSON.stringify(body),
     });
   } catch {
     // Falha de rede / CORS / API fora do ar (cold start do Render, por ex.).
