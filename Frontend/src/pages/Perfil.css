@@ -230,3 +230,11 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Link "Meus pedidos" com o mesmo visual do botão (BRV-89) */
+.perfil__botao--link {
+  display: block;
+  margin-top: 16px;
+  text-align: center;
+  text-decoration: none;
+}

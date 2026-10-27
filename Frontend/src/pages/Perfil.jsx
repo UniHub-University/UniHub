@@ -13,6 +13,7 @@
 
 
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api, ApiError } from '../services/api.js';
 import './Perfil.css';
 
@@ -364,6 +365,10 @@ export default function Perfil() {
             {salvando ? 'Salvando...' : 'Salvar alterações'}
           </button>
         </form>
+
+        <Link className="perfil__botao perfil__botao--link" to="/pedidos">
+          Meus pedidos
+        </Link>
       </section>
     </main>
   );
