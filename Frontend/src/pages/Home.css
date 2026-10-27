@@ -1,0 +1,82 @@
+/* Home / Vitrine de pré-visualização — tema UniHub. */
+
+.home {
+  font-family: var(--fonte-corpo);
+  color: #243322;
+}
+
+.home__cabecalho {
+  margin-bottom: 32px;
+}
+
+.home__titulo {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  line-height: 1.2;
+  color: var(--cor-verde);
+}
+
+.home__subtitulo {
+  margin: 12px 0 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #596452;
+}
+
+.home__secao-topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.home__secao-titulo {
+  font-family: var(--fonte-corpo);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #243322;
+}
+
+.home__ver-todos {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--cor-verde);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.home__ver-todos:hover {
+  text-decoration: underline;
+}
+
+.home__ver-todos:focus-visible {
+  outline: 2px solid var(--cor-verde);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.home__status,
+.home__erro {
+  margin: 24px 0;
+  padding: 24px;
+  border-radius: 14px;
+  line-height: 1.6;
+  background: #fffdf7;
+  color: #52604e;
+}
+
+.home__erro {
+  color: var(--cor-erro);
+  border: 1px solid #e4bdbd;
+}
+
+.home__grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  gap: 24px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}

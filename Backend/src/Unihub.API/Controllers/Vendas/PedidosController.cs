@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UniHub.Application.DTOs.Common;
 using UniHub.Application.DTOs.Vendas;
 using UniHub.Application.Services.Vendas;
 
@@ -33,5 +34,23 @@ public class PedidosController : ControllerBase
             return Conflict(resultado); //Outro usuario levou o estoque primeiro
         
         return Ok(resultado);
+    }
+
+    // GET api/pedidos?page=1&pageSize=10
+    // Historico de pedidos do usuario autenticado (BRV-89). O comprador vem SEMPRE
+    // do token (claim "sub"), nunca da requisicao, para ninguem ver pedidos de outro.
+    // O Service ajusta page/pageSize (padrao 10, maximo 50) e devolvemos os valores usados.
+    [HttpGet]
+    public async Task<ActionResult<PaginatedResultDto<HistoricoPedidoDto>>> GetHistorico(
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var compradorId = Guid.Parse(User.FindFirst("sub")?.Value ?? Guid.Empty.ToString());
+        var (pedidos, total, paginaUsada, tamanhoUsado) =
+            await _pedidoService.GetHistoricoAsync(compradorId, page, pageSize);
+
+        var totalPaginas = (int)Math.Ceiling(total / (double)tamanhoUsado);
+
+        return Ok(new PaginatedResultDto<HistoricoPedidoDto>(
+            pedidos, paginaUsada, tamanhoUsado, total, totalPaginas));
     }
 }
