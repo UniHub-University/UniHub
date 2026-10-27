@@ -1,3 +1,4 @@
+namespace UniHub.Application.DTOs.Perfil;
 public class AtualizarPerfilDto
 {
     public string NomeCompleto { get; set; } = string.Empty;

@@ -1,0 +1,89 @@
+/* ---------------------------------------------------------------------------
+   Cartão de produto na listagem de busca (BRV-6).
+   Cores e fontes vêm da identidade visual (variáveis em index.css).
+   --------------------------------------------------------------------------- */
+
+.produto-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 18px 16px;
+  background-color: var(--cor-superficie);
+  border: 1px solid rgba(177, 149, 99, 0.35);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.produto-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 34px rgba(42, 69, 21, 0.16);
+}
+
+.produto-card__tipo {
+  align-self: flex-start;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-radius: 999px;
+  color: var(--cor-verde);
+  background-color: rgba(177, 149, 99, 0.22);
+}
+
+.produto-card__tipo--lanche {
+  color: var(--cor-creme);
+  background-color: var(--cor-verde);
+}
+
+.produto-card__nome {
+  font-family: var(--fonte-titulo);
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.produto-card__descricao {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--cor-verde);
+  opacity: 0.8;
+  /* Limita a 2 linhas para os cartões ficarem com altura parecida. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.produto-card__preco {
+  margin: 2px 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--cor-verde);
+}
+
+.produto-card__detalhes {
+  margin: 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.produto-card__detalhe {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.82rem;
+}
+
+.produto-card__detalhe dt {
+  color: var(--cor-tan);
+  font-weight: 600;
+}
+
+.produto-card__detalhe dd {
+  margin: 0;
+  text-align: right;
+  color: var(--cor-verde);
+}
