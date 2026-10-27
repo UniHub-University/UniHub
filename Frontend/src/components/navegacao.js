@@ -9,6 +9,7 @@
 export const LINKS_NAV = [
   { para: '/home', rotulo: 'Home' },
   { para: '/bazar', rotulo: 'Bazar' },
+  { para: '/pedidos', rotulo: 'Meus pedidos' },
   { para: '/alimentacao', rotulo: 'Alimentação' },
   { para: '/solidariedade', rotulo: 'Ação Solidária' },
   { para: '/perfil', rotulo: 'Perfil' },
