@@ -22,8 +22,11 @@ namespace UniHub.Tests.Application;
 public class ProdutoServiceTests
 {
     private readonly IProdutoRepository _produtoRepo = Substitute.For<IProdutoRepository>();
+    private readonly IProdutoBuscaRepository _produtoBuscaRepo = Substitute.For<IProdutoBuscaRepository>(); 
 
-    private ProdutoService CriarService() => new(_produtoRepo);
+    
+
+    private ProdutoService CriarService() => new(_produtoRepo, _produtoBuscaRepo);
 
     [Fact]
     public async Task InativarProduto_QuandoRepositorioInativa_RetornaTrue()
