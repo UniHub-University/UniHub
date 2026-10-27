@@ -72,6 +72,42 @@ public class PedidoService
 
     }
 
+    // Historico de pedidos:
+    private const int PageSizePadrao = 10;
+    private const int PageSizeMaximo = 50;
+
+    // Devolve a pagina do historico do comprador autenticado (compradorId vem do
+    // token no Controller, nunca da requisicao) e os valores de page/pageSize
+    // efetivamente usados, para o Controller montar a resposta paginada.
+    public async Task<(List<HistoricoPedidoDto> Pedidos, int Total, int Page, int PageSize)> GetHistoricoAsync(
+        Guid compradorId, int page, int pageSize)
+    {
+        // Valida a entrada: nunca confiar em page/pageSize vindos da requisicao.
+        pageSize = pageSize < 1 ? PageSizePadrao : Math.Min(pageSize, PageSizeMaximo);
+
+        // O teto de page evita estouro de int em (page - 1) * pageSize no repositorio.
+        page = Math.Clamp(page, 1, int.MaxValue / pageSize);
+
+        var (pedidos, total) = await _pedidoRepository.GetByCompradorAsync(compradorId, page, pageSize);
+
+        var historico = pedidos
+            .Select(p => new HistoricoPedidoDto(
+                p.Id,
+                p.Status,
+                p.CreatedAt,
+                p.Itens
+                    .Select(i => new HistoricoItemPedidoDto(
+                        i.ProdutoId,
+                        i.Produto?.Nome ?? "Produto indisponivel",
+                        i.Quantidade,
+                        i.PrecoUnitarioNaCompra))
+                    .ToList(),
+                p.Itens.Sum(i => i.Quantidade * i.PrecoUnitarioNaCompra)))
+            .ToList();
+
+        return (historico, total, page, pageSize);
+    }
+
     private async Task RollbackAsync (List<(Guid ProdutoId, int Quantidade)> decrementados)
     {
         foreach (var (produtoId, quantidade) in decrementados)
