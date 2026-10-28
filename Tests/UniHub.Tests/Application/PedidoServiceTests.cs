@@ -30,6 +30,15 @@ public class PedidoServiceTests
         Status = status
     };
 
+    // Helper: Alimento (Reserva nao vale para ele).
+    private static Alimento NovoAlimento(Guid? id = null) => new()
+    {
+        Id = id ?? Guid.NewGuid(),
+        Nome = "Salgado Teste",
+        Preco = 6m,
+        Status = ProdutoStatus.Disponivel
+    };
+
     // ---------- Pedido sem itens ----------
     [Fact]
     public async Task CreatePedido_QuandoListaDeItensVazia_RetornaFalhaSemTocarRepositorios()
@@ -173,6 +182,136 @@ public class PedidoServiceTests
         // B nunca foi decrementado, entao nao pode ser estornado
         await _produtoRepo.DidNotReceive().IncrementarEstoqueAsync(produtoB.Id, Arg.Any<int>());
         // pedido nao e salvo quando ha falha
+        await _pedidoRepo.DidNotReceive().AddAsync(Arg.Any<Pedido>());
+    }
+
+    // ---------- Comprar vs Reservar (P2/P3) ----------
+    [Fact]
+    public async Task CreatePedido_SemTipo_ECompraSemExpiracao()
+    {
+        var service = CriarService();
+        var produto = NovoProduto();
+        _produtoRepo.GetByIdAsync(produto.Id).Returns(produto);
+        _produtoRepo.TryDecrementarEstoqueAsync(produto.Id, 1).Returns(true);
+        _pedidoRepo.AddAsync(Arg.Any<Pedido>()).Returns(call => call.Arg<Pedido>());
+
+        // sem informar o Tipo: o padrao do DTO e Compra
+        var request = new CreatePedidoDto(new List<CreateItemPedidoDto> { new(produto.Id, 1) });
+
+        var resultado = await service.CreatePedidoAsync(Guid.NewGuid(), request);
+
+        Assert.True(resultado.Sucesso);
+        await _pedidoRepo.Received(1).AddAsync(Arg.Is<Pedido>(p =>
+            p.Tipo == TipoPedido.Compra && p.ExpiraEm == null));
+    }
+
+    [Fact]
+    public async Task CreatePedido_ReservaDeItemBazar_GravaTipoEExpiraEm()
+    {
+        var service = CriarService();
+        var produto = NovoProduto();
+        _produtoRepo.GetByIdAsync(produto.Id).Returns(produto);
+        _produtoRepo.TryDecrementarEstoqueAsync(produto.Id, 1).Returns(true);
+
+        Pedido? salvo = null;
+        _pedidoRepo.AddAsync(Arg.Any<Pedido>()).Returns(call =>
+        {
+            var pedido = call.Arg<Pedido>();
+            salvo = pedido;
+            return pedido;
+        });
+
+        var request = new CreatePedidoDto(
+            new List<CreateItemPedidoDto> { new(produto.Id, 1) },
+            TipoPedido.Reserva);
+
+        var antes = DateTime.UtcNow;
+        var resultado = await service.CreatePedidoAsync(Guid.NewGuid(), request);
+        var depois = DateTime.UtcNow;
+
+        Assert.True(resultado.Sucesso);
+        Assert.NotNull(salvo);
+        Assert.Equal(TipoPedido.Reserva, salvo!.Tipo);
+        Assert.Equal(PedidoStatus.Reservado, salvo.Status);
+        // ExpiraEm = agora + TTL (dentro da janela em que o teste rodou)
+        Assert.NotNull(salvo.ExpiraEm);
+        Assert.InRange(salvo.ExpiraEm!.Value, antes.Add(PedidoService.TtlReserva), depois.Add(PedidoService.TtlReserva));
+    }
+
+    [Fact]
+    public async Task CreatePedido_ReservaDeAlimento_RetornaFalhaSemDecrementarEstoque()
+    {
+        var service = CriarService();
+        var alimento = NovoAlimento();
+        _produtoRepo.GetByIdAsync(alimento.Id).Returns(alimento);
+
+        var request = new CreatePedidoDto(
+            new List<CreateItemPedidoDto> { new(alimento.Id, 1) },
+            TipoPedido.Reserva);
+
+        var resultado = await service.CreatePedidoAsync(Guid.NewGuid(), request);
+
+        Assert.False(resultado.Sucesso);
+        Assert.Contains("nao pode ser reservado", resultado.Mensagem);
+        Assert.Null(resultado.PedidoId);
+        await _produtoRepo.DidNotReceive().TryDecrementarEstoqueAsync(Arg.Any<Guid>(), Arg.Any<int>());
+        await _pedidoRepo.DidNotReceive().AddAsync(Arg.Any<Pedido>());
+    }
+
+    [Fact]
+    public async Task CreatePedido_ReservaComAlimentoNoSegundoItem_EstornaOPrimeiro()
+    {
+        var service = CriarService();
+        var itemBazar = NovoProduto();
+        var alimento = NovoAlimento();
+        _produtoRepo.GetByIdAsync(itemBazar.Id).Returns(itemBazar);
+        _produtoRepo.GetByIdAsync(alimento.Id).Returns(alimento);
+        _produtoRepo.TryDecrementarEstoqueAsync(itemBazar.Id, 1).Returns(true);
+
+        var request = new CreatePedidoDto(
+            new List<CreateItemPedidoDto> { new(itemBazar.Id, 1), new(alimento.Id, 1) },
+            TipoPedido.Reserva);
+
+        var resultado = await service.CreatePedidoAsync(Guid.NewGuid(), request);
+
+        Assert.False(resultado.Sucesso);
+        // o item do Bazar ja decrementado volta ao estoque; o alimento nunca foi tocado
+        await _produtoRepo.Received(1).IncrementarEstoqueAsync(itemBazar.Id, 1);
+        await _produtoRepo.DidNotReceive().TryDecrementarEstoqueAsync(alimento.Id, Arg.Any<int>());
+        await _pedidoRepo.DidNotReceive().AddAsync(Arg.Any<Pedido>());
+    }
+
+    [Fact]
+    public async Task CreatePedido_CompraDeAlimento_ContinuaPermitida()
+    {
+        var service = CriarService();
+        var alimento = NovoAlimento();
+        _produtoRepo.GetByIdAsync(alimento.Id).Returns(alimento);
+        _produtoRepo.TryDecrementarEstoqueAsync(alimento.Id, 1).Returns(true);
+        _pedidoRepo.AddAsync(Arg.Any<Pedido>()).Returns(call => call.Arg<Pedido>());
+
+        var request = new CreatePedidoDto(
+            new List<CreateItemPedidoDto> { new(alimento.Id, 1) },
+            TipoPedido.Compra);
+
+        var resultado = await service.CreatePedidoAsync(Guid.NewGuid(), request);
+
+        Assert.True(resultado.Sucesso);
+    }
+
+    [Fact]
+    public async Task CreatePedido_QuandoTipoInvalido_RetornaFalhaSemTocarRepositorios()
+    {
+        var service = CriarService();
+        var request = new CreatePedidoDto(
+            new List<CreateItemPedidoDto> { new(Guid.NewGuid(), 1) },
+            (TipoPedido)99);
+
+        var resultado = await service.CreatePedidoAsync(Guid.NewGuid(), request);
+
+        Assert.False(resultado.Sucesso);
+        Assert.Contains("Tipo de pedido invalido", resultado.Mensagem);
+        await _produtoRepo.DidNotReceive().GetByIdAsync(Arg.Any<Guid>());
         await _pedidoRepo.DidNotReceive().AddAsync(Arg.Any<Pedido>());
     }
 }
