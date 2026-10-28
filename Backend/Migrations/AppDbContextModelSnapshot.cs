@@ -450,6 +450,29 @@ namespace Backend.Migrations
                     b.ToTable("Voluntarios");
                 });
 
+            modelBuilder.Entity("UniHub.Domain.Entities.Alimento", b =>
+                {
+                    b.HasBaseType("UniHub.Domain.Entities.Produto");
+
+                    b.Property<string>("Categoria")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<TimeSpan>("HorarioDisponibilidade")
+                        .HasColumnType("interval");
+
+                    b.Property<string>("Restricoes")
+                        .HasColumnType("text");
+
+                    b.ToTable("Produtos", t =>
+                        {
+                            t.Property("Categoria")
+                                .HasColumnName("Alimento_Categoria");
+                        });
+
+                    b.HasDiscriminator().HasValue("Alimento");
+                });
+
             modelBuilder.Entity("UniHub.Domain.Entities.ItemBazar", b =>
                 {
                     b.HasBaseType("UniHub.Domain.Entities.Produto");

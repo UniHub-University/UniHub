@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<Vendedor> Vendedores { get; set; }
     public DbSet<Produto> Produtos { get; set; }
     public DbSet<ItemBazar> ItensBazar { get; set; }
+    public DbSet<Alimento> Alimentos { get; set; }
     public DbSet<RestricaoAlimentar> RestricoesAlimentares { get; set; }
 
     public DbSet<HorarioVenda> HorariosVenda { get; set; }
@@ -29,6 +30,14 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // Mapeamento TPH do Alimento (subtipo de Produto). O valor "Alimento" do
+        // discriminador precisa bater EXATAMENTE com ProdutoBuscaRepository
+        // (DiscriminadorAlimento = "Alimento"), senão o filtro tipo=lanche quebra.
+        modelBuilder.Entity<Alimento>()
+            .HasBaseType<Produto>()
+            .HasDiscriminator()
+            .HasValue<Alimento>("Alimento");
 
         // Configuração da relação 1:0..1 entre Usuario e Vendedor
         modelBuilder.Entity<Usuario>()
