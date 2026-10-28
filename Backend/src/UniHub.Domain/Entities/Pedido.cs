@@ -8,7 +8,17 @@ public enum PedidoStatus
     Reservado = 0,  // estoque decrementado, aguardando retirada/pagamento
     Confirmado = 1,
     Concluido = 2,
-    Cancelado = 3
+    Cancelado = 3,
+    Expirado = 4    // reserva que venceu (ExpiraEm passou); estoque devolvido
+}
+
+// Distingue uma compra (definitiva) de uma reserva (temporaria). A reserva
+// so vale para ItemBazar e expira em ExpiraEm -- a validacao dessa regra
+// fica na camada de Service, nao aqui.
+public enum TipoPedido
+{
+    Compra = 0,
+    Reserva = 1
 }
 
 /// Representa a acao de um usuario comprando/reservando um ou mais
@@ -23,6 +33,15 @@ public class Pedido
     public Usuario? Comprador { get; set; }
 
     public PedidoStatus Status { get; set; } = PedidoStatus.Reservado;
+
+    // Compra (definitiva) ou Reserva (temporaria). Default Compra -- pedidos
+    // existentes no banco entram como Compra ao aplicar a migration.
+    public TipoPedido Tipo { get; set; } = TipoPedido.Compra;
+
+    // Quando a reserva vence. Nulo para Compra (que nao expira). Setado pelo
+    // Service ao criar uma Reserva (now + TTL).
+    public DateTime? ExpiraEm { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
