@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     // Mapeamento das classes para as tabelas do banco de dados
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Vendedor> Vendedores { get; set; }
+    public DbSet<Voluntario> Voluntarios { get; set; }
     public DbSet<Produto> Produtos { get; set; }
     public DbSet<ItemBazar> ItensBazar { get; set; }
     public DbSet<Alimento> Alimentos { get; set; }
@@ -44,6 +45,12 @@ public class AppDbContext : DbContext
             .HasOne(u => u.Vendedor)
             .WithOne(v => v.Usuario)
             .HasForeignKey<Vendedor>(v => v.UsuarioId);
+
+        // Configuração da relação 1:0..1 entre Usuario e Voluntario (espelha Vendedor)
+        modelBuilder.Entity<Usuario>()                 
+            .HasOne(u => u.Voluntario)
+            .WithOne(v => v.Usuario)
+            .HasForeignKey<Voluntario>(v => v.UsuarioId);    
 
         // Relação N:N (Muitos-para-Muitos) entre Usuario e RestricaoAlimentar
         modelBuilder.Entity<Usuario>()
