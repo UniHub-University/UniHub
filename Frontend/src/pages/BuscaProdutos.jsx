@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { FaMagnifyingGlass } from 'react-icons/fa6';
 
 import ProdutoCard from '../components/ProdutoCard.jsx';
@@ -19,11 +20,20 @@ const TAMANHO_PAGINA = 12;
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
 export default function BuscaProdutos() {
+  const [parametros, setParametros] = useSearchParams();
+  return <BuscaComFiltros key={parametros.toString()} parametros={parametros} setParametros={setParametros} />;
+}
+
+function BuscaComFiltros({ parametros, setParametros }) {
+  const iniciais = Object.fromEntries(Object.keys(FILTROS_INICIAIS).map((chave) => [chave, parametros.get(chave) ?? '']));
+  if (!['', 'bazar', 'lanche'].includes(iniciais.tipo)) iniciais.tipo = '';
+  const numeroPagina = Number(parametros.get('page') ?? 1);
+  const pagina = Number.isSafeInteger(numeroPagina) && numeroPagina > 0 ? numeroPagina : 1;
   // Dois estados: o que está no formulário (form) e o que foi de fato aplicado
   // (filtrosAplicados). A busca só dispara ao submeter, não a cada tecla.
-  const [form, setForm] = useState(FILTROS_INICIAIS);
-  const [filtrosAplicados, setFiltrosAplicados] = useState(FILTROS_INICIAIS);
-  const [pagina, setPagina] = useState(1);
+  const [form, setForm] = useState(iniciais);
+  const [filtrosAplicados, setFiltrosAplicados] = useState(iniciais);
+
 
   const [resultado, setResultado] = useState(null);
   const [carregando, setCarregando] = useState(true);
@@ -61,24 +71,29 @@ export default function BuscaProdutos() {
     setForm((atual) => ({ ...atual, [name]: value }));
   }
 
+  function atualizarBusca(filtros, novaPagina = 1) {
+    const proximos = new URLSearchParams();
+    Object.entries(filtros).forEach(([chave, valor]) => {
+      if (String(valor).trim()) proximos.set(chave, String(valor).trim());
+    });
+    if (novaPagina > 1) proximos.set('page', String(novaPagina));
+    if (proximos.toString() === parametros.toString()) {
+      setCarregando(true);
+      setFiltrosAplicados({ ...filtros });
+    } else setParametros(proximos);
+  }
+
   function aplicarFiltros(evento) {
     evento.preventDefault();
-    setCarregando(true);
-    setPagina(1);
-    setFiltrosAplicados({ ...form });
+    atualizarBusca(form);
   }
 
   function limparFiltros() {
-    setCarregando(true);
     setForm(FILTROS_INICIAIS);
-    setPagina(1);
-    setFiltrosAplicados({ ...FILTROS_INICIAIS });
+    atualizarBusca(FILTROS_INICIAIS);
   }
 
-  function irParaPagina(nova) {
-    setCarregando(true);
-    setPagina(nova);
-  }
+  function irParaPagina(nova) { atualizarBusca(filtrosAplicados, nova); }
 
   const itens = resultado?.items ?? [];
   const totalItens = resultado?.totalItems ?? 0;
@@ -201,13 +216,13 @@ export default function BuscaProdutos() {
         <p className="busca__vazio">Nenhum produto encontrado com esses filtros.</p>
       )}
 
-      <section className="busca__grade" aria-label="Resultados">
-        {itens.map((produto) => (
+      <section className="busca__grade" aria-label="Resultados" aria-busy={carregando}>
+        {!carregando && !erro && itens.map((produto) => (
           <ProdutoCard key={produto.id} produto={produto} />
         ))}
       </section>
 
-      {totalPaginas > 1 && (
+      {!erro && totalPaginas > 1 && (
         <nav className="busca__paginacao" aria-label="Paginação dos resultados">
           <button
             type="button"

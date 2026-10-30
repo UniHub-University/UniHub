@@ -10,6 +10,7 @@
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { FiBookOpen, FiShoppingBag, FiHeart } from 'react-icons/fi';
 
 import { listarItensBazar } from '../services/anuncios.js';
 import { ApiError } from '../services/api.js';
@@ -56,11 +57,19 @@ export default function Home() {
 
   return (
     <section className="home">
-      <header className="home__cabecalho">
-        <h1 className="home__titulo">Bem-vindo ao UniHub</h1>
-        <p className="home__subtitulo">
-          Dá uma olhada nos anúncios mais recentes da comunidade.
-        </p>
+      <header className="home__banner">
+        <div className="home__banner-conteudo">
+          <span className="home__banner-etiqueta">FEITO PELA COMUNIDADE, PARA A COMUNIDADE</span>
+          <h1 className="home__banner-titulo">Seu campus.<br />Novas conexões.<br /><em>Mais possibilidades.</em></h1>
+          <p className="home__banner-descricao">Dê uma nova história ao que você não usa mais e descubra achados de quem compartilha a vida universitária com você.</p>
+          <Link className="home__banner-botao" to="/bazar">Explorar o Bazar <span aria-hidden="true">↗</span></Link>
+        </div>
+        <div className="home__banner-arte" aria-hidden="true">
+          <span className="home__banner-orbita" />
+          <div className="home__banner-cartao home__banner-cartao--livro"><FiBookOpen /><span>Uma nova leitura.<br /><strong>Outra descoberta.</strong></span></div>
+          <div className="home__banner-cartao home__banner-cartao--sacola"><FiShoppingBag /><span>Seu próximo achado<br /><strong>pode estar aqui.</strong></span></div>
+          <span className="home__banner-selo"><FiHeart /> Conexões que circulam</span>
+        </div>
       </header>
 
       <div className="home__secao">

@@ -70,6 +70,24 @@ public class ItensBazarController : ControllerBase
     }
 
 
+    // Consulta exclusiva do editor: autenticação não equivale a posse do produto.
+    [HttpGet("{id:guid}/edicao")]
+    public async Task<ActionResult<ItemBazarRespostaDto>> ObterParaEdicao(Guid id)
+    {
+        if (!Guid.TryParse(User.FindFirst("sub")?.Value, out var usuarioId))
+            return Unauthorized();
+
+        var item = await _context.ItensBazar.AsNoTracking()
+            .Include(i => i.Vendedor).FirstOrDefaultAsync(i => i.Id == id);
+        if (item is null)
+            return NotFound(new { mensagem = "Item do bazar não encontrado." });
+
+        if (item.Vendedor is null || item.Vendedor.UsuarioId != usuarioId)
+            return Forbid();
+
+        return Ok(MapearParaDto(item));
+    }
+
        // UPDATE: PUT /api/itens-bazar/{id}
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Atualizar(Guid id, [FromBody] AtualizarItemBazarDto dto)
