@@ -7,14 +7,34 @@
   background-color: var(--cor-creme);
 }
 
-.perfil__cartao {
+/* ===== Grade de blocos independentes =====
+   Cada bloco tem seu próprio fundo/borda/sombra e "flutua" sobre o fundo creme. */
+.perfil__grade {
   width: 100%;
-  max-width: 720px;
-  padding: 36px;
+  max-width: 1040px;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.perfil__coluna--acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ===== Cartão (base compartilhada por dados + cards de ação) ===== */
+.perfil__cartao,
+.perfil__card {
   background-color: var(--cor-superficie);
   border: 1px solid rgba(177, 149, 99, 0.35);
   border-radius: var(--raio);
   box-shadow: var(--sombra);
+}
+
+.perfil__cartao--dados {
+  padding: 36px;
 }
 
 .perfil__cabecalho {
@@ -29,8 +49,8 @@
 }
 
 .perfil__foto {
-  width: 170px;
-  height: 170px;
+  width: 150px;
+  height: 150px;
   display: block;
   object-fit: cover;
   border: 3px solid var(--cor-tan);
@@ -117,7 +137,7 @@
 
 .perfil__informacoes {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   margin-top: 4px;
   padding: 18px;
@@ -175,6 +195,128 @@
   opacity: 0.65;
 }
 
+/* Botão compacto (dentro dos cards: "Ser voluntário", "Histórico", pausar/retomar) */
+.perfil__botao--compacto {
+  width: auto;
+  min-height: 0;
+  margin-top: 0;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ===== Cards da coluna direita ===== */
+.perfil__card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+}
+
+.perfil__card-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.perfil__card-titulo {
+  margin: 0;
+  color: var(--cor-verde);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.perfil__expandir {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cor-tan);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.perfil__expandir:hover {
+  color: var(--cor-verde);
+}
+
+.perfil__card-descricao {
+  margin: 0;
+  color: var(--cor-verde);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.perfil__card-vazio {
+  margin: 0;
+  color: var(--cor-tan);
+  font-size: 0.88rem;
+}
+
+/* Lista do resumo de pedidos */
+.perfil__pedidos-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.perfil__pedido-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid rgba(177, 149, 99, 0.3);
+  border-radius: 8px;
+  background-color: rgba(177, 149, 99, 0.06);
+}
+
+.perfil__pedido-topo,
+.perfil__pedido-base {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.perfil__pedido-produto {
+  color: var(--cor-verde);
+  font-weight: 600;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+}
+
+.perfil__pedido-status {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: rgba(42, 69, 21, 0.1);
+  color: var(--cor-verde);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.perfil__pedido-data {
+  color: var(--cor-tan);
+  font-size: 0.8rem;
+}
+
+.perfil__pedido-total {
+  color: var(--cor-verde);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
 .perfil__mensagem {
   margin: 0 0 20px;
   padding: 12px 14px;
@@ -202,12 +344,19 @@
   text-align: center;
 }
 
+/* Responsivo: empilha em 1 coluna */
+@media (max-width: 768px) {
+  .perfil__grade {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
   .perfil {
     padding: 24px 16px;
   }
 
-  .perfil__cartao {
+  .perfil__cartao--dados {
     padding: 24px 18px;
   }
 
@@ -229,12 +378,4 @@
   .perfil__informacoes {
     grid-template-columns: 1fr;
   }
-}
-
-/* Link "Meus pedidos" com o mesmo visual do botão (BRV-89) */
-.perfil__botao--link {
-  display: block;
-  margin-top: 16px;
-  text-align: center;
-  text-decoration: none;
 }
