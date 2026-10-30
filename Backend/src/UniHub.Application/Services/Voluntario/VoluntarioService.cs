@@ -36,4 +36,27 @@ public class VoluntarioService
 
         return new TornarVoluntarioResultDto(true, "Perfil de voluntário criado com sucesso!", voluntario.Id);
     }
+
+    public async Task<VoluntarioResultDto> DesistirAsync(Guid usuarioId)
+    {
+        var voluntario = await _context.Voluntarios
+            .FirstOrDefaultAsync(v => v.UsuarioId == usuarioId);
+
+        if (voluntario is null)
+            return Falha(SemPerfil);
+
+        // Guarda: não pode desistir com apoio em andamento (compromisso ativo).
+        var temAtiva = await _context.Correspondencias.AnyAsync(c =>
+            c.VoluntarioId == voluntario.Id &&
+            c.Status == StatusCorrespondencia.AceitaPeloVoluntario);
+
+        if (temAtiva)
+            return Falha("Você tem apoios em andamento. Conclua ou cancele antes de desistir.");
+
+        _context.Voluntarios.Remove(voluntario);
+        await _context.SaveChangesAsync();
+
+        return new VoluntarioResultDto(true, "Você deixou de ser voluntário.", null);
+    }
+
 }

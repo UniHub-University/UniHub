@@ -494,7 +494,7 @@ export default function Perfil() {
 
         {/* ===== BLOCO DIREITA — cartões de ações ===== */}
         <aside className="perfil__coluna perfil__coluna--acoes">
-          {/* Card: voluntário */}
+                  {/* Card: voluntário */}
           <section className="perfil__card" aria-label="Voluntariado">
             {perfil?.ehVoluntario ? (
               <>
@@ -519,40 +519,47 @@ export default function Perfil() {
                     {alterandoDisponibilidade
                       ? 'Processando...'
                       : voluntarioDisponivel
-                      ? 'Pausar atuação'
-                      : 'Retomar atuação'}
+                      ? 'Deixar de atuar'
+                      : 'Voltar a atuar'}
                   </button>
+                )}
+
+                {voluntarioDisponivel === false && (
+                  <p className="perfil__card-aviso">
+                    Enquanto estiver fora de atuação, você não recebe novas sugestões
+                    de apoio. As solicitações que você já aceitou continuam acessíveis.
+                  </p>
                 )}
               </>
             ) : (
-              <>
-                <div className="perfil__card-linha">
-                  <p className="perfil__card-titulo">Quer ser voluntário?</p>
-                  <button
-                    type="button"
-                    className="perfil__botao perfil__botao--compacto"
-                    onClick={tornarSeVoluntario}
-                    disabled={tornandoVoluntario}
-                  >
-                    {tornandoVoluntario ? 'Processando...' : 'Ser voluntário'}
-                  </button>
-                </div>
-
+              <div className="perfil__card-linha">
+                <p className="perfil__card-titulo">Quer ser voluntário?</p>
                 <button
                   type="button"
-                  className="perfil__expandir"
-                  onClick={() => setDescricaoAberta((v) => !v)}
-                  aria-expanded={descricaoAberta}
+                  className="perfil__botao perfil__botao--compacto"
+                  onClick={tornarSeVoluntario}
+                  disabled={tornandoVoluntario}
                 >
-                  {descricaoAberta ? 'Ocultar' : 'Saiba mais'} {descricaoAberta ? '▴' : '▾'}
+                  {tornandoVoluntario ? 'Processando...' : 'Ser voluntário'}
                 </button>
+              </div>
+            )}
 
-                {descricaoAberta && (
-                  <p className="perfil__card-descricao">{DESCRICAO_VOLUNTARIO}</p>
-                )}
-              </>
+            {/* "Saiba mais" aparece nos dois casos (voluntário ou não) */}
+            <button
+              type="button"
+              className="perfil__expandir"
+              onClick={() => setDescricaoAberta((v) => !v)}
+              aria-expanded={descricaoAberta}
+            >
+              {descricaoAberta ? 'Ocultar' : 'Saiba mais'} {descricaoAberta ? '▴' : '▾'}
+            </button>
+
+            {descricaoAberta && (
+              <p className="perfil__card-descricao">{DESCRICAO_VOLUNTARIO}</p>
             )}
           </section>
+
 
           {/* Card: resumo de pedidos */}
           <section className="perfil__card" aria-label="Resumo de pedidos">

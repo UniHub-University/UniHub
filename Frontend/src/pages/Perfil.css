@@ -379,3 +379,14 @@
     grid-template-columns: 1fr;
   }
 }
+
+.perfil__card-aviso {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background-color: rgba(177, 149, 99, 0.12);
+  color: var(--cor-verde);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+

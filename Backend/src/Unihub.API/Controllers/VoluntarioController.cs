@@ -30,4 +30,19 @@ public class VoluntarioController : ControllerBase
 
         return Ok(new { mensagem = resultado.Mensagem, voluntarioId = resultado.VoluntarioId });
     }
+
+    /// DELETE /api/perfil/voluntario
+    /// Remove o perfil de voluntario. Bloqueado se houver apoio em andamento.
+    [HttpDelete]
+    public async Task<IActionResult> Desistir()
+    {
+        var usuarioId = Guid.Parse(User.FindFirst("sub")?.Value ?? Guid.Empty.ToString());
+        var resultado = await _voluntarioService.DesistirAsync(usuarioId);
+
+        if (!resultado.Sucesso)
+            return BadRequest(new { mensagem = resultado.Mensagem });
+
+        return Ok(new { mensagem = resultado.Mensagem });
+    }
+
 }

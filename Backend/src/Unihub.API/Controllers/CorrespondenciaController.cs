@@ -23,12 +23,17 @@ public class CorrespondenciaController : ControllerBase
     }
 
     // GET /api/correspondencias/sugestoes
-    [HttpGet("sugestoes")]
+        [HttpGet("sugestoes")]
     public async Task<ActionResult<IEnumerable<SolicitacaoApoioRespostaDto>>> Sugestoes()
     {
-        var voluntario = await ObterVoluntarioLogado();
+         var voluntario = await ObterVoluntarioLogado();
         if (voluntario is null)
             return BadRequest(new { mensagem = "Usuario precisa ser voluntario para ver sugestoes." });
+
+        // Voluntario com atuacao pausada (Disponivel = false) nao recebe novas
+        // sugestoes. Nao afeta correspondencias ja aceitas -- so a lista de novas.
+        if (!voluntario.Disponivel)
+            return Ok(Array.Empty<SolicitacaoApoioRespostaDto>());
 
         var areas = voluntario.AreasDeAtuacao;
 
