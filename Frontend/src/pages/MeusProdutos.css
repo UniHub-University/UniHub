@@ -1,0 +1,188 @@
+/* Meus Produtos — listagem/gerência do vendedor (BRV-164), tema UniHub. */
+
+.meus-produtos {
+  color: var(--cor-verde);
+  overflow-wrap: anywhere;
+}
+
+.meus-produtos__cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.meus-produtos__cabecalho h1 {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+}
+
+.meus-produtos__cabecalho p {
+  margin: 10px 0 0;
+  line-height: 1.6;
+  color: #596452;
+}
+
+.meus-produtos__novo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--cor-verde);
+  color: var(--cor-superficie);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.meus-produtos__novo:hover {
+  background: var(--cor-verde-escuro);
+}
+
+.meus-produtos__status,
+.meus-produtos__erro {
+  margin: 24px 0;
+  padding: 24px;
+  border-radius: 14px;
+  line-height: 1.6;
+  background: #fffdf7;
+  color: #52604e;
+}
+
+.meus-produtos__erro {
+  color: var(--cor-erro);
+  border: 1px solid #e4bdbd;
+}
+
+.meus-produtos__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.meus-produtos__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px 24px;
+  border: 1px solid #e2dfd2;
+  border-radius: 16px;
+  background: var(--cor-superficie);
+}
+
+.meus-produtos__info {
+  min-width: 0;
+  flex: 1 1 260px;
+}
+
+.meus-produtos__topo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.meus-produtos__nome {
+  margin: 0;
+  font-family: var(--fonte-corpo);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #243322;
+}
+
+.meus-produtos__tag,
+.meus-produtos__status {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.meus-produtos__tag {
+  background: #edf1e7;
+  color: #425637;
+}
+
+/* Status: Disponivel=0 (verde), Esgotado=1 (âmbar), Inativo=2 (cinza). */
+.meus-produtos__status--0 {
+  background: #e4efe0;
+  color: #2f6b2f;
+}
+
+.meus-produtos__status--1 {
+  background: #f6ead1;
+  color: #8a5a12;
+}
+
+.meus-produtos__status--2 {
+  background: #ececec;
+  color: #6b6b6b;
+}
+
+.meus-produtos__meta {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.meus-produtos__preco {
+  color: var(--cor-verde);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.meus-produtos__qtd {
+  font-size: 0.85rem;
+  color: #596452;
+}
+
+.meus-produtos__acoes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.meus-produtos__editar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--cor-verde);
+  border-radius: 999px;
+  color: var(--cor-verde);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.meus-produtos__editar:hover {
+  background: var(--cor-verde);
+  color: var(--cor-superficie);
+}
+
+.meus-produtos :focus-visible {
+  outline: 3px solid var(--cor-tan);
+  outline-offset: 3px;
+}
+
+@media (max-width: 560px) {
+  .meus-produtos__item {
+    align-items: stretch;
+  }
+
+  .meus-produtos__acoes {
+    width: 100%;
+  }
+}
