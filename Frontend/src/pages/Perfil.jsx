@@ -19,6 +19,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, ApiError } from '../services/api.js';
+import { usePerfilVendedor } from '../auth/PerfilVendedor.jsx';
 import './Perfil.css';
 
 const formularioInicial = {
@@ -117,6 +118,8 @@ export default function Perfil() {
   const [mensagemSucesso, setMensagemSucesso] = useState('');
   const [fotoSelecionada, setFotoSelecionada] = useState(null);
   const [previewFoto, setPreviewFoto] = useState('');
+  const { recarregar: recarregarPerfilVendedor } = usePerfilVendedor();
+  const [tornandoVendedor, setTornandoVendedor] = useState(false);
   const [tornandoVoluntario, setTornandoVoluntario] = useState(false);
   const [descricaoAberta, setDescricaoAberta] = useState(false);
   const [voluntarioDisponivel, setVoluntarioDisponivel] = useState(null);
@@ -307,6 +310,23 @@ export default function Perfil() {
     }
   }
 
+  async function tornarSeVendedor() {
+    setErro('');
+    setMensagemSucesso('');
+    setTornandoVendedor(true);
+
+    try {
+      await api.post('/api/perfil/vendedor');
+      setPerfil((atual) => ({ ...atual, ehVendedor: true }));
+      recarregarPerfilVendedor(); // libera o menu e as rotas de vendedor sem F5
+      setMensagemSucesso('Agora você é um vendedor! 🛍️');
+    } catch (e) {
+      setErro(e instanceof ApiError ? e.message : 'Não foi possível concluir. Tente novamente.');
+    } finally {
+      setTornandoVendedor(false);
+    }
+  }
+
   async function tornarSeVoluntario() {
     setErro('');
     setMensagemSucesso('');
@@ -494,6 +514,35 @@ export default function Perfil() {
 
         {/* ===== BLOCO DIREITA — cartões de ações ===== */}
         <aside className="perfil__coluna perfil__coluna--acoes">
+          {/* Card: vendedor */}
+          <section className="perfil__card" aria-label="Vendedor">
+            {perfil?.ehVendedor ? (
+              <div className="perfil__card-linha">
+                <p className="perfil__card-titulo">Você é vendedor</p>
+                <Link className="perfil__botao perfil__botao--compacto" to="/vendedor">
+                  Painel
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div className="perfil__card-linha">
+                  <p className="perfil__card-titulo">Quer vender no UniHub?</p>
+                  <button
+                    type="button"
+                    className="perfil__botao perfil__botao--compacto"
+                    onClick={tornarSeVendedor}
+                    disabled={tornandoVendedor}
+                  >
+                    {tornandoVendedor ? 'Processando...' : 'Ser vendedor'}
+                  </button>
+                </div>
+                <p className="perfil__card-descricao">
+                  Anuncie lanches e itens do bazar para a comunidade da UNIFESP.
+                </p>
+              </>
+            )}
+          </section>
+
                   {/* Card: voluntário */}
           <section className="perfil__card" aria-label="Voluntariado">
             {perfil?.ehVoluntario ? (

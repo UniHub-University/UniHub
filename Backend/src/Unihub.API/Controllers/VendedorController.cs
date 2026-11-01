@@ -64,4 +64,19 @@ public class VendedorController : ControllerBase
     
         return Ok(new { mensagem = resultado.Mensagem, vendedorId = resultado.VendedorId });
     }
+
+    /// GET /api/perfil/vendedor/produtos
+    /// Lista os produtos do vendedor autenticado, em qualquer status.
+    /// O vendedor vem do token, nunca de um id na requisição.
+    [HttpGet("produtos")]
+    public async Task<ActionResult<IReadOnlyList<MeuProdutoDto>>> ListarMeusProdutos()
+    {
+        var usuarioId = Guid.Parse(User.FindFirst("sub")?.Value ?? Guid.Empty.ToString());
+        var resultado = await _vendedorService.ListarMeusProdutosAsync(usuarioId);
+
+        if (!resultado.Sucesso)
+            return NotFound(new { mensagem = resultado.Mensagem });
+
+        return Ok(resultado.Produtos);
+    }
 }
