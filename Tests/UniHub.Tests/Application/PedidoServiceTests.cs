@@ -314,4 +314,62 @@ public class PedidoServiceTests
         await _produtoRepo.DidNotReceive().GetByIdAsync(Arg.Any<Guid>());
         await _pedidoRepo.DidNotReceive().AddAsync(Arg.Any<Pedido>());
     }
+
+
+    // ---------- Historico com Tipo e ExpiraEm (extensao Sprint 4) ----------
+    [Fact]
+    public async Task GetHistorico_PedidoDeCompra_DevolveTipoCompraSemExpiraEm()
+    {
+        var service = CriarService();
+        var compradorId = Guid.NewGuid();
+        var pedido = new Pedido
+        {
+            Id = Guid.NewGuid(),
+            CompradorId = compradorId,
+            Status = PedidoStatus.Reservado,
+            Tipo = TipoPedido.Compra,
+            ExpiraEm = null,
+            CreatedAt = DateTime.UtcNow,
+            Itens = new List<ItemPedido>()
+        };
+        var lista = new List<Pedido> { pedido };
+        _pedidoRepo.GetByCompradorAsync(compradorId, 1, 10)
+            .Returns(((IReadOnlyList<Pedido>)lista, lista.Count));
+
+        var (pedidos, total, _, _) = await service.GetHistoricoAsync(compradorId, 1, 10);
+
+        Assert.Equal(1, total);
+        var dto = Assert.Single(pedidos);
+        Assert.Equal(TipoPedido.Compra, dto.Tipo);
+        Assert.Null(dto.ExpiraEm);
+    }
+
+    [Fact]
+    public async Task GetHistorico_PedidoDeReserva_DevolveTipoReservaEExpiraEm()
+    {
+        var service = CriarService();
+        var compradorId = Guid.NewGuid();
+        var expiraEm = DateTime.UtcNow.AddHours(24);
+        var pedido = new Pedido
+        {
+            Id = Guid.NewGuid(),
+            CompradorId = compradorId,
+            Status = PedidoStatus.Reservado,
+            Tipo = TipoPedido.Reserva,
+            ExpiraEm = expiraEm,
+            CreatedAt = DateTime.UtcNow,
+            Itens = new List<ItemPedido>()
+        };
+        var lista = new List<Pedido> { pedido };
+        _pedidoRepo.GetByCompradorAsync(compradorId, 1, 10)
+            .Returns(((IReadOnlyList<Pedido>)lista, lista.Count));
+
+        var (pedidos, _, _, _) = await service.GetHistoricoAsync(compradorId, 1, 10);
+
+        var dto = Assert.Single(pedidos);
+        Assert.Equal(TipoPedido.Reserva, dto.Tipo);
+        Assert.Equal(expiraEm, dto.ExpiraEm);
+    }
+
+
 }
