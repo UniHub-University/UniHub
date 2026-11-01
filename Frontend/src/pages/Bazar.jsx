@@ -4,17 +4,21 @@
 // pré-visualização dos mais recentes e este feed completo (com busca) passou a
 // viver na aba Bazar (/bazar). Consome o único endpoint de produtos existente
 // hoje (GET /api/itens-bazar) e trata os estados carregando/erro/vazio.
-// A busca textual é client-side (a lista ainda não é paginada no backend).
+// A pesquisa é encaminhada para a tela unificada /produtos, com tipo=bazar.
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { listarItensBazar } from '../services/anuncios.js';
 import { ApiError } from '../services/api.js';
 import { ordenarPorMaisRecente } from '../services/anunciosUtils.js';
 import CardAnuncio from '../components/CardAnuncio.jsx';
 import './Bazar.css';
+import { Link, useNavigate } from 'react-router-dom';
+import { usePerfilVendedor } from '../auth/PerfilVendedor.jsx';
 
 export default function Bazar() {
+  const { ehVendedor } = usePerfilVendedor();
+  const navigate = useNavigate();
   const [itens, setItens] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
@@ -47,21 +51,13 @@ export default function Bazar() {
     };
   }, []);
 
-  // Filtro textual client-side por nome, descrição e categoria, já ordenado
-  // pelos anúncios mais recentes (dataPublicacao desc).
-  const itensFiltrados = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
-    const base = termo
-      ? itens.filter((item) => {
-          const alvo = [item.nome, item.descricao, item.categoria]
-            .filter(Boolean)
-            .join(' ')
-            .toLowerCase();
-          return alvo.includes(termo);
-        })
-      : itens;
-    return ordenarPorMaisRecente(base);
-  }, [itens, busca]);
+  const itensFiltrados = ordenarPorMaisRecente(itens);
+  function pesquisar(evento) {
+    evento.preventDefault();
+    const parametros = new URLSearchParams({ tipo: 'bazar' });
+    if (busca.trim()) parametros.set('termo', busca.trim());
+    navigate(`/produtos?${parametros.toString()}`);
+  }
 
   // Texto do contador de resultados (reflete a lista filtrada e exibida).
   const totalExibido = itensFiltrados.length;
@@ -79,14 +75,13 @@ export default function Bazar() {
           </p>
         </div>
 
-        <input
-          type="search"
-          className="bazar__busca"
-          placeholder="Buscar anúncios…"
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          aria-label="Buscar anúncios"
-        />
+        {ehVendedor && <Link className="bazar__adicionar" to="/vendedor/produtos/novo">Adicionar produto</Link>}
+
+        <form className="bazar__pesquisa" onSubmit={pesquisar} role="search" aria-label="Pesquisar no Bazar">
+          <input type="search" className="bazar__busca" placeholder="Buscar anúncios…"
+            value={busca} onChange={(e) => setBusca(e.target.value)} aria-label="Buscar anúncios" />
+          <button className="bazar__pesquisar" type="submit">Pesquisar</button>
+        </form>
       </header>
 
       {carregando && <p className="bazar__status">Carregando anúncios…</p>}
@@ -100,12 +95,6 @@ export default function Bazar() {
       {!carregando && !erro && itens.length === 0 && (
         <p className="bazar__status">
           Ainda não há anúncios publicados. Volte em breve!
-        </p>
-      )}
-
-      {!carregando && !erro && itens.length > 0 && itensFiltrados.length === 0 && (
-        <p className="bazar__status">
-          Nenhum anúncio encontrado para “{busca}”.
         </p>
       )}
 

@@ -1,0 +1,35 @@
+.formulario-bazar { max-width: 760px; width: 100%; margin: 0 auto; padding: 24px 16px 48px; }
+.formulario-bazar h1 { margin: 20px 0; font-size: clamp(1.6rem, 5vw, 2.2rem); }
+.formulario-bazar form, .formulario-bazar-area-exclusao, .formulario-bazar-resultado { padding: 24px; background: var(--cor-superficie); border-radius: var(--raio); box-shadow: var(--sombra); }
+.formulario-bazar fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.formulario-bazar legend { font-weight: 700; margin-bottom: 12px; }
+.formulario-bazar label { display: block; font-weight: 600; margin: 16px 0 6px; }
+.formulario-bazar input, .formulario-bazar select, .formulario-bazar textarea { width: 100%; min-height: 44px; padding: 10px 12px; font: inherit; color: var(--cor-verde); background: white; border: 1px solid var(--cor-tan); border-radius: 8px; }
+.formulario-bazar textarea { resize: vertical; }
+.formulario-bazar-colunas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.formulario-bazar-colunas > div { min-width: 0; }
+.formulario-bazar button { min-height: 44px; padding: 12px 18px; border: 1px solid var(--cor-verde); border-radius: 8px; background: var(--cor-superficie); color: var(--cor-verde); font-weight: 600; }
+.formulario-bazar .formulario-bazar-primario { margin-top: 24px; background: var(--cor-verde); color: white; }
+.formulario-bazar button:disabled { opacity: .6; cursor: not-allowed; }
+.formulario-bazar :focus-visible { outline: 3px solid var(--cor-verde); outline-offset: 3px; }
+.formulario-bazar-area-exclusao { margin-top: 24px; border: 1px solid var(--cor-erro); }
+.formulario-bazar-area-exclusao h2 { font-size: 1.3rem; }
+.formulario-bazar-exclusao button { color: var(--cor-erro); border-color: var(--cor-erro); }
+.formulario-bazar [role="alert"] { color: var(--cor-erro); }
+@media (max-width: 520px) {
+  .formulario-bazar-colunas { grid-template-columns: 1fr; gap: 0; }
+  .formulario-bazar form, .formulario-bazar-area-exclusao, .formulario-bazar-resultado { padding: 16px; }
+  .formulario-bazar .formulario-bazar-primario { width: 100%; }
+}
+
+.formulario-bazar-exclusao .formulario-bazar-botao-excluir { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 12px 18px; border: 1px solid #a32323; border-radius: 10px; background: #a32323; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.formulario-bazar-exclusao .formulario-bazar-botao-excluir:hover:not(:disabled) { background: #7f1d1d; }
+.formulario-bazar-exclusao .formulario-bazar-botao-excluir:focus-visible { outline: 3px solid #a32323; outline-offset: 3px; }
+.formulario-bazar-exclusao .formulario-bazar-botao-excluir:disabled { opacity: .6; cursor: not-allowed; }
+.formulario-bazar-acesso-negado { padding: 24px; border: 1px solid #a32323; border-left: 6px solid #a32323; border-radius: 12px; background: #fff4f2; }
+.formulario-bazar-acesso-negado h2 { margin-top: 0; font-size: 1.3rem; }
+.formulario-bazar-acesso-negado p:first-of-type { font-weight: 700; }
+.formulario-bazar [role="alert"], .formulario-bazar-exclusao [role="alert"] { color: #7f1d1d; }
+.formulario-bazar-exclusao [role="alert"] { padding: 12px; background: #fff4f2; border-left: 4px solid #a32323; border-radius: 6px; }
+.formulario-bazar-ajuda { font-size: .9rem; line-height: 1.5; }
+@media (max-width: 520px) { .formulario-bazar-botao-excluir { width: 100%; } }
