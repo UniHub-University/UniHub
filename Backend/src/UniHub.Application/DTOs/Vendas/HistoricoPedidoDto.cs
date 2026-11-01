@@ -14,9 +14,13 @@ public record HistoricoItemPedidoDto(
     int Quantidade,
     decimal PrecoUnitarioNaCompra);
 
+// Tipo (Compra/Reserva) e ExpiraEm (prazo da reserva; nulo na Compra) ficam no
+// fim do record para nao quebrar quem ja consome os campos anteriores (P2/P3).
 public record HistoricoPedidoDto(
     Guid PedidoId,
     PedidoStatus Status,
     DateTime CreatedAt,
     List<HistoricoItemPedidoDto> Itens,
-    decimal Total);
+    decimal Total,
+    TipoPedido Tipo,
+    DateTime? ExpiraEm);
