@@ -22,7 +22,7 @@ export class ApiError extends Error {
   }
 }
 
-async function request(caminho, { method = 'GET', body, autenticado = true } = {}) {
+async function request(caminho, { method = 'GET', body, autenticado = true, signal } = {}) {
   const enviandoFormulario = body instanceof FormData;
   const headers = {};
 
@@ -42,6 +42,7 @@ async function request(caminho, { method = 'GET', body, autenticado = true } = {
     resposta = await fetch(`${API_BASE_URL}${caminho}`, {
       method,
       headers,
+      signal,
       body:
         body === undefined
           ? undefined
@@ -49,7 +50,12 @@ async function request(caminho, { method = 'GET', body, autenticado = true } = {
             ? body
             : JSON.stringify(body),
     });
-  } catch {
+  } catch (e) {
+    // Cancelamento via AbortController: repassa o AbortError para o chamador
+    // poder ignorá-lo (não é uma falha de rede real).
+    if (e?.name === 'AbortError') {
+      throw e;
+    }
     // Falha de rede / CORS / API fora do ar (cold start do Render, por ex.).
     throw new ApiError('Não foi possível conectar ao servidor. Tente novamente.', 0, null);
   }
