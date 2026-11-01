@@ -11,6 +11,7 @@ public interface IAlimentoRepository
     Task<Alimento?> ObterPorIdAsync(Guid id);
     Task<Alimento?> ObterPorIdComVendedorAsync(Guid id);
     Task<Alimento?> ObterDoVendedorAsync(Guid id, Guid vendedorId);
+    Task<Guid?> ObterVendedorIdPorUsuarioAsync(Guid usuarioId);
     Task AdicionarAsync(Alimento alimento);
     Task AtualizarAsync(Alimento alimento);
     Task<bool> InativarAsync(Guid id);

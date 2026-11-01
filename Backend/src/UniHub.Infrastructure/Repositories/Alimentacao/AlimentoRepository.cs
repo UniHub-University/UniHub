@@ -87,4 +87,13 @@ public class AlimentoRepository : IAlimentoRepository
 
         return linhasAfetadas == 1;
     }
+
+    public async Task<Guid?> ObterVendedorIdPorUsuarioAsync(Guid usuarioId)
+    {
+        return await _context.Vendedores
+            .Where(v => v.UsuarioId == usuarioId)
+            .Select(v => (Guid?)v.Id)
+            .FirstOrDefaultAsync();
+    }
+
 }
