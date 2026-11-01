@@ -135,4 +135,44 @@ public class PedidoService
             await _produtoRepository.IncrementarEstoqueAsync(produtoId, quantidade);
         }
     }
+
+    // P7: baixa manual do pedido pelo vendedor. usuarioId vem do token (claim "sub")
+    // no Controller, nunca da requisicao.
+    // Ordem: existe? -> o usuario e vendedor de algum item? -> a regra permite? ->
+    // gravacao atomica (so se ainda estiver Reservado).
+    public async Task<ConcluirPedidoResultDto> ConcluirPedidoAsync(Guid pedidoId, Guid usuarioId)
+    {
+        var pedido = await _pedidoRepository.GetByIdAsync(pedidoId);
+        if (pedido is null)
+        {
+            return new ConcluirPedidoResultDto(ConcluirPedidoStatus.NaoEncontrado, "Pedido nao encontrado.");
+        }
+
+        // Anti-IDOR: so quem vende algum item do pedido pode conclui-lo.
+        // A checagem vem antes da regra de estado para nao revelar o status a quem nao e dono.
+        if (!await _pedidoRepository.PedidoTemItemDoVendedorAsync(pedidoId, usuarioId))
+        {
+            return new ConcluirPedidoResultDto(ConcluirPedidoStatus.Proibido, "Voce nao e vendedor de nenhum item deste pedido.");
+        }
+
+        // A regra de transicao fica na entidade (so Reservado pode ser concluido).
+        // Aqui so validamos: nada e salvo por este objeto (a gravacao e o UPDATE abaixo).
+        try
+        {
+            pedido.Concluir();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return new ConcluirPedidoResultDto(ConcluirPedidoStatus.Conflito, ex.Message);
+        }
+
+        // UPDATE condicional (WHERE Status = Reservado): se o pedido mudou de estado
+        // entre a leitura e a gravacao (ex.: expirou), nenhuma linha e afetada.
+        if (!await _pedidoRepository.TryConcluirAsync(pedidoId))
+        {
+            return new ConcluirPedidoResultDto(ConcluirPedidoStatus.Conflito, "O pedido mudou de estado e nao pode mais ser concluido.");
+        }
+
+        return new ConcluirPedidoResultDto(ConcluirPedidoStatus.Sucesso, "Pedido concluido com sucesso.");
+    }
 }

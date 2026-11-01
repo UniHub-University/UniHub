@@ -53,4 +53,26 @@ public class PedidosController : ControllerBase
         return Ok(new PaginatedResultDto<HistoricoPedidoDto>(
             pedidos, paginaUsada, tamanhoUsado, total, totalPaginas));
     }
+
+    // POST api/pedidos/{id}/concluir  (P7)
+    // Baixa manual: o vendedor de algum item do pedido o marca como Concluido.
+    // O vendedor vem SEMPRE do token (claim "sub"), nunca da requisicao.
+    // 200 concluido | 401 token sem "sub" | 403 nao e vendedor do pedido |
+    // 404 pedido inexistente | 409 pedido nao esta Reservado (ou mudou de estado).
+    [HttpPost("{id:guid}/concluir")]
+    public async Task<IActionResult> Concluir(Guid id)
+    {
+        if (!Guid.TryParse(User.FindFirst("sub")?.Value, out var usuarioId))
+            return Unauthorized();
+
+        var resultado = await _pedidoService.ConcluirPedidoAsync(id, usuarioId);
+
+        return resultado.Status switch
+        {
+            ConcluirPedidoStatus.Sucesso => Ok(resultado),
+            ConcluirPedidoStatus.NaoEncontrado => NotFound(resultado),
+            ConcluirPedidoStatus.Proibido => Forbid(),
+            _ => Conflict(resultado)
+        };
+    }
 }
