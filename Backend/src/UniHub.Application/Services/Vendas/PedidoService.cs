@@ -13,6 +13,10 @@ public class PedidoService
     private readonly IProdutoRepository _produtoRepository;
     private readonly IPedidoRepository _pedidoRepository;
 
+    // Quanto tempo uma Reserva vale antes de expirar (ExpiraEm = agora + TTL).
+    // Publico para o job de expiracao (P4) reutilizar o mesmo valor.
+    // 24h e o valor inicial proposto; a confirmar com o squad.
+    public static readonly TimeSpan TtlReserva = TimeSpan.FromHours(24);
 
     public PedidoService(IProdutoRepository produtoRepository, IPedidoRepository pedidoRepository)
     {
@@ -27,10 +31,19 @@ public class PedidoService
             return new PedidoResultDto(false, "Pedido sem itens.", null);
         }
 
+        // Enum vindo da API: nunca assumir que o inteiro recebido e um valor valido.
+        if (!Enum.IsDefined(request.Tipo))
+        {
+            return new PedidoResultDto(false, "Tipo de pedido invalido.", null);
+        }
+
         var pedido = new Pedido
         {
             CompradorId = compradorId,
             Status = PedidoStatus.Reservado,
+            Tipo = request.Tipo,
+            // So a Reserva expira; a Compra e definitiva (ExpiraEm nulo).
+            ExpiraEm = request.Tipo == TipoPedido.Reserva ? DateTime.UtcNow.Add(TtlReserva) : null,
             Itens = new List<ItemPedido>()
         };
 
@@ -46,6 +59,13 @@ public class PedidoService
             {
                  await RollbackAsync(decrementados);
                  return new PedidoResultDto(false, $"Produto {item.ProdutoId} indisponível.", null);
+            }
+
+            // Reserva e temporaria e so vale para ItemBazar (nao para Alimento).
+            if (request.Tipo == TipoPedido.Reserva && produto is not ItemBazar)
+            {
+                await RollbackAsync(decrementados);
+                return new PedidoResultDto(false, $"Produto '{produto.Nome}' nao pode ser reservado: reserva so vale para itens do Bazar.", null);
             }
 
             var sucesso = await _produtoRepository.TryDecrementarEstoqueAsync(item.ProdutoId, item.Quantidade);
