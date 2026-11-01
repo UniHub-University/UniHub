@@ -19,11 +19,13 @@ import './HistoricoPedidos.css';
 const TAMANHO_PAGINA = 10;
 
 // A API devolve o status como número (enum PedidoStatus do backend).
+// 4 = Expirado: reserva cujo prazo venceu (estoque devolvido).
 const STATUS = {
   0: 'Reservado',
   1: 'Confirmado',
   2: 'Concluído',
   3: 'Cancelado',
+  4: 'Expirado',
 };
 
 function formatarMoeda(valor) {
