@@ -14,6 +14,9 @@ using UniHub.Infrastructure.Repositories.Vendas;
 using UniHub.Infrastructure.Repositories;
 using UniHub.Application.Interfaces.AcaoSolidaria;
 using UniHub.Infrastructure.Repositories.AcaoSolidaria;
+using UniHub.Application.Interfaces.Alimentacao;
+using UniHub.Application.Services.Alimentacao;
+using UniHub.Infrastructure.Repositories.Alimentacao;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +61,8 @@ builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
 builder.Services.AddScoped<PedidoService>();
 builder.Services.AddScoped<ProdutoService>();
 builder.Services.AddScoped<ISolicitacaoApoioRepository, SolicitacaoApoioRepository>();
+builder.Services.AddScoped<IAlimentoRepository, AlimentoRepository>();
+builder.Services.AddScoped<AlimentoService>();
 
 builder.Services.AddScoped<IDenunciaRepository, DenunciaRepository>();
 
