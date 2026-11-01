@@ -76,7 +76,7 @@
   color: var(--cor-verde);
 }
 
-/* 0 Reservado, 1 Confirmado, 2 Concluído, 3 Cancelado */
+/* 0 Reservado, 1 Confirmado, 2 Concluído, 3 Cancelado, 4 Expirado */
 .pedido__status--2 {
   background-color: var(--cor-verde);
   color: var(--cor-creme);
@@ -85,6 +85,12 @@
 .pedido__status--3 {
   background-color: var(--cor-erro);
   color: var(--cor-creme);
+}
+
+/* Expirado: reserva vencida — tom neutro/apagado (não é erro, mas inativo). */
+.pedido__status--4 {
+  background-color: rgba(177, 149, 99, 0.25);
+  color: #6b5a38;
 }
 
 .pedido__itens {
