@@ -1,27 +1,38 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext.jsx';
 import { api } from '../services/api.js';
 
 const Contexto = createContext(null);
 export function PerfilVendedorProvider({ children }) {
   const { token } = useAuth();
-  const { pathname } = useLocation();
   const [tentativa, setTentativa] = useState(0);
-  const [resultado, setResultado] = useState(null);
+  const [carregando, setCarregando] = useState(true);
+  const [perfil, setPerfil] = useState(null);
+  const [erro, setErro] = useState('');
+  // Verifica o perfil uma vez por sessão/token (e ao chamar recarregar).
+  // O token muda em login/logout, o que já cobre a reverificação por sessão.
   useEffect(() => {
-    let ativo = true;
-    api.get('/api/perfil').then((perfil) => {
-      if (ativo) setResultado({ token, pathname, tentativa, perfil });
-    }).catch(() => {
-      if (ativo) setResultado({ token, pathname, tentativa, erro: 'Não foi possível verificar seu perfil de vendedor.' });
-    });
-    return () => { ativo = false; };
-  }, [token, pathname, tentativa]);
-  const atual = resultado?.token === token && resultado?.pathname === pathname && resultado?.tentativa === tentativa;
-  const perfil = atual ? resultado.perfil : null;
-  return <Contexto.Provider value={{ perfil, carregando: !atual,
-    ehVendedor: perfil?.ehVendedor === true, erro: atual ? resultado.erro : '',
+    const controlador = new AbortController();
+    // Reset síncrono ao (re)verificar: volta a UI para "carregando" e limpa erro
+    // anterior antes de refazer a busca em /api/perfil (sincronização com a API).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCarregando(true);
+    setErro('');
+    api.get('/api/perfil', { signal: controlador.signal })
+      .then((dados) => {
+        setPerfil(dados);
+        setCarregando(false);
+      })
+      .catch((e) => {
+        // Chamada cancelada (troca de token/recarregar ou desmontagem): ignora.
+        if (e?.name === 'AbortError') return;
+        setErro('Não foi possível verificar seu perfil de vendedor.');
+        setCarregando(false);
+      });
+    return () => controlador.abort();
+  }, [token, tentativa]);
+  return <Contexto.Provider value={{ perfil, carregando,
+    ehVendedor: perfil?.ehVendedor === true, erro,
     recarregar: () => setTentativa((n) => n + 1) }}>{children}</Contexto.Provider>;
 }
 // eslint-disable-next-line react-refresh/only-export-components
