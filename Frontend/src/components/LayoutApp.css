@@ -118,3 +118,39 @@
     padding: 24px 16px 40px;
   }
 }
+
+/* Ações à direita e menu compacto; o perfil permanece acessível. */
+.layout__marca { text-decoration: none; flex-shrink: 0; }
+.layout__usuario { margin-left: auto; gap: 6px; }
+.layout__usuario .layout__link { display: inline-flex; align-items: center; min-height: 44px; }
+.layout__menu { display: none; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border: 1px solid var(--cor-verde); border-radius: 12px; background: transparent; color: var(--cor-verde); }
+.layout__header :focus-visible { outline: 3px solid var(--cor-tan); outline-offset: 3px; }
+@media (max-width: 1100px) {
+  .layout__header { gap: 12px; padding: 12px 16px; }
+  .layout__menu { display: inline-flex; }
+  .layout__nav { display: none; order: 3; flex: 1 0 100%; }
+  .layout__nav--aberta { display: flex; flex-direction: column; align-items: stretch; }
+}
+@media (max-width: 540px) {
+  .layout__texto-painel { display: none; }
+  .layout__header { gap: 8px; padding: 10px; }
+  .layout__usuario { gap: 2px; }
+  .layout__usuario .layout__link { padding: 8px 10px; }
+  .layout__sair { padding: 8px; min-height: 44px; }
+  .layout__nome-app { font-size: 1.1rem; }
+  .layout__marca { gap: 4px; }
+  .layout__logo { width: 28px; height: 28px; }
+}
+
+/* Acesso do vendedor com identidade própria. */
+.layout__painel-botao { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 44px; min-width: 44px; padding: 10px 16px; border: 1px solid #49643a; border-radius: 14px; background: #2a4515; color: #fffbed; font-size: .88rem; font-weight: 600; text-decoration: none; box-shadow: 0 3px 9px #213b1720; transition: background-color .15s ease; }
+.layout__painel-botao:hover { background: #3b5c24; }
+.layout__painel-botao--ativo { background: #e9dfc3; color: #2a4515; border-color: #b19563; box-shadow: inset 0 0 0 1px #b19563; }
+.layout__painel-botao--ativo:hover { background: #dfd1ad; }
+@media (max-width: 540px) { .layout__painel-botao { padding: 10px; } }
+
+/* Mantém os acessos globais na mesma linha em celulares estreitos. */
+@media (max-width: 380px) {
+  .layout__nome-app { display: none; }
+  .layout__usuario .layout__link { min-width: 44px; justify-content: center; }
+}

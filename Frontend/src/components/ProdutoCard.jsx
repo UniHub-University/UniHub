@@ -1,4 +1,5 @@
 import './ProdutoCard.css';
+import { Link } from 'react-router-dom';
 
 const formatadorPreco = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
@@ -46,6 +47,7 @@ export default function ProdutoCard({ produto }) {
           <dd>{quantidadeDisponivel}</dd>
         </div>
       </dl>
+      {tipo === 'bazar' && <Link to={`/bazar/${encodeURIComponent(produto.id)}`} aria-label={`Ver anúncio: ${nome}`}>Ver anúncio →</Link>}
     </article>
   );
 }
