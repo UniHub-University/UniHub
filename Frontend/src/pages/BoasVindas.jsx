@@ -28,6 +28,8 @@ import { useAuth } from '../auth/AuthContext.jsx';
 import logoUniHub from '../assets/logo-unihub.png';
 import './BoasVindas.css';
 
+import { useTituloPagina } from '../hooks/useTituloPagina.js';
+
 // Módulos exibidos no hero. Centralizados numa constante para facilitar manutenção.
 const MODULOS = [
   {
@@ -50,6 +52,9 @@ const MODULOS = [
 export default function BoasVindas() {
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  // Título de marca na aba (texto vazio => usa o título completo do UniHub).
+  useTituloPagina('');
 
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
