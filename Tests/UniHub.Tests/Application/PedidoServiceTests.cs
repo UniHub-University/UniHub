@@ -371,5 +371,28 @@ public class PedidoServiceTests
         Assert.Equal(expiraEm, dto.ExpiraEm);
     }
 
+    // ---------- Nao pode comprar o proprio produto ----------
+    [Fact]
+    public async Task CreatePedido_QuandoProdutoEhDoProprioComprador_RecusaSemDecrementarEstoque()
+    {
+        var service = CriarService();
+        var compradorId = Guid.NewGuid();
+        var produto = NovoProduto();
+        _produtoRepo.GetByIdAsync(produto.Id).Returns(produto);
+        // O produto pertence ao proprio comprador.
+        _produtoRepo.ProdutoPertenceAoUsuarioAsync(produto.Id, compradorId).Returns(true);
+
+        var request = new CreatePedidoDto(new List<CreateItemPedidoDto> { new(produto.Id, 1) });
+
+        var resultado = await service.CreatePedidoAsync(compradorId, request);
+
+        Assert.False(resultado.Sucesso);
+        Assert.Contains("próprio produto", resultado.Mensagem);
+        Assert.Null(resultado.PedidoId);
+        // nao pode decrementar estoque nem salvar pedido
+        await _produtoRepo.DidNotReceive().TryDecrementarEstoqueAsync(Arg.Any<Guid>(), Arg.Any<int>());
+        await _pedidoRepo.DidNotReceive().AddAsync(Arg.Any<Pedido>());
+    }
+
 
 }

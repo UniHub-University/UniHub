@@ -6,6 +6,10 @@ public interface IProdutoRepository
 {
     Task<Produto?> GetByIdAsync(Guid id);
 
+    // Indica se o produto pertence ao usuario informado (dono = Vendedor.UsuarioId).
+    // Usado para impedir que alguem compre/reserve o proprio produto.
+    Task<bool> ProdutoPertenceAoUsuarioAsync(Guid produtoId, Guid usuarioId);
+
     Task<bool> TryDecrementarEstoqueAsync(Guid produtoId, int quantidade);
 
     Task IncrementarEstoqueAsync(Guid produtoId, int quantidade);

@@ -1,0 +1,220 @@
+/* ---------------------------------------------------------------------------
+   Pedidos recebidos pelo vendedor (P9 — Frente B).
+   Reaproveita a linguagem visual do histórico (selos de status, cartões) e
+   as variáveis da identidade visual (index.css).
+   --------------------------------------------------------------------------- */
+
+.pedidos-vendedor {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 40px 20px 64px;
+}
+
+.pedidos-vendedor__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.pedidos-vendedor__topo h1 {
+  font-family: var(--fonte-titulo);
+}
+
+.pedidos-vendedor__voltar {
+  font-size: 0.95rem;
+  color: var(--cor-tan);
+}
+
+.pedidos-vendedor__aviso {
+  padding: 24px;
+  text-align: center;
+  background-color: var(--cor-superficie);
+  border-radius: var(--raio);
+  color: var(--cor-tan);
+}
+
+.pedidos-vendedor__aviso--erro {
+  color: var(--cor-erro);
+}
+
+.pedidos-vendedor__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ------------------------------ Cartão do pedido ------------------------------ */
+
+.pv-pedido {
+  padding: 20px;
+  background-color: var(--cor-superficie);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+}
+
+.pv-pedido__cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.pv-pedido__data {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: var(--cor-tan);
+}
+
+.pv-pedido__status {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: var(--cor-creme);
+  color: var(--cor-verde);
+  white-space: nowrap;
+}
+
+/* Mesmas cores do histórico do comprador. */
+.pv-pedido__status--2 {
+  background-color: var(--cor-verde);
+  color: var(--cor-creme);
+}
+
+.pv-pedido__status--3 {
+  background-color: var(--cor-erro);
+  color: var(--cor-creme);
+}
+
+.pv-pedido__status--4 {
+  background-color: rgba(177, 149, 99, 0.25);
+  color: #6b5a38;
+}
+
+/* ------------------------------ Metadados ------------------------------ */
+
+.pv-pedido__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: var(--cor-verde);
+}
+
+.pv-pedido__tag {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background-color: rgba(42, 69, 21, 0.1);
+  color: var(--cor-verde);
+}
+
+.pv-pedido__expira {
+  color: var(--cor-tan);
+  font-weight: 600;
+}
+
+/* ------------------------------ Itens ------------------------------ */
+
+.pv-pedido__itens {
+  margin: 0;
+  padding: 12px 0;
+  list-style: none;
+  border-top: 1px solid rgba(177, 149, 99, 0.35);
+  border-bottom: 1px solid rgba(177, 149, 99, 0.35);
+}
+
+.pv-pedido__itens li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 0.95rem;
+}
+
+.pv-pedido__itens li span:last-child {
+  color: var(--cor-tan);
+  white-space: nowrap;
+}
+
+/* ------------------------------ Base (total + concluir) ------------------------------ */
+
+.pv-pedido__base {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.pv-pedido__total {
+  font-size: 0.95rem;
+}
+
+.pv-pedido__concluir {
+  padding: 8px 18px;
+  border: none;
+  border-radius: var(--raio);
+  background-color: var(--cor-verde);
+  color: var(--cor-creme);
+  font-weight: 600;
+}
+
+.pv-pedido__concluir:hover:not(:disabled) {
+  background-color: var(--cor-verde-escuro);
+}
+
+.pv-pedido__concluir:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* -------------------------------- Paginação -------------------------------- */
+
+.pedidos-vendedor__paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.pedidos-vendedor__paginacao button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: var(--raio);
+  background-color: var(--cor-verde);
+  color: var(--cor-creme);
+  font-weight: 600;
+}
+
+.pedidos-vendedor__paginacao button:hover:not(:disabled) {
+  background-color: var(--cor-verde-escuro);
+}
+
+.pedidos-vendedor__paginacao button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+  .pedidos-vendedor__topo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pv-pedido__base {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
