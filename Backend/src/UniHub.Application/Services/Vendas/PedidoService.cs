@@ -122,7 +122,9 @@ public class PedidoService
                         i.Quantidade,
                         i.PrecoUnitarioNaCompra))
                     .ToList(),
-                p.Itens.Sum(i => i.Quantidade * i.PrecoUnitarioNaCompra)))
+                p.Itens.Sum(i => i.Quantidade * i.PrecoUnitarioNaCompra),
+                p.Tipo,
+                p.ExpiraEm))
             .ToList();
 
         return (historico, total, page, pageSize);
