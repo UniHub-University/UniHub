@@ -37,6 +37,18 @@ const TIPOS_DE_IMAGEM_PERMITIDOS = [
 // Resumo de pedidos no Perfil: mesmas convenções da tela /pedidos (BRV-89).
 const QTD_RESUMO_PEDIDOS = 3;
 
+// O backend envia o Role como texto do enum (Aluno/Voluntario/Admin). Aqui
+// traduzimos para um rótulo amigável exibido no badge do perfil.
+const ROTULOS_PAPEL = {
+  Aluno: 'Aluno(a)',
+  Voluntario: 'Voluntário(a)',
+  Admin: 'Administrador(a)',
+};
+
+function rotuloPapel(role) {
+  return ROTULOS_PAPEL[role] ?? 'Não informado';
+}
+
 const STATUS_PEDIDO = {
   0: 'Reservado',
   1: 'Confirmado',
@@ -177,21 +189,26 @@ export default function Perfil() {
 
   // Status de disponibilidade do voluntário (ativo/pausado). O GET /api/perfil
   // não traz isso; buscamos no endpoint dedicado só quando o usuário é voluntário.
+  // Quando não é voluntário, o estado é resolvido dentro da função assíncrona
+  // (sem setState síncrono no corpo do effect, que dispara cascading renders).
   useEffect(() => {
-    if (!perfil?.ehVoluntario) {
-      setVoluntarioDisponivel(null);
-      return;
+    let cancelado = false;
+
+    async function carregarDisponibilidade() {
+      if (!perfil?.ehVoluntario) {
+        if (!cancelado) setVoluntarioDisponivel(null);
+        return;
+      }
+
+      try {
+        const dados = await api.get('/api/perfil/voluntario');
+        if (!cancelado) setVoluntarioDisponivel(dados?.disponivel ?? true);
+      } catch {
+        if (!cancelado) setVoluntarioDisponivel(true); // assume ativo se não conseguir ler
+      }
     }
 
-    let cancelado = false;
-    api
-      .get('/api/perfil/voluntario')
-      .then((dados) => {
-        if (!cancelado) setVoluntarioDisponivel(dados?.disponivel ?? true);
-      })
-      .catch(() => {
-        if (!cancelado) setVoluntarioDisponivel(true); // assume ativo se não conseguir ler
-      });
+    carregarDisponibilidade();
 
     return () => {
       cancelado = true;
@@ -410,6 +427,7 @@ export default function Perfil() {
               <p className="perfil__subtitulo">
                 Consulte e atualize seus dados pessoais.
               </p>
+              <span className="perfil__badge">{rotuloPapel(perfil?.role)}</span>
             </div>
           </header>
 
@@ -491,17 +509,6 @@ export default function Perfil() {
               <small>Opcional. Informe DDD e número.</small>
             </div>
 
-            <div className="perfil__informacoes">
-              <p>
-                <strong>Papel:</strong> {perfil?.role ?? 'Não informado'}
-              </p>
-
-              <p>
-                <strong>Vendedor:</strong>{' '}
-                {perfil?.ehVendedor ? 'Sim' : 'Não'}
-              </p>
-            </div>
-
             <button
               className="perfil__botao"
               type="submit"
@@ -517,17 +524,15 @@ export default function Perfil() {
           {/* Card: vendedor */}
           <section className="perfil__card" aria-label="Vendedor">
             {perfil?.ehVendedor ? (
-              <div className="perfil__card-linha">
-                <p className="perfil__card-titulo">Você é vendedor</p>
-                <div className="perfil__card-acoes">
-                  <Link className="perfil__botao perfil__botao--compacto" to="/vendedor/produtos">
-                    Meus produtos
-                  </Link>
-                  <Link className="perfil__botao perfil__botao--compacto" to="/vendedor">
-                    Painel
-                  </Link>
+              <>
+                <div className="perfil__card-linha">
+                  <p className="perfil__card-titulo">Você é vendedor</p>
                 </div>
-              </div>
+
+                <p className="perfil__card-aviso">
+                  Gerencie seus produtos pelo Painel do vendedor, no menu acima.
+                </p>
+              </>
             ) : (
               <>
                 <div className="perfil__card-linha">

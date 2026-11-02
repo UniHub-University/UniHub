@@ -135,32 +135,17 @@
   font-size: 0.8rem;
 }
 
-.perfil__informacoes {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-top: 4px;
-  padding: 18px;
-  border: 1px solid rgba(177, 149, 99, 0.3);
-  border-radius: 10px;
-  background-color: rgba(177, 149, 99, 0.08);
-}
-
-.perfil__informacoes p {
-  margin: 0;
-  color: var(--cor-verde);
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.perfil__informacoes strong {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--cor-tan);
-  font-size: 0.78rem;
+/* Badge do papel do usuário no cabeçalho: chip arredondado na paleta verde. */
+.perfil__badge {
+  margin-top: 8px;
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background-color: var(--cor-verde);
+  color: var(--cor-creme);
+  font-size: 0.8rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  line-height: 1.6;
 }
 
 .perfil__botao {
@@ -380,10 +365,6 @@
 
   .perfil__titulo {
     font-size: 1.9rem;
-  }
-
-  .perfil__informacoes {
-    grid-template-columns: 1fr;
   }
 }
 
