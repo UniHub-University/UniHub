@@ -75,4 +75,24 @@ public class PedidosController : ControllerBase
             _ => Conflict(resultado)
         };
     }
+
+    // GET api/pedidos/vendedor?page=1&pageSize=10  (P6)
+    // Pedidos que contem produtos do vendedor autenticado. O vendedor vem SEMPRE do
+    // token (claim "sub"), nunca da query. Quem nao e vendedor recebe lista vazia.
+    // Do comprador, so o nome (LGPD). Mesmo contrato paginado do historico.
+    [HttpGet("vendedor")]
+    public async Task<ActionResult<PaginatedResultDto<PedidoVendedorDto>>> GetPedidosDoVendedor(
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        if (!Guid.TryParse(User.FindFirst("sub")?.Value, out var usuarioId))
+            return Unauthorized();
+
+        var (pedidos, total, paginaUsada, tamanhoUsado) =
+            await _pedidoService.GetPedidosDoVendedorAsync(usuarioId, page, pageSize);
+
+        var totalPaginas = (int)Math.Ceiling(total / (double)tamanhoUsado);
+
+        return Ok(new PaginatedResultDto<PedidoVendedorDto>(
+            pedidos, paginaUsada, tamanhoUsado, total, totalPaginas));
+    }
 }

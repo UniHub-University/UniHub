@@ -20,4 +20,10 @@ public interface IPedidoRepository
     // estiver Reservado (UPDATE condicional). Devolve false se nenhuma linha foi
     // afetada (pedido inexistente ou que ja mudou de estado, ex.: expirou).
     Task<bool> TryConcluirAsync(Guid pedidoId);
+
+    // P6: pedidos que contem ao menos um item de produto do vendedor (usuarioId e o
+    // Usuario.Id vindo do token), do mais recente para o mais antigo. page eh 1-based.
+    // Carrega Comprador, Itens, Produto e Vendedor para o Service filtrar so os
+    // itens do vendedor. Devolve a pagina e o total (para a resposta paginada).
+    Task<(IReadOnlyList<Pedido> Pedidos, int Total)> GetByVendedorAsync(Guid usuarioId, int page, int pageSize);
 }

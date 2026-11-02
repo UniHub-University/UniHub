@@ -72,4 +72,29 @@ public class PedidoRepository : IPedidoRepository
 
         return linhasAfetadas == 1;
     }
+
+    // P6: pedidos que tem ao menos um item de produto do vendedor. O vendedor vem
+    // do token (usuarioId), nunca da requisicao. Consulta somente leitura (AsNoTracking).
+    public async Task<(IReadOnlyList<Pedido> Pedidos, int Total)> GetByVendedorAsync(
+        Guid usuarioId, int page, int pageSize)
+    {
+        var pedidosDoVendedor = _context.Set<Pedido>()
+            .AsNoTracking()
+            .Where(p => p.Itens.Any(i => i.Produto!.Vendedor!.UsuarioId == usuarioId));
+
+        var total = await pedidosDoVendedor.CountAsync();
+
+        var pedidos = await pedidosDoVendedor
+            .Include(p => p.Comprador)
+            .Include(p => p.Itens)
+                .ThenInclude(i => i.Produto)
+                    .ThenInclude(pr => pr!.Vendedor)
+            .OrderByDescending(p => p.CreatedAt)
+            .ThenByDescending(p => p.Id) // desempate: paginas estaveis
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (pedidos, total);
+    }
 }
