@@ -223,6 +223,13 @@
   gap: 12px;
 }
 
+.perfil__card-acoes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .perfil__card-titulo {
   margin: 0;
   color: var(--cor-verde);

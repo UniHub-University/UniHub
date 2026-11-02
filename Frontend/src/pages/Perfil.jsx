@@ -519,9 +519,14 @@ export default function Perfil() {
             {perfil?.ehVendedor ? (
               <div className="perfil__card-linha">
                 <p className="perfil__card-titulo">Você é vendedor</p>
-                <Link className="perfil__botao perfil__botao--compacto" to="/vendedor">
-                  Painel
-                </Link>
+                <div className="perfil__card-acoes">
+                  <Link className="perfil__botao perfil__botao--compacto" to="/vendedor/produtos">
+                    Meus produtos
+                  </Link>
+                  <Link className="perfil__botao perfil__botao--compacto" to="/vendedor">
+                    Painel
+                  </Link>
+                </div>
               </div>
             ) : (
               <>

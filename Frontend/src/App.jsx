@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 
 import PainelVendedor from './pages/PainelVendedor.jsx';
+import MeusProdutos from './pages/MeusProdutos.jsx';
 import { SomenteVendedor } from './auth/PerfilVendedor.jsx';
 import FormularioBazar from './pages/FormularioBazar.jsx';
 import BoasVindas from './pages/BoasVindas.jsx';
@@ -37,6 +38,7 @@ function App() {
         }
       >
         <Route path="/vendedor" element={<SomenteVendedor><PainelVendedor /></SomenteVendedor>} />
+        <Route path="/vendedor/produtos" element={<SomenteVendedor><MeusProdutos /></SomenteVendedor>} />
         <Route path="/home" element={<Home />} />
         <Route path="/vendedor/produtos/novo" element={<SomenteVendedor><FormularioBazar /></SomenteVendedor>} />
         <Route path="/vendedor/produtos/:id/editar" element={<SomenteVendedor><FormularioBazar /></SomenteVendedor>} />
