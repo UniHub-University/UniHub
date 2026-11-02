@@ -17,6 +17,7 @@ using UniHub.Infrastructure.Repositories.AcaoSolidaria;
 using UniHub.Application.Interfaces.Alimentacao;
 using UniHub.Application.Services.Alimentacao;
 using UniHub.Infrastructure.Repositories.Alimentacao;
+using UniHub.API.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +66,9 @@ builder.Services.AddScoped<IAlimentoRepository, AlimentoRepository>();
 builder.Services.AddScoped<AlimentoService>();
 
 builder.Services.AddScoped<IDenunciaRepository, DenunciaRepository>();
+
+// P4: job de expiracao de reservas (devolve estoque + marca Expirado a cada 10 min).
+builder.Services.AddHostedService<ExpiracaoReservasBackgroundService>();
 
 
 
