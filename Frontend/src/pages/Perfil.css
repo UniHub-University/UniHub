@@ -163,6 +163,21 @@
   letter-spacing: 0.04em;
 }
 
+/* Papel: label à esquerda e badge à direita, na mesma linha. */
+.perfil__papel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Sobrescreve o strong em bloco (padrao de perfil__informacoes) so aqui,
+   para o label "Papel:" ficar na mesma linha que o badge. */
+.perfil__papel strong {
+  display: inline;
+  margin-bottom: 0;
+}
+
 /* Badge do papel do usuário: chip arredondado na paleta verde do projeto. */
 .perfil__badge {
   display: inline-block;

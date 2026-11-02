@@ -509,8 +509,8 @@ export default function Perfil() {
             </div>
 
             <div className="perfil__informacoes">
-              <p>
-                <strong>Papel:</strong>{' '}
+              <p className="perfil__papel">
+                <strong>Papel:</strong>
                 <span className="perfil__badge">{rotuloPapel(perfil?.role)}</span>
               </p>
             </div>
