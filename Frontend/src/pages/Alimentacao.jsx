@@ -3,8 +3,8 @@
 // Esta tela consome o endpoint GET /api/alimentos e exibe apenas alimentos
 // disponíveis para compra. Trata os estados de carregamento, erro e lista vazia.
 //
-// O botão Comprar será integrado ao fluxo de pedidos da Frente B,
-// usando somente o tipo Compra. Reserva não faz parte do módulo Alimentação.
+// A compra é realizada na tela de detalhes do alimento.
+// Alimentação usa somente o tipo Compra; Reserva não faz parte deste módulo.
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -143,7 +143,6 @@ export default function Alimentacao() {
                     {alimentosFiltrados.map((alimento) => (
                         <li className="alimentacao__card" key={alimento.id}>
                             <div className="alimentacao__card-conteudo">
-
                             <h2 className="alimentacao__nome">
                                 <Link
                                     className="alimentacao__card-link"
@@ -153,9 +152,13 @@ export default function Alimentacao() {
                                 </Link>
                             </h2>
 
-                            <span className="alimentacao__categoria">
-                                {alimento.categoria}
-                            </span>
+                            <div className="alimentacao__tags">
+                                {alimento.categoria && (
+                                <span className="alimentacao__categoria">
+                                    {alimento.categoria}
+                                </span>
+                                )}
+                            </div>
 
                             {alimento.descricao && (
                                 <p className="alimentacao__descricao">
@@ -168,24 +171,20 @@ export default function Alimentacao() {
                                     Restrições: {alimento.restricoes}
                                 </p>
                             )}
-
-                            <p className="alimentacao__preco">
-                                {formatarPreco(alimento.preco)}
-                            </p>
-
-                            <p className="alimentacao__estoque">
-                                {alimento.quantidadeDisponivel} disponíveis
-                            </p>
                             </div>
 
-                            <button
-                                type="button"
-                                className="alimentacao__comprar"
-                                disabled
-                                title="A integração da compra será adicionada depois"
-                            >
-                                Comprar
-                            </button>
+                            <div className="alimentacao__rodape">
+                                <span className="alimentacao__preco">
+                                    {formatarPreco(alimento.preco)}
+                                </span>
+
+                                <span className="alimentacao__status">
+                                    {alimento.quantidadeDisponivel}{' '}
+                                    {alimento.quantidadeDisponivel === 1
+                                    ? 'unidade'
+                                    : 'unidades'}
+                                </span>
+                            </div>
                         </li>
                     ))}
                 </ul>
