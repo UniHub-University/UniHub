@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 
 import { listarAlimentos } from '../services/alimentos.js';
 import { ApiError } from '../services/api.js';
+import { usePerfilVendedor } from '../auth/PerfilVendedor.jsx';
 import './Alimentacao.css';
 
 function formatarPreco(preco) {
@@ -21,6 +22,7 @@ function formatarPreco(preco) {
 }
 
 export default function Alimentacao() {
+    const { ehVendedor } = usePerfilVendedor();
     const [alimentos, setAlimentos] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState('');
@@ -97,6 +99,12 @@ export default function Alimentacao() {
                 Explore todos os anúncios da área de Alimentação.
             </p>
             </div>
+
+            {ehVendedor && (
+            <Link className="alimentacao__adicionar" to="/vendedor/alimentos/novo">
+                Adicionar alimento
+            </Link>
+            )}
 
             <input
             type="search"
