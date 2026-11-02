@@ -500,11 +500,6 @@ export default function Perfil() {
               <p>
                 <strong>Papel:</strong> {perfil?.role ?? 'Não informado'}
               </p>
-
-              <p>
-                <strong>Vendedor:</strong>{' '}
-                {perfil?.ehVendedor ? 'Sim' : 'Não'}
-              </p>
             </div>
 
             <button
