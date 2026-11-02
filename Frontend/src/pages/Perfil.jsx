@@ -427,6 +427,7 @@ export default function Perfil() {
               <p className="perfil__subtitulo">
                 Consulte e atualize seus dados pessoais.
               </p>
+              <span className="perfil__badge">{rotuloPapel(perfil?.role)}</span>
             </div>
           </header>
 
@@ -506,13 +507,6 @@ export default function Perfil() {
               />
 
               <small>Opcional. Informe DDD e número.</small>
-            </div>
-
-            <div className="perfil__informacoes">
-              <p className="perfil__papel">
-                <strong>Papel:</strong>
-                <span className="perfil__badge">{rotuloPapel(perfil?.role)}</span>
-              </p>
             </div>
 
             <button
