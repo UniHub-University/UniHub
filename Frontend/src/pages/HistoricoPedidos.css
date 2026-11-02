@@ -93,6 +93,28 @@
   color: #6b5a38;
 }
 
+.pedido__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+}
+
+.pedido__tipo {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  background-color: rgba(42, 69, 21, 0.1);
+  color: var(--cor-verde);
+}
+
+.pedido__expira {
+  color: var(--cor-tan);
+  font-weight: 600;
+}
+
 .pedido__itens {
   margin: 0;
   padding: 12px 0;

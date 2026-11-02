@@ -28,12 +28,20 @@ const STATUS = {
   4: 'Expirado',
 };
 
+// TipoPedido do backend: 0 = Compra, 1 = Reserva.
+const TIPO = { 0: 'Compra', 1: 'Reserva' };
+const TIPO_RESERVA = 1;
+
 function formatarMoeda(valor) {
   return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 function formatarData(iso) {
   return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+function formatarDataCurta(iso) {
+  return new Date(iso).toLocaleDateString('pt-BR', { dateStyle: 'short' });
 }
 
 export default function HistoricoPedidos() {
@@ -115,6 +123,15 @@ export default function HistoricoPedidos() {
                   <span className={`pedido__status pedido__status--${pedido.status}`}>
                     {STATUS[pedido.status] ?? 'Desconhecido'}
                   </span>
+                </div>
+
+                <div className="pedido__meta">
+                  <span className="pedido__tipo">{TIPO[pedido.tipo] ?? 'Pedido'}</span>
+                  {pedido.tipo === TIPO_RESERVA && pedido.expiraEm && (
+                    <span className="pedido__expira">
+                      Reserva até {formatarDataCurta(pedido.expiraEm)}
+                    </span>
+                  )}
                 </div>
 
                 <ul className="pedido__itens">
