@@ -102,6 +102,35 @@ public class VendedorService
         return new TornarVendedorResultDto(true, "Perfil de vendedor criado com sucesso!", vendedor.Id);
     }
 
+    /// Lista os produtos do vendedor autenticado, em qualquer status.
+    public async Task<MeusProdutosResultDto> ListarMeusProdutosAsync(Guid usuarioId)
+    {
+        var vendedorId = await _context.Vendedores
+            .Where(v => v.UsuarioId == usuarioId)
+            .Select(v => (Guid?)v.Id)
+            .FirstOrDefaultAsync();
+
+        if (vendedorId is null)
+            return new MeusProdutosResultDto(false, "Usuário não possui um perfil de vendedor válido.", []);
+
+        var produtos = await _context.Produtos
+            .AsNoTracking()
+            .Where(p => p.VendedorId == vendedorId.Value)
+            .OrderByDescending(p => p.DataPublicacao)
+            .Select(p => new MeuProdutoDto(
+                p.Id,
+                p.Nome,
+                p.Descricao,
+                p.Preco,
+                p.QuantidadeDisponivel,
+                p is Alimento ? "lanche" : "bazar",
+                p.Status,
+                p.DataPublicacao))
+            .ToListAsync();
+
+        return new MeusProdutosResultDto(true, "Produtos carregados.", produtos);
+    }
+
     
     /// Atualiza os dados descritivos da loja (foto, cardapio, descricao).
     /// Espera que FotoUrl/CardapioUrl ja tenham sido geradas previamente
