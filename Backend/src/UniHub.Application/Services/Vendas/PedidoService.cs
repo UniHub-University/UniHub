@@ -175,4 +175,43 @@ public class PedidoService
 
         return new ConcluirPedidoResultDto(ConcluirPedidoStatus.Sucesso, "Pedido concluido com sucesso.");
     }
+
+    // P6: pedidos que contem produtos do vendedor autenticado (usuarioId vem do token).
+    // O vendedor ve SO os itens dos proprios produtos e o total dessa parte; do comprador,
+    // so o nome (LGPD). Quem nao tem perfil de vendedor recebe lista vazia.
+    public async Task<(List<PedidoVendedorDto> Pedidos, int Total, int Page, int PageSize)> GetPedidosDoVendedorAsync(
+        Guid usuarioId, int page, int pageSize)
+    {
+        // Mesma validacao de paginacao do historico do comprador.
+        pageSize = pageSize < 1 ? PageSizePadrao : Math.Min(pageSize, PageSizeMaximo);
+        page = Math.Clamp(page, 1, int.MaxValue / pageSize);
+
+        var (pedidos, total) = await _pedidoRepository.GetByVendedorAsync(usuarioId, page, pageSize);
+
+        var lista = pedidos
+            .Select(p =>
+            {
+                var itensDoVendedor = p.Itens
+                    .Where(i => i.Produto?.Vendedor?.UsuarioId == usuarioId)
+                    .Select(i => new PedidoVendedorItemDto(
+                        i.ProdutoId,
+                        i.Produto?.Nome ?? "Produto indisponivel",
+                        i.Quantidade,
+                        i.PrecoUnitarioNaCompra))
+                    .ToList();
+
+                return new PedidoVendedorDto(
+                    p.Id,
+                    p.Status,
+                    p.Tipo,
+                    p.CreatedAt,
+                    p.ExpiraEm,
+                    p.Comprador?.NomeCompleto ?? "Comprador",
+                    itensDoVendedor,
+                    itensDoVendedor.Sum(i => i.Quantidade * i.PrecoUnitarioNaCompra));
+            })
+            .ToList();
+
+        return (lista, total, page, pageSize);
+    }
 }
