@@ -61,6 +61,14 @@ public class PedidoService
                  return new PedidoResultDto(false, $"Produto {item.ProdutoId} indisponível.", null);
             }
 
+            // Ninguem compra ou reserva o proprio produto. A checagem e no backend
+            // (a trava real), nao so no front.
+            if (await _produtoRepository.ProdutoPertenceAoUsuarioAsync(item.ProdutoId, compradorId))
+            {
+                await RollbackAsync(decrementados);
+                return new PedidoResultDto(false, $"Você não pode comprar o próprio produto '{produto.Nome}'.", null);
+            }
+
             // Reserva e temporaria e so vale para ItemBazar (nao para Alimento).
             if (request.Tipo == TipoPedido.Reserva && produto is not ItemBazar)
             {

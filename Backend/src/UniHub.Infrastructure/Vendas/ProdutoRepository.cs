@@ -17,6 +17,18 @@ public class ProdutoRepository : IProdutoRepository
     public async Task<Produto?> GetByIdAsync(Guid id) =>
         await _context.Set<Produto>().AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
 
+    // O produto pertence ao usuario quando o Vendedor dono (Produto.VendedorId ->
+    // Vendedor.Id) tem UsuarioId igual ao usuario informado. Consulta so leitura.
+    public async Task<bool> ProdutoPertenceAoUsuarioAsync(Guid produtoId, Guid usuarioId) =>
+        await _context.Set<Produto>()
+            .AsNoTracking()
+            .Join(
+                _context.Vendedores.AsNoTracking(),
+                produto => produto.VendedorId,
+                vendedor => vendedor.Id,
+                (produto, vendedor) => new { produto.Id, vendedor.UsuarioId })
+            .AnyAsync(x => x.Id == produtoId && x.UsuarioId == usuarioId);
+
     public async Task<bool> TryDecrementarEstoqueAsync(Guid produtoId, int quantidade)
     {
         if (quantidade <= 0)
