@@ -37,6 +37,18 @@ const TIPOS_DE_IMAGEM_PERMITIDOS = [
 // Resumo de pedidos no Perfil: mesmas convenções da tela /pedidos (BRV-89).
 const QTD_RESUMO_PEDIDOS = 3;
 
+// O backend envia o Role como texto do enum (Aluno/Voluntario/Admin). Aqui
+// traduzimos para um rótulo amigável exibido no badge do perfil.
+const ROTULOS_PAPEL = {
+  Aluno: 'Aluno(a)',
+  Voluntario: 'Voluntário(a)',
+  Admin: 'Administrador(a)',
+};
+
+function rotuloPapel(role) {
+  return ROTULOS_PAPEL[role] ?? 'Não informado';
+}
+
 const STATUS_PEDIDO = {
   0: 'Reservado',
   1: 'Confirmado',
@@ -498,7 +510,8 @@ export default function Perfil() {
 
             <div className="perfil__informacoes">
               <p>
-                <strong>Papel:</strong> {perfil?.role ?? 'Não informado'}
+                <strong>Papel:</strong>{' '}
+                <span className="perfil__badge">{rotuloPapel(perfil?.role)}</span>
               </p>
             </div>
 
