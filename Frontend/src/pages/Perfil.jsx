@@ -522,12 +522,15 @@ export default function Perfil() {
           {/* Card: vendedor */}
           <section className="perfil__card" aria-label="Vendedor">
             {perfil?.ehVendedor ? (
-              <div className="perfil__card-linha">
-                <p className="perfil__card-titulo">Você é vendedor</p>
-                <p className="perfil__card-descricao">
+              <>
+                <div className="perfil__card-linha">
+                  <p className="perfil__card-titulo">Você é vendedor</p>
+                </div>
+
+                <p className="perfil__card-aviso">
                   Gerencie seus produtos pelo Painel do vendedor, no menu acima.
                 </p>
-              </div>
+              </>
             ) : (
               <>
                 <div className="perfil__card-linha">
