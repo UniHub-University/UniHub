@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 
 import PainelVendedor from './pages/PainelVendedor.jsx';
 import MeusProdutos from './pages/MeusProdutos.jsx';
+import PedidosVendedor from './pages/PedidosVendedor.jsx';
 import { SomenteVendedor } from './auth/PerfilVendedor.jsx';
 import FormularioBazar from './pages/FormularioBazar.jsx';
 import BoasVindas from './pages/BoasVindas.jsx';
@@ -66,6 +67,16 @@ function App() {
             <SomenteVendedor>
               <Titulo texto="Editar produto">
                 <FormularioBazar />
+              </Titulo>
+            </SomenteVendedor>
+          }
+        />
+        <Route
+          path="/vendedor/pedidos"
+          element={
+            <SomenteVendedor>
+              <Titulo texto="Pedidos recebidos">
+                <PedidosVendedor />
               </Titulo>
             </SomenteVendedor>
           }
