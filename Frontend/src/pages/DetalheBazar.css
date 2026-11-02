@@ -118,3 +118,118 @@
     border-top: 0;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Área de ação: Comprar / Reservar (P8 — Frente B)
+   --------------------------------------------------------------------------- */
+
+.detalhe-bazar__acoes {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid #e7e7dc;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.detalhe-bazar__qtd {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 180px;
+  font-size: 0.9rem;
+  color: #596452;
+  font-weight: 600;
+}
+
+.detalhe-bazar__qtd input {
+  padding: 10px 12px;
+  border: 1px solid #cfd3c4;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: var(--fonte-corpo);
+  color: #243322;
+}
+
+.detalhe-bazar__qtd small {
+  font-weight: 400;
+  color: #7a846f;
+}
+
+.detalhe-bazar__botoes {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Reusa o estilo base de .detalhe-bazar button (verde). O "Comprar" é a ação
+   primária; "Reservar" fica como ação secundária (contorno). */
+.detalhe-bazar__comprar {
+  min-width: 140px;
+}
+
+.detalhe-bazar__reservar {
+  min-width: 140px;
+  background: transparent !important;
+  color: var(--cor-verde) !important;
+  border: 2px solid var(--cor-verde) !important;
+}
+
+.detalhe-bazar__reservar:hover:not(:disabled) {
+  background: rgba(42, 69, 21, 0.08) !important;
+}
+
+.detalhe-bazar__acoes button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.detalhe-bazar__dica {
+  margin: 0;
+  padding: 0 !important;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-size: 0.82rem;
+  color: #7a846f;
+}
+
+.detalhe-bazar__erro-acao {
+  margin: 0;
+  padding: 10px 14px !important;
+  background: rgba(155, 44, 44, 0.08) !important;
+  border: 1px solid rgba(155, 44, 44, 0.25) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  color: var(--cor-erro);
+  font-size: 0.9rem;
+}
+
+.detalhe-bazar__indisponivel {
+  margin-top: 24px;
+  color: #7a846f;
+  font-weight: 600;
+}
+
+.detalhe-bazar__sucesso {
+  margin-top: 28px;
+  padding: 16px 18px !important;
+  background: rgba(42, 69, 21, 0.06) !important;
+  border: 1px solid rgba(42, 69, 21, 0.2) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detalhe-bazar__sucesso p {
+  margin: 0;
+  font-weight: 600;
+  color: var(--cor-verde);
+}
+
+.detalhe-bazar__link-pedidos {
+  font-weight: 600;
+  color: var(--cor-verde);
+}
