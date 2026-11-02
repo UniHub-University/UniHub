@@ -15,6 +15,8 @@ import HistoricoPedidos from './pages/HistoricoPedidos.jsx';
 import LayoutApp from './components/LayoutApp.jsx';
 import RotaProtegida from './auth/RotaProtegida.jsx';
 import Titulo from './components/Titulo.jsx';
+import Alimentacao from './pages/Alimentacao.jsx';
+import DetalheAlimentacao from './pages/DetalheAlimentacao.jsx';
 
 function App() {
   return (
@@ -74,10 +76,8 @@ function App() {
         <Route path="/produtos" element={<Titulo texto="Buscar produtos"><BuscaProdutos /></Titulo>} />
         <Route path="/pedidos" element={<Titulo texto="Meus pedidos"><HistoricoPedidos /></Titulo>} />
         <Route path="/perfil" element={<Titulo texto="Meu perfil"><Perfil /></Titulo>} />
-        <Route
-          path="/alimentacao"
-          element={<Titulo texto="Alimentação"><EmBreve titulo="Alimentação" /></Titulo>}
-        />
+        <Route path="/alimentacao" element={ <Titulo texto="Alimentação"><Alimentacao /></Titulo>}/>
+        <Route path="/alimentacao/:id" element={ <Titulo texto="Detalhe do alimento"><DetalheAlimentacao /></Titulo>}/>
         <Route
           path="/solidariedade"
           element={<Titulo texto="Ação Solidária"><EmBreve titulo="Ação Solidária" /></Titulo>}
