@@ -13,6 +13,8 @@ import BuscaProdutos from './pages/BuscaProdutos.jsx';
 import HistoricoPedidos from './pages/HistoricoPedidos.jsx';
 import LayoutApp from './components/LayoutApp.jsx';
 import RotaProtegida from './auth/RotaProtegida.jsx';
+import Alimentacao from './pages/Alimentacao.jsx';
+import DetalheAlimentacao from './pages/DetalheAlimentacao.jsx';
 
 // Mapa de rotas da aplicação.
 // "/"      -> tela inicial de boas-vindas + login (pública) — BRV-116
@@ -23,7 +25,12 @@ import RotaProtegida from './auth/RotaProtegida.jsx';
 // "/produtos" -> busca e filtro de produtos — BRV-6
 // "/pedidos"  -> histórico de pedidos — BRV-89
 // "/perfil"   -> perfil do usuário — BRV-115
-// "/alimentacao", "/solidariedade" -> placeholder "em breve"
+// "/vendedor" -> painel do vendedor
+// "/vendedor/produtos/novo" -> formulário de criação de produto
+// "/vendedor/produtos/:id/editar" -> formulário de edição de produto
+// "/alimentacao" -> anúncios de alimentos
+// "/solidariedade" -> placeholder "em breve"
+
 function App() {
   return (
     <Routes>
@@ -45,7 +52,8 @@ function App() {
         <Route path="/produtos" element={<BuscaProdutos />} />
         <Route path="/pedidos" element={<HistoricoPedidos />} />
         <Route path="/perfil" element={<Perfil />} />
-        <Route path="/alimentacao" element={<EmBreve titulo="Alimentação" />} />
+        <Route path="/alimentacao" element={<Alimentacao />} />
+        <Route path="/alimentacao/:id" element={<DetalheAlimentacao  />} />
         <Route path="/solidariedade" element={<EmBreve titulo="Ação Solidária" />} />
       </Route>
     </Routes>
