@@ -76,6 +76,29 @@ public class Pedido
         Status = PedidoStatus.Expirado;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    // Cancelamento de uma Reserva pelo comprador: so uma Reserva ainda Reservada
+    // pode ser cancelada. Uma Compra e definitiva (nao se cancela) e qualquer outro
+    // status (concluido, expirado, ja cancelado) viola a regra; ambos lancam
+    // InvalidOperationException (o Service traduz em 409). A devolucao do estoque e
+    // a gravacao atomica ficam no Service/Repositorio.
+    public void Cancelar()
+    {
+        if (Tipo != TipoPedido.Reserva)
+        {
+            throw new InvalidOperationException(
+                "Somente reservas podem ser canceladas; uma compra e definitiva.");
+        }
+
+        if (Status != PedidoStatus.Reservado)
+        {
+            throw new InvalidOperationException(
+                $"Reserva nao pode ser cancelada: status atual e {Status}.");
+        }
+
+        Status = PedidoStatus.Cancelado;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }
 
 /// Cada linha representa "N unidades de um Produto dentro de um Pedido".
