@@ -48,4 +48,53 @@ public class PedidoRepository : IPedidoRepository
 
         return (pedidos, total);
     }
+
+    // P7: o dono vem do token (UsuarioId), nunca da requisicao. Produto.VendedorId
+    // e o id do Vendedor, entao a ligacao com o usuario passa por Vendedor.UsuarioId.
+    public async Task<bool> PedidoTemItemDoVendedorAsync(Guid pedidoId, Guid usuarioId) =>
+        await _context.Set<Pedido>()
+            .AsNoTracking()
+            .AnyAsync(p => p.Id == pedidoId &&
+                p.Itens.Any(i => i.Produto!.Vendedor!.UsuarioId == usuarioId));
+
+    // P7: UPDATE condicional (WHERE Status = Reservado), no mesmo espirito do
+    // decremento atomico de estoque. Se o job de expiracao ou outra requisicao
+    // mudar o pedido antes, nenhuma linha e afetada e a baixa e recusada.
+    public async Task<bool> TryConcluirAsync(Guid pedidoId)
+    {
+        var agora = DateTime.UtcNow;
+
+        var linhasAfetadas = await _context.Set<Pedido>()
+            .Where(p => p.Id == pedidoId && p.Status == PedidoStatus.Reservado)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(p => p.Status, PedidoStatus.Concluido)
+                .SetProperty(p => p.UpdatedAt, (DateTime?)agora));
+
+        return linhasAfetadas == 1;
+    }
+
+    // P6: pedidos que tem ao menos um item de produto do vendedor. O vendedor vem
+    // do token (usuarioId), nunca da requisicao. Consulta somente leitura (AsNoTracking).
+    public async Task<(IReadOnlyList<Pedido> Pedidos, int Total)> GetByVendedorAsync(
+        Guid usuarioId, int page, int pageSize)
+    {
+        var pedidosDoVendedor = _context.Set<Pedido>()
+            .AsNoTracking()
+            .Where(p => p.Itens.Any(i => i.Produto!.Vendedor!.UsuarioId == usuarioId));
+
+        var total = await pedidosDoVendedor.CountAsync();
+
+        var pedidos = await pedidosDoVendedor
+            .Include(p => p.Comprador)
+            .Include(p => p.Itens)
+                .ThenInclude(i => i.Produto)
+                    .ThenInclude(pr => pr!.Vendedor)
+            .OrderByDescending(p => p.CreatedAt)
+            .ThenByDescending(p => p.Id) // desempate: paginas estaveis
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (pedidos, total);
+    }
 }

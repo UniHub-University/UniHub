@@ -46,6 +46,21 @@ public class Pedido
     public DateTime? UpdatedAt { get; set; }
 
     public ICollection<ItemPedido> Itens { get; set; } = new List<ItemPedido>();
+
+    // Baixa manual feita pelo vendedor (P7): so um pedido Reservado pode ser
+    // concluido. Qualquer outro status (ja concluido, cancelado, expirado)
+    // viola a regra e lanca InvalidOperationException (o Service traduz em 409).
+    public void Concluir()
+    {
+        if (Status != PedidoStatus.Reservado)
+        {
+            throw new InvalidOperationException(
+                $"Pedido nao pode ser concluido: status atual e {Status}.");
+        }
+
+        Status = PedidoStatus.Concluido;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }
 
 /// Cada linha representa "N unidades de um Produto dentro de um Pedido".
