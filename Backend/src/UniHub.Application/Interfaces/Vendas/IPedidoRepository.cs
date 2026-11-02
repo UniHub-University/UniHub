@@ -26,4 +26,15 @@ public interface IPedidoRepository
     // Carrega Comprador, Itens, Produto e Vendedor para o Service filtrar so os
     // itens do vendedor. Devolve a pagina e o total (para a resposta paginada).
     Task<(IReadOnlyList<Pedido> Pedidos, int Total)> GetByVendedorAsync(Guid usuarioId, int page, int pageSize);
+
+    // P4: reservas vencidas (Tipo = Reserva, Status = Reservado, ExpiraEm <= agora),
+    // com os Itens carregados (ProdutoId + Quantidade) para o Service devolver o
+    // estoque. Usado pelo BackgroundService de expiracao.
+    Task<IReadOnlyList<Pedido>> GetReservasVencidasAsync(DateTime agora);
+
+    // P4/P5: expiracao atomica. Define Status = Expirado SOMENTE se o pedido ainda
+    // estiver Reservado (UPDATE condicional). Devolve false se nenhuma linha foi
+    // afetada (ja concluido/cancelado/expirado por outro caminho concorrente),
+    // garantindo que o estoque seja devolvido uma unica vez.
+    Task<bool> TryExpirarAsync(Guid pedidoId);
 }

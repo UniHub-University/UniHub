@@ -97,4 +97,34 @@ public class PedidoRepository : IPedidoRepository
 
         return (pedidos, total);
     }
+
+    // P4: reservas vencidas, com os itens (ProdutoId + Quantidade) para o Service
+    // devolver o estoque. Somente leitura (AsNoTracking): a gravacao e feita pelo
+    // UPDATE condicional em TryExpirarAsync.
+    public async Task<IReadOnlyList<Pedido>> GetReservasVencidasAsync(DateTime agora) =>
+        await _context.Set<Pedido>()
+            .AsNoTracking()
+            .Include(p => p.Itens)
+            .Where(p => p.Tipo == TipoPedido.Reserva
+                && p.Status == PedidoStatus.Reservado
+                && p.ExpiraEm != null
+                && p.ExpiraEm <= agora)
+            .ToListAsync();
+
+    // P4/P5: UPDATE condicional (WHERE Status = Reservado), no mesmo espirito do
+    // TryConcluirAsync. Se o pedido mudou de estado antes (conclusao manual, ou
+    // outra expiracao concorrente), nenhuma linha e afetada e o chamador NAO
+    // devolve o estoque -- evitando devolucao dupla.
+    public async Task<bool> TryExpirarAsync(Guid pedidoId)
+    {
+        var agora = DateTime.UtcNow;
+
+        var linhasAfetadas = await _context.Set<Pedido>()
+            .Where(p => p.Id == pedidoId && p.Status == PedidoStatus.Reservado)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(p => p.Status, PedidoStatus.Expirado)
+                .SetProperty(p => p.UpdatedAt, (DateTime?)agora));
+
+        return linhasAfetadas == 1;
+    }
 }

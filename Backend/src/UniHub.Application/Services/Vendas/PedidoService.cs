@@ -15,8 +15,7 @@ public class PedidoService
 
     // Quanto tempo uma Reserva vale antes de expirar (ExpiraEm = agora + TTL).
     // Publico para o job de expiracao (P4) reutilizar o mesmo valor.
-    // 24h e o valor inicial proposto; a confirmar com o squad.
-    public static readonly TimeSpan TtlReserva = TimeSpan.FromHours(24);
+    public static readonly TimeSpan TtlReserva = TimeSpan.FromHours(48);
 
     public PedidoService(IProdutoRepository produtoRepository, IPedidoRepository pedidoRepository)
     {
@@ -100,6 +99,64 @@ public class PedidoService
 
     }
 
+    // ---------- Expiracao de reservas (P4/P5) ----------
+
+    // Expira UMA reserva de forma atomica e idempotente: tenta marcar Expirado
+    // (UPDATE condicional WHERE Status = Reservado). So quem "ganha" a corrida
+    // (linha afetada) devolve o estoque -- garante que o estoque volta uma unica
+    // vez, mesmo com o job (P4) e a checagem lazy (P5) concorrendo na mesma reserva.
+    // Devolve true se ESTE chamador foi quem expirou.
+    private async Task<bool> ExpirarReservaAsync(Pedido pedido)
+    {
+        if (!await _pedidoRepository.TryExpirarAsync(pedido.Id))
+            return false; // outro caminho ja resolveu; nao devolve estoque de novo
+
+        foreach (var item in pedido.Itens)
+        {
+            await _produtoRepository.IncrementarEstoqueAsync(item.ProdutoId, item.Quantidade);
+        }
+
+        return true;
+    }
+
+    // P4: usado pelo BackgroundService. Busca todas as reservas vencidas e expira
+    // cada uma. Devolve quantas foram efetivamente expiradas por esta chamada.
+    public async Task<int> ExpirarReservasVencidasAsync()
+    {
+        var vencidas = await _pedidoRepository.GetReservasVencidasAsync(DateTime.UtcNow);
+
+        var expiradas = 0;
+        foreach (var pedido in vencidas)
+        {
+            if (await ExpirarReservaAsync(pedido))
+                expiradas++;
+        }
+
+        return expiradas;
+    }
+
+    // P5 (lazy): dada a pagina ja carregada de pedidos, expira SOMENTE as reservas
+    // vencidas presentes nela (nao varre o banco). Rede de seguranca para quando o
+    // job hibernou. Devolve os ids que foram expirados, para refletir no DTO.
+    private async Task<HashSet<Guid>> ExpirarVencidasDaConsultaAsync(IEnumerable<Pedido> pedidos)
+    {
+        var agora = DateTime.UtcNow;
+        var expirados = new HashSet<Guid>();
+
+        foreach (var pedido in pedidos)
+        {
+            var venceu = pedido.Tipo == TipoPedido.Reserva
+                && pedido.Status == PedidoStatus.Reservado
+                && pedido.ExpiraEm is not null
+                && pedido.ExpiraEm <= agora;
+
+            if (venceu && await ExpirarReservaAsync(pedido))
+                expirados.Add(pedido.Id);
+        }
+
+        return expirados;
+    }
+
     // Historico de pedidos:
     private const int PageSizePadrao = 10;
     private const int PageSizeMaximo = 50;
@@ -118,10 +175,14 @@ public class PedidoService
 
         var (pedidos, total) = await _pedidoRepository.GetByCompradorAsync(compradorId, page, pageSize);
 
+        // P5: expira lazy as reservas vencidas desta pagina (rede de seguranca
+        // caso o job tenha hibernado). O status expirado e refletido no DTO.
+        var expirados = await ExpirarVencidasDaConsultaAsync(pedidos);
+
         var historico = pedidos
             .Select(p => new HistoricoPedidoDto(
                 p.Id,
-                p.Status,
+                expirados.Contains(p.Id) ? PedidoStatus.Expirado : p.Status,
                 p.CreatedAt,
                 p.Itens
                     .Select(i => new HistoricoItemPedidoDto(
@@ -198,6 +259,10 @@ public class PedidoService
 
         var (pedidos, total) = await _pedidoRepository.GetByVendedorAsync(usuarioId, page, pageSize);
 
+        // P5: expira lazy as reservas vencidas desta pagina (rede de seguranca
+        // caso o job tenha hibernado). O status expirado e refletido no DTO.
+        var expirados = await ExpirarVencidasDaConsultaAsync(pedidos);
+
         var lista = pedidos
             .Select(p =>
             {
@@ -212,7 +277,7 @@ public class PedidoService
 
                 return new PedidoVendedorDto(
                     p.Id,
-                    p.Status,
+                    expirados.Contains(p.Id) ? PedidoStatus.Expirado : p.Status,
                     p.Tipo,
                     p.CreatedAt,
                     p.ExpiraEm,

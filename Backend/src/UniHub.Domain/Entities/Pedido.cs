@@ -61,6 +61,21 @@ public class Pedido
         Status = PedidoStatus.Concluido;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    // Expiracao de uma Reserva (P4/P5): so um pedido Reservado pode expirar.
+    // Qualquer outro status (concluido, cancelado, ja expirado) viola a regra.
+    // A devolucao de estoque e a gravacao atomica ficam no Service/Repositorio.
+    public void Expirar()
+    {
+        if (Status != PedidoStatus.Reservado)
+        {
+            throw new InvalidOperationException(
+                $"Pedido nao pode expirar: status atual e {Status}.");
+        }
+
+        Status = PedidoStatus.Expirado;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }
 
 /// Cada linha representa "N unidades de um Produto dentro de um Pedido".
