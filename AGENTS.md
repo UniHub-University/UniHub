@@ -118,6 +118,7 @@ Software, equipe de ~7 pessoas, Scrum com sprints de 2 semanas.
 - **Auth:** Google OAuth (login institucional) + JWT emitido pela API
 - **Imagens:** Cloudinary
 - **Docs de API:** Swagger/Swashbuckle
+- **Testes:** xUnit + NSubstitute (unidade, integração e concorrência)
 - **Frontend:** React + Vite
 - **Deploy:** Render (container Docker), HTTPS automático em `*.onrender.com`
 
@@ -155,12 +156,18 @@ Infrastructure implementa interfaces da Application; API monta tudo via injeçã
   (Este bug já apareceu em múltiplos PRs — é o erro nº 1 do projeto.)
 - **DTOs organizados por módulo** em subpastas de `DTOs/` (ex.: `DTOs/AcaoSolidaria`).
 - **Regras de estado vivem na entidade** (métodos como `Aceitar()`, `Cancelar()`,
-  `SuspenderConta()`), nunca como setter solto no controller. O controller chama o
-  método e trata a `InvalidOperationException` com um status HTTP adequado (geralmente 409).
+  `Concluir()`, `Expirar()`, `SuspenderConta()`), nunca como setter solto no controller.
+  O controller chama o método e trata a `InvalidOperationException` com um status HTTP
+  adequado (geralmente 409).
 - **Autorização por posse:** o dono de um recurso é SEMPRE derivado do token, nunca
   de um id vindo do corpo/query da requisição (evita IDOR).
 - **Validação de enum vindo da API:** usar `Enum.IsDefined(...)` / `Enum.TryParse(...)`
   — não assumir que o inteiro recebido é um valor válido do enum.
+- **Newline final obrigatório.** Todo arquivo deve terminar com uma quebra de linha
+  (sem `\ No newline at end of file` no diff). Faltou em vários PRs da Sprint 4 —
+  configure o editor para inserir a newline final automaticamente
+  (`"files.insertFinalNewline": true` no VS Code); no front, o ESLint/Prettier
+  sinaliza via `eol-last`.
 
 ## 5. Segurança e configuração
 
@@ -189,6 +196,9 @@ Infrastructure implementa interfaces da Application; API monta tudo via injeçã
   "cannot be cast automatically".
 - FKs usam `OnDelete(DeleteBehavior.Restrict)` por padrão neste projeto (evita
   cascata indesejada e o erro de "múltiplos caminhos de cascata").
+  > ⚠️ Consequência prática: não dá para dar `DELETE` físico num registro que tem
+  > dependentes (ex.: `Voluntario` com `Correspondencia`, `Alimento` com histórico de
+  > pedido). Prefira **exclusão lógica** (mudar `Status`/flag) — é o padrão do projeto.
 - **A API NÃO aplica migrations no startup** — a aplicação é manual e controlada.
 
 ## 7. Requisito técnico central: concorrência de estoque
@@ -203,8 +213,16 @@ WHERE "Id" = @id AND "QuantidadeDisponivel" >= @qtd
 ```
 
 Verifica `rowsAffected == 1`. O mesmo padrão vale para o aceite de solicitações de
-apoio (`TryMarcarEmAndamentoAsync`: `UPDATE ... WHERE Status = Aberta`). `RowVersion`
-foi avaliado e **descartado** (gerava falso conflito). Mantenha esse padrão.
+apoio (`TryMarcarEmAndamentoAsync`: `UPDATE ... WHERE Status = Aberta`), para a baixa
+do vendedor (`TryConcluirAsync`: `WHERE Status = Reservado`) e para a expiração de
+reservas (`TryExpirarAsync`: `WHERE Status = Reservado`). `RowVersion` foi avaliado e
+**descartado** (gerava falso conflito). Mantenha esse padrão.
+
+> **Transição de estado atômica + efeito colateral:** sempre faça o efeito (devolver
+> estoque, etc.) **somente** quando o UPDATE condicional afetou a linha (ganhou a
+> corrida). Ex.: na expiração, o estoque só é devolvido se `TryExpirarAsync` retornou
+> `true` — evita devolução dupla quando o job (P4) e a checagem lazy (P5) tocam a
+> mesma reserva ao mesmo tempo.
 
 ## 8. Privacidade / LGPD (módulo Ação Solidária)
 
@@ -214,6 +232,9 @@ foi avaliado e **descartado** (gerava falso conflito). Mantenha esse padrão.
 - A identidade real só é revelada após `Correspondencia.AutorizarRevelacaoIdentidade()`
   — chamado explicitamente pelo solicitante, nunca automático.
 - DTOs de resposta do módulo expõem só o código público e campos não-sensíveis.
+- **Exceção consciente:** a `ChavePix` do vendedor é exposta no detalhe do produto
+  (Bazar e Alimentação) para qualquer autenticado — **decisão de produto** (o comprador
+  precisa da chave para pagar). A UI deve deixar claro que é para pagamento.
 
 ## 9. Fluxo de trabalho Git / PRs
 
@@ -230,11 +251,17 @@ foi avaliado e **descartado** (gerava falso conflito). Mantenha esse padrão.
 - **Branch muito defasada com código já mergeado:** não rebasear 20+ commits — preferir
   recriar a branch a partir da `main` e trazer só os commits próprios via `git cherry-pick`
   (preserva autoria, importante para a avaliação por commits).
+- **PRs empilhados (stacked):** quando um PR depende de outro ainda não mergeado, sua
+  base é a branch do outro (não a `main`). Mergear na ordem: o de baixo primeiro. Deixar
+  a dependência explícita na descrição.
 - **Commits preservam autoria** — a avaliação conta commits por pessoa. Ao reintegrar
   trabalho de outra pessoa, use `cherry-pick` (não `git checkout` de arquivos, que
   perde o crédito).
 - **PRs pequenos**, especialmente em `AppDbContext.cs` e `Program.cs` (pontos de
-  conflito entre squads).
+  conflito entre squads). Evitar misturar "feature" + "polimento visual" no mesmo PR.
+- **Conflito recorrente no `App.jsx` / controllers:** quando dois PRs adicionam coisas
+  no fim do mesmo arquivo, o merge conflita. Resolver mantendo **todos** os blocos
+  (não "aceitar current/incoming" cegamente, que apaga o do outro).
 - **Arquivos de CI/pipeline** (`.github/workflows/`) só entram via PR, nunca direto na main.
 
 ## 10. Checklist de Code Review (riscos recorrentes)
@@ -247,7 +274,10 @@ Ao revisar um PR, verificar:
 - [ ] LGPD: nenhum vazamento de identidade na Ação Solidária.
 - [ ] Migration coordenada com o Guardião, sem operações inesperadas.
 - [ ] `Enum.TryParse`/`IsDefined` para enums vindos da API (evita 500).
+- [ ] Transição de estado + efeito colateral só quando o UPDATE condicional afeta a linha.
+- [ ] Testes para a lógica nova (service/regra de negócio) — o projeto tem suíte desde a Sprint 4.
 - [ ] `dotnet build` limpo (0 erros, idealmente 0 warnings).
+- [ ] Newline final em todos os arquivos tocados (sem `\ No newline at end of file`).
 - [ ] Arquivos citados no PR realmente commitados.
 
 ## 11. Deploy
@@ -256,6 +286,8 @@ Ao revisar um PR, verificar:
 - Variáveis de ambiente (segredos) no painel do Render, formato `Secao__Chave`.
 - Endpoint `/health` para health check e warm-up do cold start.
 - Plano free do Render dorme após 15 min — cold start de ~50s; aquecer antes de demos.
+  > ⚠️ Isso afeta `BackgroundService` (ex.: expiração de reservas): se o app hibernar,
+  > o job para. Por isso há sempre uma rede de segurança (checagem *lazy* no acesso).
 - Runbook completo em `DEPLOY.md`.
 
 ## 12. Débitos técnicos conhecidos (não "corrigir" sem alinhar)
@@ -267,7 +299,15 @@ Ao revisar um PR, verificar:
 - Inconsistência `Dto` vs `DTO` em nomes de arquivo/record.
 - Enum `DiaSemana` definido em `Application.DTOs` em vez de `Domain` (direção de
   dependência invertida).
-- Sem paginação nas listagens; sem testes automatizados (planejado para Sprint 4).
+- Paginação ausente em algumas listagens antigas (bazar/alimentos); as novas
+  (produtos, pedidos) já paginam.
+- **"Excluir" vs "Inativar" na UI de alimento:** o botão diz "Excluir... não pode ser
+  desfeito", mas alimento faz inativação lógica (reversível). Revisar o texto e expor
+  o "reativar" pela UI.
+- **Botão "Comprar" no próprio produto:** a trava está no backend (409); o front ainda
+  mostra o botão (o detalhe não sabe se o produto é do usuário). Esconder é melhoria futura.
+- **Gestão de Alimento pela UI:** criar/editar/inativar já existem; falta o "reativar"
+  pela interface e exibir alimentos recentes na Home.
 
 ## 13. Como rodar localmente
 
@@ -283,6 +323,19 @@ dotnet ef database update   # só o Guardião de Migrations, idealmente
 dotnet run                  # Swagger em /swagger (Development)
 ```
 
+### Testes
+```bash
+# unidade (rápido, sem banco — roda no CI)
+dotnet test --filter "Categoria=Unit"
+
+# integração/concorrência (contra uma branch de teste do Neon)
+# exige a env var UNIHUB_TEST_DB com a connection string da branch development.
+# cada teste roda em transação + ROLLBACK, então nada fica persistido.
+dotnet test --filter "Categoria=Integracao"
+```
+> O CI roda apenas `Categoria=Unit`. Os testes de integração rodam localmente,
+> nunca contra a produção.
+
 ## 14. Frontend (React + Vite)
 
 O frontend consome a API REST. Os padrões abaixo foram estabelecidos na primeira
@@ -295,14 +348,17 @@ crescer consistente.
 - **Login Google:** `@react-oauth/google`.
 - **Ícones:** `react-icons`.
 - **Estado de autenticação:** Context API (`AuthContext`), sem Redux.
+- **Node 20+ obrigatório** (o Vite 8 / rolldown usa APIs que não existem no Node 18).
 
 ### Estrutura de pastas (`Frontend/src/`)
 ```
 src/
-├── auth/            ← autenticação: AuthContext, RotaProtegida, authStorage
+├── auth/            ← autenticação: AuthContext, RotaProtegida, authStorage, PerfilVendedor
 ├── config/          ← leitura centralizada de env (env.js)
-├── services/        ← wrapper de chamadas à API (api.js)
+├── services/        ← wrappers de chamadas à API (api.js + um por módulo)
 ├── pages/           ← telas (uma pasta/arquivo por tela: .jsx + .css)
+├── components/      ← componentes compartilhados (cards, formulários, layout)
+├── hooks/           ← hooks reutilizáveis
 ├── assets/          ← imagens/logos
 ├── App.jsx          ← rotas
 ├── main.jsx         ← providers (GoogleOAuth, Router, Auth)
@@ -313,8 +369,11 @@ src/
 
 - **Toda chamada à API passa pelo wrapper `services/api.js`.** Não usar `fetch`
   direto nas telas. O wrapper injeta `Authorization: Bearer <jwt>` automaticamente,
-  prefixa a `VITE_API_BASE_URL`, trata 204 e padroniza erros via `ApiError`.
+  prefixa a `VITE_API_BASE_URL`, trata 204, suporta `AbortController` (via `signal`)
+  e padroniza erros via `ApiError`.
   - Rotas públicas (ex.: login): passar `{ autenticado: false }`.
+  - Cada módulo tem seu service fino sobre o `api.js` (ex.: `services/pedidos.js`,
+    `services/alimentos.js`) — a tela não monta URL.
 - **Variáveis de ambiente só via `config/env.js`.** Nunca ler `import.meta.env`
   espalhado pelo código. Variáveis do Vite exigem o prefixo `VITE_`:
   - `VITE_API_BASE_URL` — URL da API (local `http://localhost:5206`, prod = Render).
@@ -323,7 +382,16 @@ src/
   `estaAutenticado`, `login()`, `logout()`. A persistência fica isolada em
   `authStorage.js` (hoje `localStorage`; se mudar para cookie, só esse arquivo muda).
 - **Rotas que exigem login** são envolvidas por `<RotaProtegida>` (redireciona
-  para `/` quem não está autenticado).
+  para `/` quem não está autenticado). Rotas só de vendedor usam `<SomenteVendedor>`.
+- **Enums vêm do backend como NÚMERO** (não há `JsonStringEnumConverter`). O front
+  mapeia o inteiro para o rótulo (ex.: `ProdutoStatus` 0/1/2, `PedidoStatus` 0..4,
+  `TipoPedido` 0/1). Tratar número e, defensivamente, string.
+- **`setState` síncrono em `useEffect` dispara `react-hooks/set-state-in-effect`.**
+  Não chamar `setX(...)` direto no corpo do effect; mova para dentro de uma função
+  assíncrona interna (ou do `.then`/`.catch`), respeitando a flag de cancelamento.
+  (Bug recorrente na tela de Perfil — ver o effect do voluntário como referência.)
+- **Upload de imagem** é centralizado: `POST /api/upload/imagem?pasta=<perfis|produtos|cardapios>`
+  retorna `{ url }`; a tela salva essa URL na entidade. Reusar o fluxo do `Perfil.jsx`.
 - **Segredos / config local:** `.env.local` NÃO é versionado (coberto pelo
   `.gitignore`). Só o `.env.example` entra no repo. O `VITE_GOOGLE_CLIENT_ID`,
   apesar de ficar exposto no browser por natureza, mora em env para não travar
@@ -348,7 +416,8 @@ Para evitar muitos merges pequenos direto na `main`, o squad de frontend usa uma
   periódico) para não divergir das branches-guia que foram direto para a main.
 
 ### Validação (adaptação do checklist para front)
-- `npm run lint` limpo.
+- `npm run lint` limpo (inclui a regra `react-hooks/set-state-in-effect`).
+- `npm run build` limpo.
 - Fluxo validado manualmente no `npm run dev`.
 - Nenhum segredo versionado (`.env.local` ignorado).
 - Branch rebaseada sobre a base correta antes do PR.
@@ -366,17 +435,32 @@ cada entidade, especialmente no módulo de Ação Solidária, que tem termos nã
   produtos. Tem `ChavePix`, dados da loja e logística.
 - **Voluntario** — perfil opcional de um `Usuario` (relação 1:0..1). Quem atende
   solicitações na Ação Solidária. Tem `AreasDeAtuacao` (lista de `CategoriaApoio`)
-  e `Disponivel` (pausar/retomar atuação).
+  e `Disponivel` (pausar/retomar atuação — voluntário pausado não recebe sugestões).
   > Obs.: ser Vendedor/Voluntário é representado pela existência do perfil, NÃO por
   > um valor de `UserRole` — evita inconsistência entre o enum e o perfil.
 
 ### Comércio (Alimentação e Bazar)
 - **Produto** — classe **abstrata** (Table-Per-Hierarchy no EF). Subtipos: `Alimento`
-  (Alimentação) e `ItemBazar` (Bazar). `QuantidadeDisponivel` é o campo sensível à
-  concorrência (ver seção 7). Tem `ProdutoStatus` (`Disponivel`, `Esgotado`, `Inativo`).
-- **Pedido / ItemPedido** — a transação de compra. `Pedido` tem `PedidoStatus`
-  (começa em `Reservado`). `ItemPedido` guarda o produto, a quantidade e o
-  `PrecoUnitarioNaCompra` (preço "congelado" no momento da compra).
+  (Alimentação) e `ItemBazar` (Bazar), distinguidos pela coluna `Discriminator`.
+  `QuantidadeDisponivel` é o campo sensível à concorrência (ver seção 7). Tem
+  `ProdutoStatus` (`Disponivel=0`, `Esgotado=1`, `Inativo=2`). A exclusão de produto é
+  **lógica** (`Status = Inativo`), preservando o histórico de pedidos.
+- **Pedido / ItemPedido** — a transação de compra/reserva. `Pedido` tem:
+  - `PedidoStatus` (`Reservado=0`, `Confirmado=1`, `Concluido=2`, `Cancelado=3`,
+    `Expirado=4`);
+  - `TipoPedido` (`Compra=0` | `Reserva=1`) — **Reserva** só vale para `ItemBazar`
+    (não Alimento) e é temporária;
+  - `ExpiraEm` — prazo da reserva (nulo em Compra). TTL da reserva = **48h**
+    (`PedidoService.TtlReserva`).
+  - `ItemPedido` guarda o produto, a quantidade e o `PrecoUnitarioNaCompra` (preço
+    "congelado" no momento da compra).
+- **Expiração de reserva** — uma `Reserva` vencida (`ExpiraEm` passou) tem o estoque
+  devolvido e o status vira `Expirado`. Dois caminhos complementares: um
+  `BackgroundService` (tempo real) e uma checagem *lazy* nos GETs de pedido (rede de
+  segurança para quando o job hibernar no Render). O estoque volta uma única vez
+  (transição atômica — ver seção 7).
+- **Baixa manual (vendedor)** — o vendedor de algum item do pedido pode concluí-lo
+  (`Reservado → Concluido`), via `Pedido.Concluir()` + UPDATE condicional.
 
 ### Ação Solidária (o módulo mais sensível — ver LGPD, seção 8)
 - **SolicitacaoApoio** — pedido de ajuda feito por um aluno (o *solicitante*). Tem
@@ -406,21 +490,18 @@ cada entidade, especialmente no módulo de Ação Solidária, que tem termos nã
   identidade real — base do *privacy by design*.
 - **Guardião de Migrations** — papel rotativo por sprint: a pessoa que centraliza
   toda geração/aplicação de migration (ver seção 6).
+- **Exclusão lógica** — padrão do projeto para "remover" entidades com dependentes
+  (produto, alimento): muda `Status` em vez de `DELETE` físico (ver seção 6, FKs
+  `Restrict`), preservando histórico.
 
 ---
 
 ## 16. Mantenha este documento vivo
 
 Este `AGENTS.md` é a fonte de verdade compartilhada do time — qualquer IA (Kiro,
-Codex, Cursor, etc.) e qualquer desenvolvingedor o lê para se alinhar. Ele só é
+Codex, Cursor, etc.) e qualquer desenvolvedor o lê para se alinhar. Ele só é
 útil se estiver atualizado:
 - **Toda convenção nova entra aqui no mesmo PR** que a introduz.
 - Decisões voláteis (sprint atual, prioridades) ficam nos documentos de planejamento,
   não aqui.
 - Trate-o como código: revisado e versionado.
-
----
-
-**Resumo em uma frase:** planeje antes de codar, respeite as camadas, use o claim
-`"sub"`, nunca versione segredos, coordene migrations com o Guardião, proteja a
-identidade na Ação Solidária, e valide com `dotnet build` antes de todo PR.

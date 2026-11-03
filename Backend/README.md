@@ -1,143 +1,160 @@
 # UniHub — Backend
 
-Ecossistema digital para centralizar comércio (Alimentação e Bazar
-Acadêmico) e ação social (Ação Solidária) dentro do campus, restrito a
-usuários autenticados com e-mail institucional.
+API REST do UniHub: o ecossistema digital que centraliza comércio (Alimentação e
+Bazar Acadêmico) e ação social (Ação Solidária) dentro do campus da UNIFESP,
+restrito a usuários autenticados com e-mail institucional (`@unifesp.br`).
+
+> Para as convenções de código, fluxo de PRs, migrations e lições aprendidas, leia
+> o [`AGENTS.md`](../AGENTS.md) na raiz — é a fonte de verdade do time.
 
 ## Como o backend funciona
 
-O backend é uma API REST em **.NET 8**, organizada em camadas para separar
-regra de negócio de detalhes de infraestrutura:
+API em **.NET 10** (ASP.NET Core), organizada em camadas (Clean Architecture
+simplificada) para separar regra de negócio de detalhes de infraestrutura:
 
 ```
-Domain          → entidades puras (Produto, Usuário, Pedido, Doação)
-Application     → regras de negócio, interfaces de repositório, DTOs
-Infrastructure  → EF Core, acesso ao banco, implementação dos repositórios
-API             → Controllers, autenticação, configuração
+Domain          → entidades puras (Produto, Usuario, Pedido, Correspondencia, ...)
+Application     → regras de negócio (Services), interfaces de repositório, DTOs
+Infrastructure  → EF Core, AppDbContext, repositórios, Cloudinary
+API             → Controllers, autenticação JWT, BackgroundServices, composição (DI)
 ```
 
-Cada camada só conhece a camada abaixo dela (API → Application →
-Infrastructure → Domain), nunca o contrário. Isso permite, por exemplo,
-trocar o banco de dados sem alterar uma linha de regra de negócio.
+Cada camada só conhece a de baixo (API → Application → Infrastructure → Domain),
+nunca o contrário.
 
 ### Autenticação
 
-Todo acesso à API exige um usuário autenticado com e-mail do domínio da
-universidade. O login emite um token **JWT**, validado em cada requisição
-pelos middlewares configurados no `Program.cs`. Endpoints marcados com
-`[Authorize]` rejeitam automaticamente qualquer chamada sem token válido.
+Todo acesso exige um usuário autenticado com e-mail institucional. O login via
+Google OAuth valida o domínio e a API emite um **JWT**, validado em cada requisição.
+Endpoints marcados com `[Authorize]` rejeitam chamadas sem token válido.
+
+> ⚠️ O usuário autenticado é SEMPRE extraído do claim `"sub"`
+> (`User.FindFirst("sub")`), nunca de `ClaimTypes.NameIdentifier` — o projeto usa
+> `MapInboundClaims = false`. Ver `AGENTS.md` §4.
 
 ### O maior desafio técnico: concorrência no estoque
 
-Durante o intervalo, dezenas de alunos podem tentar comprar o mesmo lanche
-ao mesmo tempo. Se o backend apenas lesse o estoque, verificasse em C# e
-depois salvasse, existiria uma janela de tempo em que dois pedidos
-simultâneos poderiam "ver" a mesma última unidade disponível.
+Durante o intervalo, dezenas de alunos podem tentar comprar o mesmo item ao mesmo
+tempo. Ler o estoque, verificar em C# e salvar depois criaria uma janela em que dois
+pedidos "veem" a mesma última unidade.
 
-A solução adotada não depende de locks em memória (que não funcionam
-quando a API roda em múltiplas instâncias atrás de um load balancer).
-Em vez disso, o decremento de estoque é um **UPDATE condicional atômico**
-executado diretamente no banco:
+A solução **não** usa locks em memória (que não funcionam com múltiplas instâncias
+atrás de um load balancer). O decremento é um **UPDATE condicional atômico** no banco:
 
 ```sql
-UPDATE Products
-SET Stock = Stock - @quantidade
-WHERE Id = @id AND Stock >= @quantidade
+UPDATE "Produtos"
+SET "QuantidadeDisponivel" = "QuantidadeDisponivel" - @quantidade
+WHERE "Id" = @id AND "QuantidadeDisponivel" >= @quantidade
 ```
 
-O banco garante que essa operação é atômica. Se duas requisições
-concorrentes disputam a última unidade, apenas uma altera uma linha; a
-outra recebe zero linhas afetadas e sabe, de forma confiável, que perdeu
-a corrida — sem depender de qual instância da API atendeu cada uma.
+Se duas requisições disputam a última unidade, apenas uma altera uma linha; a outra
+recebe zero linhas afetadas e sabe, de forma confiável, que perdeu a corrida. O mesmo
+padrão rege o aceite de solicitações de apoio (`WHERE Status = Aberta`), a baixa de
+pedido pelo vendedor (`WHERE Status = Reservado`) e a expiração de reservas. Em todos,
+o efeito colateral (ex.: devolver estoque) só é aplicado por quem ganha a corrida.
 
 ### Módulos
 
-- **Alimentação:** vendedores publicam produtos com estoque; alunos
-  reservam com garantia de consistência mesmo sob alta concorrência.
-- **Bazar Acadêmico:** marketplace de compra/venda entre alunos
-  (livros, calculadoras, equipamentos), reaproveitando a mesma
-  modelagem de produto/estoque, sem a pressão de concorrência extrema.
-- **Ação Solidária:** solicitações de doação são pseudonimizadas — a
-  identidade real do solicitante fica isolada numa tabela separada,
-  acessível apenas por um fluxo administrativo restrito, nunca pelo
-  fluxo normal de listagem ou match com voluntários.
+- **Alimentação:** vendedores publicam alimentos com estoque; alunos compram com
+  garantia de consistência mesmo sob alta concorrência. Exclusão de alimento é lógica
+  (preserva histórico).
+- **Bazar Acadêmico:** marketplace de compra/venda entre alunos (livros, calculadoras,
+  equipamentos), reaproveitando a modelagem de produto/estoque. Suporta **compra** e
+  **reserva temporária** (TTL de 48h) que expira e devolve o estoque automaticamente —
+  via `BackgroundService` + checagem *lazy* nos acessos.
+- **Ação Solidária:** solicitações são pseudonimizadas por um `CodigoPublico`. A
+  identidade real do solicitante só é revelada após autorização explícita
+  (`Correspondencia.AutorizarRevelacaoIdentidade()`), nunca no fluxo de listagem/match.
+- **Moderação:** denúncias de usuários/produtos, gerenciadas pelo Admin.
 
 ## Banco de dados: Neon (Postgres serverless)
 
-O projeto usa **Neon**, um Postgres gerenciado e serverless, no lugar de
-uma instância tradicional sempre ligada. Motivos principais:
+O projeto usa **Neon** (Postgres serverless gerenciado), com EF Core 10 + provider
+**Npgsql**. Motivos:
 
-- **Scale-to-zero:** o banco "dorme" quando não há tráfego (por exemplo,
-  fora do horário de aula) e volta a responder em segundos — sem custo
-  de compute enquanto ocioso.
-- **Branching instantâneo:** cada integrante do time pode criar uma
-  branch isolada do banco (com todos os dados copiados) para testar sua
-  feature sem afetar o ambiente dos demais.
-- **Postgres padrão:** sem vendor lock-in — a mesma modelagem funciona
-  se o time decidir migrar para RDS Postgres futuramente.
+- **Scale-to-zero:** o banco "dorme" quando ocioso e volta em segundos — sem custo de
+  compute parado.
+- **Branching instantâneo:** cada squad/integrante cria uma branch isolada do banco
+  para testar sem afetar os demais (é o que os testes de integração usam, via a env
+  var `UNIHUB_TEST_DB`).
+- **Postgres padrão:** sem vendor lock-in.
 
-**Atenção ao usar:**
-- Use sempre a *connection string com pooling* (PgBouncer) fornecida pelo
-  Neon, não a conexão direta — evita esgotar o limite de conexões.
-- O primeiro acesso após um período ocioso pode ter uma latência extra
-  (cold start de alguns milissegundos). Isso é especialmente relevante
-  antes de rodar o teste de carga de concorrência: vale "aquecer" o
-  banco com uma query simples antes de medir.
+**Ao usar:**
+- Use sempre a *connection string com pooling* e **SSL** do Neon.
+- O primeiro acesso após ociosidade tem latência extra (cold start) — aquecer o banco
+  com uma query simples antes de medir concorrência.
+
+### Migrations
+
+> ⚠️ Centralizadas pelo **Guardião de Migrations** (um por sprint). Não rode
+> `dotnet ef migrations add` por conta própria. Detalhes em `AGENTS.md` §6.
+
+- Toda mudança de entidade/`AppDbContext` que afete o schema gera migration.
+- Testar sempre em uma branch do Neon antes da principal.
+- FKs usam `DeleteBehavior.Restrict` — prefira **exclusão lógica** (mudar `Status`) a
+  `DELETE` físico em entidades com dependentes.
+- A API **não** aplica migrations no startup (aplicação é manual).
+
+## Segurança e configuração
+
+- **Segredos nunca versionados.** Localmente: `dotnet user-secrets`. Em produção:
+  variáveis de ambiente no Render (formato `Secao__Chave`).
+- Segredos: connection string do Neon, `JwtSettings:SecureKey`, credenciais Cloudinary.
+- `EnableSensitiveDataLogging` só em Development (LGPD).
 
 ## Estrutura de pastas
 
 ```
-UniHub/
-├── UniHub.sln
+Backend/
+├── Program.cs                       # composição, DI, auth, CORS, hosted services
+├── Dockerfile                       # imagem de produção (deploy no Render)
+├── Migrations/                      # migrations do EF Core (Guardião)
 └── src/
-    ├── UniHub.Domain/
-    │   └── Entities/
-    ├── UniHub.Application/
-    │   ├── Interfaces/
-    │   ├── Services/
-    │   └── DTOs/
-    ├── UniHub.Infrastructure/
-    │   ├── Data/
-    │   └── Repositories/
-    └── UniHub.API/
-        └── Controllers/
+    ├── UniHub.Domain/Entities/      # entidades e enums
+    ├── UniHub.Application/          # Services, Interfaces, DTOs (por módulo)
+    ├── UniHub.Infrastructure/       # AppDbContext, repositórios, Cloudinary
+    └── Unihub.API/
+        ├── Controllers/             # endpoints REST
+        └── BackgroundServices/      # jobs (ex.: expiração de reservas)
 ```
 
 ## Como rodar localmente
 
-1. **Criar um projeto no Neon** (console.neon.tech ou `neonctl`) e copiar
-   a connection string com pooling.
+```bash
+cd Backend
 
-2. **Configurar a connection string** em
-   `src/UniHub.API/appsettings.Development.json`:
-   ```json
-   {
-     "ConnectionStrings": {
-       "DefaultConnection": "Host=<seu-endpoint>.neon.tech;Database=unihub;Username=<user>;Password=<senha>;SSL Mode=Require;Channel Binding=Require;Pooling=true"
-     }
-   }
-   ```
+# 1. Configurar os segredos (uma vez)
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<neon-com-pooling-e-ssl>"
+dotnet user-secrets set "JwtSettings:SecureKey" "<chave-32+-caracteres>"
+dotnet user-secrets set "Cloudinary:CloudName" "<cloud-name>"
+dotnet user-secrets set "Cloudinary:ApiKey" "<api-key>"
+dotnet user-secrets set "Cloudinary:ApiSecret" "<api-secret>"
 
-3. **Aplicar as migrations** (dentro de `src/UniHub.API`):
-   ```bash
-   dotnet ef database update --project ../UniHub.Infrastructure --startup-project .
-   ```
+# 2. Restaurar, aplicar migrations e rodar
+dotnet restore
+dotnet ef database update   # idealmente só o Guardião de Migrations
+dotnet run
+```
 
-4. **Rodar a API:**
-   ```bash
-   dotnet run --project src/UniHub.API
-   ```
-   Swagger disponível em `https://localhost:5001/swagger` em ambiente
-   Development.
+Em Development, o Swagger fica na URL informada pelo `dotnet run`
+(ex.: `http://localhost:5206/swagger`).
 
-## Status atual / próximos passos
+## Testes
 
-- [x] Estrutura em camadas com injeção de dependência
-- [x] Modelagem de entidades dos três módulos
-- [x] Resolução de concorrência no estoque (UPDATE condicional)
-- [ ] Migrar provider do EF Core de SQL Server para Npgsql (Postgres/Neon)
-- [ ] `AuthController` (emissão do JWT após validação do e-mail institucional)
-- [ ] Teste automatizado de concorrência (requisições simultâneas)
-- [ ] Painel do vendedor e atualização em tempo real (Alimentação)
-- [ ] Endpoints do Bazar Acadêmico
-- [ ] Serviço de match voluntário-solicitação (Ação Solidária)
+```bash
+# unidade (rápido, sem banco — é o que o CI roda)
+dotnet test --filter "Categoria=Unit"
+
+# integração/concorrência (exige a env var UNIHUB_TEST_DB apontando para uma
+# branch de teste do Neon; cada teste roda em transação + ROLLBACK)
+dotnet test --filter "Categoria=Integracao"
+```
+
+A suíte cobre domínio, services (com NSubstitute), integração e o teste de
+concorrência de estoque (o diferencial técnico do projeto).
+
+## Deploy
+
+Deploy no **Render** a partir do `Backend/Dockerfile`, banco no **Neon**. Endpoint
+`/health` para health check e warm-up do cold start. Runbook completo em
+[`../DEPLOY.md`](../DEPLOY.md).
