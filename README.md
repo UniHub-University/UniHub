@@ -8,8 +8,8 @@ O **UniHub** é um ecossistema digital desenvolvido para centralizar e otimizar 
 
 ## → Módulos do Sistema
 
-* 🍔 **Alimentação:** painel de pedidos em tempo real — vendedores gerenciam o estoque de lanches e alunos reservam, evitando filas e incertezas no intervalo. É o módulo que concentra o maior desafio técnico (concorrência de estoque).
-* ▪ **Bazar Acadêmico:** marketplace de compra e venda de materiais universitários entre alunos (livros, calculadoras, equipamentos), reaproveitando a mesma modelagem de produto/estoque.
+* 🍔 **Alimentação:** vendedores anunciam e gerenciam o estoque de lanches, e alunos compram pela plataforma — evitando filas e incertezas no intervalo. É o módulo que concentra o maior desafio técnico (concorrência de estoque).
+* ▪ **Bazar Acadêmico:** marketplace de compra e venda de materiais universitários entre alunos (livros, calculadoras, equipamentos), reaproveitando a mesma modelagem de produto/estoque. Suporta **compra** e **reserva temporária** (que expira e devolve o estoque automaticamente).
 * 🤝 **Ação Solidária:** conecta alunos em situação de vulnerabilidade a voluntários, com **pseudonimização rigorosa** da identidade do solicitante (privacy by design / LGPD).
 
 ---
@@ -37,12 +37,13 @@ O diagrama acima mostra o fluxo completo: o **Frontend (React + Vite)** se auten
 
 | Camada | Tecnologia |
 |---|---|
-| **Frontend** | React + Vite (JavaScript, SPA) |
+| **Frontend** | React + Vite (JavaScript, SPA) — requer Node 20+ |
 | **Backend** | C# / **.NET 10** (ASP.NET Core Web API) |
 | **ORM** | Entity Framework Core 10 (provider `Npgsql.EntityFrameworkCore.PostgreSQL`) |
 | **Banco de Dados** | **Neon** (PostgreSQL serverless) |
 | **Autenticação** | Google OAuth (login institucional) + JWT emitido pela própria API |
 | **Armazenamento de Imagens** | Cloudinary |
+| **Testes** | xUnit + NSubstitute (unidade, integração e concorrência) |
 | **Documentação de API** | Swagger / Swashbuckle (ambiente de Development) |
 | **Deploy** | Render (container Docker) — ver [`DEPLOY.md`](DEPLOY.md) |
 
@@ -56,13 +57,15 @@ O diagrama acima mostra o fluxo completo: o **Frontend (React + Vite)** se auten
   SET "QuantidadeDisponivel" = "QuantidadeDisponivel" - @quantidade
   WHERE "Id" = @id AND "QuantidadeDisponivel" >= @quantidade
   ```
-  Se duas requisições disputam a última unidade, apenas uma afeta uma linha; a outra recebe zero linhas afetadas e sabe, de forma confiável, que perdeu a corrida.
+  Se duas requisições disputam a última unidade, apenas uma afeta uma linha; a outra recebe zero linhas afetadas e sabe, de forma confiável, que perdeu a corrida. O mesmo padrão rege a conclusão e a expiração de pedidos (UPDATE condicional por `Status`), com o efeito colateral (ex.: devolver estoque) aplicado só por quem ganha a corrida.
+
+* **Reserva temporária com expiração automática:** no Bazar, além de comprar, o aluno pode **reservar** um item por tempo limitado. Reservas vencidas têm o estoque devolvido e o status alterado para `Expirado` — por um `BackgroundService` em tempo real, com uma checagem *lazy* de segurança nos acessos (robusta mesmo que o serviço hiberne no plano free do Render).
 
 * **Privacy by Design (LGPD):** no módulo de Ação Solidária, a identidade do solicitante é separada da solicitação por meio de um `CodigoPublico` pseudonimizado. A identidade real só pode ser revelada após `Correspondencia.AutorizarRevelacaoIdentidade()` explícito — **nunca** automaticamente.
 
 * **Autenticação Institucional:** o acesso é restrito ao domínio `@unifesp.br`, validado no login via Google OAuth antes da emissão do JWT.
 
-* **Banco serverless (Neon):** escolhido no lugar de uma instância sempre ligada por oferecer *scale-to-zero* (economia quando ocioso) e *branching* de banco por squad (ambientes de teste isolados). Usa-se sempre a connection string **com pooling** e **SSL**.
+* **Banco serverless (Neon):** escolhido no lugar de uma instância sempre ligada por oferecer *scale-to-zero* (economia quando ocioso) e *branching* de banco por squad (ambientes de teste isolados — usados pelos testes de integração). Usa-se sempre a connection string **com pooling** e **SSL**.
 
 ---
 
@@ -75,12 +78,14 @@ UniHub/
 │   │   ├── UniHub.Domain/           # Entidades
 │   │   ├── UniHub.Application/       # Serviços, Interfaces, DTOs
 │   │   ├── UniHub.Infrastructure/    # EF Core, repositórios, Cloudinary
-│   │   └── Unihub.API/               # Controllers
+│   │   └── Unihub.API/               # Controllers, BackgroundServices
 │   ├── Migrations/
 │   ├── Dockerfile                   # Imagem de produção (deploy no Render)
 │   └── Program.cs
 ├── Frontend/                # SPA React + Vite
-├── Documentos/              # Diagramas, identidade visual e documentos
+├── Tests/                   # Suíte de testes (xUnit): unidade, integração, concorrência
+├── Documentos/              # Diagramas, identidade visual, planos e planejamento
+├── AGENTS.md                # Guia de convenções para devs e IAs (ler antes de codar)
 ├── DEPLOY.md                # Runbook de deploy (Render + Neon)
 └── render.yaml              # Blueprint do serviço no Render
 ```
@@ -91,7 +96,7 @@ UniHub/
 
 ### Pré-requisitos
 * [.NET 10 SDK](https://dotnet.microsoft.com/download)
-* [Node.js e npm](https://nodejs.org/)
+* [Node.js 20+](https://nodejs.org/) e npm (o Vite 8 exige Node 20 ou superior)
 * Uma connection string de um banco **PostgreSQL** (recomendado: criar um projeto gratuito no [Neon](https://neon.tech))
 
 ### 1. Clonar o repositório
@@ -125,8 +130,19 @@ Em ambiente **Development**, o Swagger fica disponível na URL informada pelo `d
 ### 3. Frontend
 ```bash
 cd Frontend
+cp .env.example .env.local   # preencha VITE_API_BASE_URL e VITE_GOOGLE_CLIENT_ID
 npm install
 npm run dev
+```
+
+### 4. Testes
+```bash
+# unidade (rápido, sem banco)
+dotnet test --filter "Categoria=Unit"
+
+# integração/concorrência (exige a env var UNIHUB_TEST_DB apontando para
+# uma branch de teste do Neon; cada teste roda em transação + rollback)
+dotnet test --filter "Categoria=Integracao"
 ```
 
 ---
@@ -137,6 +153,12 @@ O deploy da API é feito no **Render**, a partir do `Backend/Dockerfile`, manten
 
 ---
 
+## 🤝 Contribuindo
+
+Antes de escrever código ou abrir um PR, leia o **[`AGENTS.md`](AGENTS.md)** — ele consolida as convenções, a arquitetura e as lições aprendidas (claim `"sub"`, concorrência de estoque, LGPD, fluxo de migrations, checklist de review e padrões do frontend). Vale tanto para desenvolvedores quanto para assistentes de IA.
+
+---
+
 ## 👥 Equipe
 
-Projeto desenvolvido em ciclos ágeis (Scrum) com fatiamento vertical por domínio de negócio. Na Sprint 3, a divisão de squads foi: **Ação Solidária**, **Moderação e Gestão**, **Perfil do Vendedor (PIX)** e **Deploy**.
+Projeto desenvolvido em ciclos ágeis (Scrum) com fatiamento vertical por domínio de negócio. Ao longo das sprints, o time entregou os 3 módulos de ponta a ponta (Alimentação, Bazar e Ação Solidária), o fluxo de Comprar/Reservar com expiração automática de reservas, os perfis de Vendedor e Voluntário, a suíte de testes automatizados (unidade, integração e concorrência) e o deploy contínuo no Render + Neon.
