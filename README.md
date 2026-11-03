@@ -125,7 +125,7 @@ dotnet ef database update
 # Rode a API
 dotnet run
 ```
-Em ambiente **Development**, o Swagger fica disponível na URL informada pelo `dotnet run` (ex.: `http://localhost:5206/swagger`).
+Em ambiente **Development**, o Swagger fica disponível na URL informada pelo `dotnet run` (ex.: `http://localhost:5000/swagger`).
 
 ### 3. Frontend
 ```bash
