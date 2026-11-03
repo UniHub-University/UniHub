@@ -70,8 +70,7 @@ export default function Bazar() {
         <div>
           <h1 className="bazar__titulo">Bazar Acadêmico</h1>
           <p className="bazar__subtitulo">
-            Explore todos os anúncios do Bazar Acadêmico. Os produtos de
-            Alimentação serão integrados em breve.
+            Explore todos os anúncios do Bazar Acadêmico.
           </p>
         </div>
 
