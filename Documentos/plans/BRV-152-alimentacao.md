@@ -176,69 +176,69 @@ O padrão visual e o comportamento de mensagens do botão Comprar devem ser reap
 
 ### Backend
 
-- [ ] Usuário autenticado consulta alimentos sem receber `ItemBazar`.
+- [x] Usuário autenticado consulta alimentos sem receber `ItemBazar`.
 
-- [ ] Alimento com quantidade zero não aparece na listagem pública.
+- [x] Alimento com quantidade zero não aparece na listagem pública.
 
-- [ ] O frontend da BRV-152 consegue consumir a listagem geral de produtos do vendedor, entregue pelo Squad C, e identificar os alimentos próprios, inclusive esgotados e inativos.
+- [x] O frontend da BRV-152 consegue consumir a listagem geral de produtos do vendedor, entregue pelo Squad C, e identificar os alimentos próprios, inclusive esgotados e inativos.
 
-- [ ] Vendedor cria alimento sem enviar `VendedorId`.
+- [x] Vendedor cria alimento sem enviar `VendedorId`.
 
-- [ ] Vendedor edita e exclui apenas o próprio alimento.
+- [x] Vendedor edita e exclui apenas o próprio alimento.
 
-- [ ] Usuário não consegue alterar alimento de outro vendedor.
+- [x] Usuário não consegue alterar alimento de outro vendedor.
 
-- [ ] Quantidade negativa é recusada.
+- [x] Quantidade negativa é recusada.
 
-- [ ] Quantidade positiva resulta em `Disponivel`.
+- [x] Quantidade positiva resulta em `Disponivel`.
 
-- [ ] Quantidade zero resulta em `Esgotado`.
+- [x] Quantidade zero resulta em `Esgotado`.
 
-- [ ] A tela e o contrato de Alimentação não oferecem Reserva.
+- [x] A tela e o contrato de Alimentação não oferecem Reserva.
 
-- [ ] O contrato usado pelo botão Comprar representa uma compra (`TipoPedido.Compra`); a implementação do pedido permanece na Frente B.
+- [x] O contrato usado pelo botão Comprar representa uma compra (`TipoPedido.Compra`); a implementação do pedido permanece na Frente B.
 
-- [ ] Alimento `Inativo` não aparece para compradores e o acesso direto retorna 404/NotFound.
+- [x] Alimento `Inativo` não aparece para compradores e o acesso direto retorna 404/NotFound.
 
-- [ ] Pedidos anteriores continuam no histórico quando o alimento fica esgotado.
+- [x] Pedidos anteriores continuam no histórico quando o alimento fica esgotado.
 
-- [ ] `dotnet build` limpo.
+- [x] `dotnet build` limpo.
 
-- [ ] Testes unitários passando.
+- [x] Testes unitários passando.
 
 ### Frontend
 
-- [ ] `/alimentacao` não exibe mais o placeholder `EmBreve`.
+- [x] `/alimentacao` não exibe mais o placeholder `EmBreve`.
 
-- [ ] A aba de Alimentação mostra apenas alimentos.
+- [x] A aba de Alimentação mostra apenas alimentos.
 
 - [ ] A Home pode mostrar alimentos recentes.
 
-- [ ] O Bazar continua mostrando apenas `ItemBazar`.
+- [x] O Bazar continua mostrando apenas `ItemBazar`.
 
-- [ ] O vendedor consegue cadastrar e editar alimentos.
+- [x] O vendedor consegue cadastrar e editar alimentos.
 
 - [ ] O vendedor consegue inativar e reativar seus alimentos, mantendo o registro no Neon.
 
-- [ ] Alimentos esgotados ficam ocultos para compradores e visíveis ao dono.
+- [x] Alimentos esgotados ficam ocultos para compradores e visíveis ao dono.
 
-- [ ] A tela mostra apenas o botão Comprar, sem botão ou seletor de Reserva.
+- [x] A tela mostra apenas o botão Comprar, sem botão ou seletor de Reserva.
 
-- [ ] Mensagens de sucesso e erro seguem o padrão da Frente B.
+- [x] Mensagens de sucesso e erro seguem o padrão da Frente B.
 
-- [ ] `npm run lint` e `npm run build` limpos.
+- [x] `npm run lint` e `npm run build` limpos.
 
 ### Integração
 
-- [ ] Na integração final, o botão Comprar da Alimentação consegue usar o fluxo de pedidos da Frente B para criar uma compra; a BRV-152 não duplica nem reimplementa o `PedidoService`.
+- [x] Na integração final, o botão Comprar da Alimentação consegue usar o fluxo de pedidos da Frente B para criar uma compra; a BRV-152 não duplica nem reimplementa o `PedidoService`.
 
-- [ ] O estoque é decrementado pelo fluxo atômico existente.
+- [x] O estoque é decrementado pelo fluxo atômico existente.
 
-- [ ] A compra aparece no histórico do comprador.
+- [x] A compra aparece no histórico do comprador.
 
-- [ ] A compra pode ser consultada pelo fluxo do vendedor da Frente B.
+- [x] A compra pode ser consultada pelo fluxo do vendedor da Frente B.
 
-- [ ] Um alimento não aparece no histórico do Bazar como se fosse `ItemBazar`.
+- [x] Um alimento não aparece no histórico do Bazar como se fosse `ItemBazar`.
 
 ## Pendências / dúvidas em aberto
 
