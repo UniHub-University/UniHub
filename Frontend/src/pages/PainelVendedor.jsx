@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { FiPlusCircle, FiUser, FiPackage, FiClipboard } from 'react-icons/fi';
+import { FiUser, FiPackage, FiClipboard, FiCoffee } from 'react-icons/fi';
+import { FaBookOpen } from 'react-icons/fa6';
 import './PainelVendedor.css';
 
 // Estrutura do painel. A listagem Meus Produtos será integrada pela equipe
@@ -19,8 +20,12 @@ export default function PainelVendedor() {
           <span><strong>Meus produtos</strong><span>Visualize e gerencie seus anúncios.</span></span>
         </Link>
         <Link className="painel-vendedor__atalho" to="/vendedor/produtos/novo">
-          <FiPlusCircle aria-hidden="true" size={28} />
-          <span><strong>Adicionar produto</strong><span>Crie um anúncio no Bazar.</span></span>
+          <FaBookOpen aria-hidden="true" size={28} />
+          <span><strong>Adicionar item</strong><span>Crie um anúncio para a aba de Bazar.</span></span>
+        </Link>
+        <Link className="painel-vendedor__atalho" to="/vendedor/alimentos/novo">
+          <FiCoffee aria-hidden="true" size={28} />
+          <span><strong>Adicionar alimento</strong><span>Crie um anúncio para a aba de Alimentação.</span></span>
         </Link>
         <Link className="painel-vendedor__atalho" to="/vendedor/pedidos">
           <FiClipboard aria-hidden="true" size={28} />

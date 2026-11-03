@@ -5,6 +5,7 @@ import MeusProdutos from './pages/MeusProdutos.jsx';
 import PedidosVendedor from './pages/PedidosVendedor.jsx';
 import { SomenteVendedor } from './auth/PerfilVendedor.jsx';
 import FormularioBazar from './pages/FormularioBazar.jsx';
+import FormularioAlimentacao from './pages/FormularioAlimentacao.jsx';
 import BoasVindas from './pages/BoasVindas.jsx';
 import DetalheBazar from './pages/DetalheBazar.jsx';
 import Home from './pages/Home.jsx';
@@ -67,6 +68,26 @@ function App() {
             <SomenteVendedor>
               <Titulo texto="Editar produto">
                 <FormularioBazar />
+              </Titulo>
+            </SomenteVendedor>
+          }
+        />
+        <Route
+          path="/vendedor/alimentos/novo"
+          element={
+            <SomenteVendedor>
+              <Titulo texto="Novo alimento">
+                <FormularioAlimentacao />
+              </Titulo>
+            </SomenteVendedor>
+          }
+        />
+        <Route
+          path="/vendedor/alimentos/:id/editar"
+          element={
+            <SomenteVendedor>
+              <Titulo texto="Editar alimento">
+                <FormularioAlimentacao />
               </Titulo>
             </SomenteVendedor>
           }
