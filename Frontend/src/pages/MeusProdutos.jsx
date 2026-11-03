@@ -10,6 +10,8 @@ import { Link } from 'react-router-dom';
 import { FiPlusCircle, FiEdit2 } from 'react-icons/fi';
 
 import { listarMeusProdutos } from '../services/vendedor.js';
+import { inativarAlimento } from '../services/alimentos.js';
+import { excluirItemBazar } from '../services/itensBazar.js';
 import { ApiError } from '../services/api.js';
 import { rotuloStatus } from '../services/rotulosProduto.js';
 import BotaoExcluirItemBazar from '../components/BotaoExcluirItemBazar.jsx';
@@ -121,7 +123,11 @@ export default function MeusProdutos() {
               <div className="meus-produtos__acoes">
                 <Link
                   className="meus-produtos__editar"
-                  to={`/vendedor/produtos/${produto.id}/editar`}
+                  to={
+                    produto.tipo === 'lanche'
+                      ? `/vendedor/alimentos/${produto.id}/editar`
+                      : `/vendedor/produtos/${produto.id}/editar`
+                    }
                 >
                   <FiEdit2 aria-hidden="true" />
                   Editar
@@ -130,6 +136,7 @@ export default function MeusProdutos() {
                   id={produto.id}
                   nome={produto.nome}
                   onExcluido={aoExcluir}
+                  aoExcluir={produto.tipo === 'lanche' ? inativarAlimento : excluirItemBazar}
                 />
               </div>
             </li>
