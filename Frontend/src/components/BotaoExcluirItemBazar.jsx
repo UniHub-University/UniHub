@@ -4,7 +4,7 @@ import '../pages/FormularioBazar.css';
 import { excluirItemBazar, mensagemErroItem } from '../services/itensBazar.js';
 
 // A listagem pode reutilizar este botão e recarregar a listagem no onExcluido.
-export default function BotaoExcluirItemBazar({ id, nome, onExcluido, onOcupado, onSemAutorizacao, disabled = false }) {
+export default function BotaoExcluirItemBazar({ id, nome, onExcluido, onOcupado, onSemAutorizacao, disabled = false, aoExcluir }) {
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState('');
   const [excluido, setExcluido] = useState(false);
@@ -18,7 +18,7 @@ export default function BotaoExcluirItemBazar({ id, nome, onExcluido, onOcupado,
     onOcupado?.(true);
     setErro('');
     try {
-      await excluirItemBazar(id);
+      await (aoExcluir ? aoExcluir(id) : excluirItemBazar(id));
     } catch (e) {
       if (e.status === 403 && onSemAutorizacao) onSemAutorizacao();
       else setErro(mensagemErroItem(e));

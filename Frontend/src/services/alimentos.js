@@ -50,13 +50,3 @@ export async function reativarAlimento(id) {
     `/api/alimentos/${encodeURIComponent(id)}/reativar`,
   );
 }
-
-export async function buscarAlimento(id) {
-  const dados = await api.get(`/api/alimentos/${encodeURIComponent(id)}`);
-
-  if (!dados || typeof dados !== 'object' || !dados.id) {
-    throw new Error('Resposta inesperada no detalhe do alimento.');
-  }
-
-  return dados;
-}

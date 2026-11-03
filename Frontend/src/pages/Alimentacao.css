@@ -49,7 +49,6 @@
 .alimentacao__grade {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
-  align-items: start;
   gap: 24px;
   list-style: none;
   margin: 0;
@@ -71,16 +70,10 @@
   border: 1px solid #e4bdbd;
 }
 
-/*
- * Card seguindo o mesmo padrão de .cartao-anuncio do Bazar.
- * O rodapé usa margin-top: auto para manter preço e disponibilidade
- * alinhados na parte inferior dos cards.
- */
 .alimentacao__card {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-self: start;
   gap: 16px;
   min-width: 0;
   padding: 24px;
@@ -183,6 +176,7 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
+  margin-top: auto;
   padding-top: 18px;
   border-top: 1px solid #eeeee5;
 }
@@ -226,4 +220,19 @@
   .alimentacao__card {
     transition: none;
   }
+}
+
+.alimentacao__adicionar {
+  display: inline-flex;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: #7a5c27;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.alimentacao__adicionar:focus-visible {
+  outline: 3px solid var(--cor-tan);
+  outline-offset: 3px;
 }
