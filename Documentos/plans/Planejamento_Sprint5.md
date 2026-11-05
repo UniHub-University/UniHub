@@ -37,6 +37,11 @@ Criar a tela do módulo consumindo o backend já pronto:
 (solicitar, sugestões, correspondência, doação) — dá para dividir bem (ex.: uma no
 lado do solicitante, outra no lado do voluntário).
 
+> **Gap de backend atribuído (pós-#74):** o endpoint `GET minhas solicitações`
+> (listar as solicitações do próprio usuário para a tela de acompanhamento) faltava
+> no backend de Ação Solidária. **Dono: Lucas** (Frente Ação Solidária). Fazer no dia 1
+> para não travar a tela de acompanhamento de status.
+
 ---
 
 ## Frente 2 — Painel em Tempo Real (SignalR) 🟠 maior risco · **2 pessoas**
