@@ -9,6 +9,11 @@
 //   - Reserva só vale para ItemBazar (o backend recusa Alimento com 409).
 //   - o comprador vem sempre do token (nunca enviamos id).
 //
+// Contrato comprador (cancelamento):
+//   POST /api/pedidos/{id}/cancelar             -> cancela a PRÓPRIA reserva (Reservado -> Cancelado)
+//   - o estoque volta e o pedido some do histórico do comprador (o vendedor ainda o vê como Cancelado).
+//   - 403 (pedido de outro), 404 (inexistente), 409 (não é Reserva ou não está mais Reservada).
+//
 // Contrato vendedor (P6/P7):
 //   GET  /api/pedidos/vendedor?page=&pageSize=  -> paginado (PedidoVendedorDto)
 //   POST /api/pedidos/{id}/concluir             -> baixa manual (Reservado -> Concluido)
@@ -29,6 +34,13 @@ export async function criarPedido({ produtoId, quantidade, tipo = TIPO_PEDIDO.CO
     tipo,
     itens: [{ produtoId, quantidade }],
   });
+}
+
+// Cancelamento de reserva pelo comprador (Reservado -> Cancelado).
+// Sem corpo. Lança ApiError em 403 (pedido de outro usuário), 404 (inexistente)
+// ou 409 (é uma Compra, ou a reserva já não está mais Reservada).
+export async function cancelarReserva(pedidoId) {
+  return api.post(`/api/pedidos/${pedidoId}/cancelar`);
 }
 
 // P6: lista paginada dos pedidos que contêm produtos do vendedor autenticado.

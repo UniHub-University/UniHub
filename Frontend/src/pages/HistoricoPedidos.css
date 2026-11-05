@@ -23,6 +23,7 @@
 }
 
 .historico__aviso {
+  margin: 0 0 16px;
   padding: 24px;
   text-align: center;
   background-color: var(--cor-superficie);
@@ -32,6 +33,13 @@
 
 .historico__aviso--erro {
   color: var(--cor-erro);
+}
+
+/* Confirmação de que a reserva foi cancelada. */
+.historico__aviso--ok {
+  padding: 14px 24px;
+  color: var(--cor-verde);
+  font-weight: 600;
 }
 
 .historico__lista {
@@ -67,6 +75,13 @@
   color: var(--cor-tan);
 }
 
+/* Agrupa a etiqueta de status e o "✕" de cancelar, lado a lado. */
+.pedido__acoes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .pedido__status {
   padding: 4px 12px;
   border-radius: 999px;
@@ -91,6 +106,34 @@
 .pedido__status--4 {
   background-color: rgba(177, 149, 99, 0.25);
   color: #6b5a38;
+}
+
+/* "✕" pequeno e discreto para cancelar a reserva. */
+.pedido__cancelar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(177, 149, 99, 0.6);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--cor-tan);
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pedido__cancelar:hover:not(:disabled) {
+  background-color: var(--cor-erro);
+  border-color: var(--cor-erro);
+  color: var(--cor-creme);
+}
+
+.pedido__cancelar:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .pedido__meta {
