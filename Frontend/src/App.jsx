@@ -10,7 +10,6 @@ import BoasVindas from './pages/BoasVindas.jsx';
 import DetalheBazar from './pages/DetalheBazar.jsx';
 import Home from './pages/Home.jsx';
 import Bazar from './pages/Bazar.jsx';
-import EmBreve from './pages/EmBreve.jsx';
 import Perfil from './pages/Perfil.jsx';
 import BuscaProdutos from './pages/BuscaProdutos.jsx';
 import HistoricoPedidos from './pages/HistoricoPedidos.jsx';
@@ -19,6 +18,8 @@ import RotaProtegida from './auth/RotaProtegida.jsx';
 import Titulo from './components/Titulo.jsx';
 import Alimentacao from './pages/Alimentacao.jsx';
 import DetalheAlimentacao from './pages/DetalheAlimentacao.jsx';
+import SolidariedadeHub from './pages/solidariedade/SolidariedadeHub.jsx';
+import EmConstrucao from './pages/solidariedade/EmConstrucao.jsx';
 
 function App() {
   return (
@@ -110,9 +111,34 @@ function App() {
         <Route path="/perfil" element={<Titulo texto="Meu perfil"><Perfil /></Titulo>} />
         <Route path="/alimentacao" element={ <Titulo texto="Alimentação"><Alimentacao /></Titulo>}/>
         <Route path="/alimentacao/:id" element={ <Titulo texto="Detalhe do alimento"><DetalheAlimentacao /></Titulo>}/>
+        {/* ---------- Módulo de Ação Solidária (Frente 1, Sprint 5) ---------- */}
+        {/* Hub compartilhado + sub-rotas. As telas marcadas com <EmConstrucao>
+            serão substituídas pelos componentes reais:
+            - Lado SOLICITANTE (Lucas): /solidariedade/solicitar, /solidariedade/minhas
+            - Lado VOLUNTÁRIO (Gabriel): /solidariedade/voluntario, /sugestoes, /doacoes */}
         <Route
           path="/solidariedade"
-          element={<Titulo texto="Ação Solidária"><EmBreve titulo="Ação Solidária" /></Titulo>}
+          element={<Titulo texto="Ação Solidária"><SolidariedadeHub /></Titulo>}
+        />
+        <Route
+          path="/solidariedade/solicitar"
+          element={<Titulo texto="Pedir apoio"><EmConstrucao titulo="Pedir apoio" /></Titulo>}
+        />
+        <Route
+          path="/solidariedade/minhas"
+          element={<Titulo texto="Minhas solicitações"><EmConstrucao titulo="Minhas solicitações" /></Titulo>}
+        />
+        <Route
+          path="/solidariedade/voluntario"
+          element={<Titulo texto="Voluntário"><EmConstrucao titulo="Área do voluntário" /></Titulo>}
+        />
+        <Route
+          path="/solidariedade/sugestoes"
+          element={<Titulo texto="Sugestões"><EmConstrucao titulo="Sugestões para você" /></Titulo>}
+        />
+        <Route
+          path="/solidariedade/doacoes"
+          element={<Titulo texto="Minhas doações"><EmConstrucao titulo="Minhas doações" /></Titulo>}
         />
       </Route>
     </Routes>
