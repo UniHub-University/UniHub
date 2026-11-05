@@ -10,6 +10,7 @@ public interface IPedidoRepository
     // Historico de pedidos: pedidos de UM comprador, do mais recente
     // para o mais antigo. page eh 1-based; o limite de pageSize eh validado no Service.
     // Devolve a pagina e o total de pedidos do comprador (para montar a resposta paginada).
+    // CANCELAR: as reservas canceladas NAO aparecem (nem no total) para o comprador.
     Task<(IReadOnlyList<Pedido> Pedidos, int Total)> GetByCompradorAsync(Guid compradorId, int page, int pageSize);
 
     // P7: true se o pedido tem ao menos um item de um produto cujo Vendedor
@@ -37,4 +38,11 @@ public interface IPedidoRepository
     // afetada (ja concluido/cancelado/expirado por outro caminho concorrente),
     // garantindo que o estoque seja devolvido uma unica vez.
     Task<bool> TryExpirarAsync(Guid pedidoId);
+
+    // CANCELAR: cancelamento atomico de uma Reserva. Define Status = Cancelado SOMENTE
+    // se o pedido ainda for uma Reserva em estado Reservado (UPDATE condicional).
+    // Devolve false se nenhuma linha foi afetada (ja concluido/expirado/cancelado por
+    // outro caminho, ou nao e Reserva), garantindo que o estoque seja devolvido uma
+    // unica vez, por quem ganhou a corrida.
+    Task<bool> TryCancelarAsync(Guid pedidoId);
 }

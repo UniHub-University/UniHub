@@ -40,6 +40,7 @@ public class PedidosController : ControllerBase
     // Historico de pedidos do usuario autenticado (BRV-89). O comprador vem SEMPRE
     // do token (claim "sub"), nunca da requisicao, para ninguem ver pedidos de outro.
     // O Service ajusta page/pageSize (padrao 10, maximo 50) e devolvemos os valores usados.
+    // Reservas canceladas nao aparecem para o comprador.
     [HttpGet]
     public async Task<ActionResult<PaginatedResultDto<HistoricoPedidoDto>>> GetHistorico(
         [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
@@ -72,6 +73,29 @@ public class PedidosController : ControllerBase
             ConcluirPedidoStatus.Sucesso => Ok(resultado),
             ConcluirPedidoStatus.NaoEncontrado => NotFound(resultado),
             ConcluirPedidoStatus.Proibido => Forbid(),
+            _ => Conflict(resultado)
+        };
+    }
+
+    // POST api/pedidos/{id}/cancelar
+    // O comprador cancela a PROPRIA reserva: o estoque volta e o pedido some do
+    // historico dele (o vendedor continua vendo, marcado como Cancelado).
+    // O comprador vem SEMPRE do token (claim "sub"), nunca da requisicao.
+    // 200 cancelada | 401 token sem "sub" | 403 pedido de outro comprador |
+    // 404 pedido inexistente | 409 nao e Reserva, ou nao esta mais Reservada.
+    [HttpPost("{id:guid}/cancelar")]
+    public async Task<IActionResult> Cancelar(Guid id)
+    {
+        if (!Guid.TryParse(User.FindFirst("sub")?.Value, out var compradorId))
+            return Unauthorized();
+
+        var resultado = await _pedidoService.CancelarReservaAsync(id, compradorId);
+
+        return resultado.Status switch
+        {
+            CancelarReservaStatus.Sucesso => Ok(resultado),
+            CancelarReservaStatus.NaoEncontrado => NotFound(resultado),
+            CancelarReservaStatus.Proibido => Forbid(),
             _ => Conflict(resultado)
         };
     }

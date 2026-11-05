@@ -28,12 +28,15 @@ public class PedidoRepository : IPedidoRepository
 
     // Historico de pedidos: so os pedidos do comprador informado, do mais
     // recente para o mais antigo, consulta somente leitura, por isso AsNoTracking.
+    // CANCELAR: reservas canceladas somem da visao do comprador (a linha continua no
+    // banco com Status = Cancelado, e o vendedor ainda a ve). O filtro vem antes do
+    // CountAsync para o total e a paginacao tambem as descartarem.
     public async Task<(IReadOnlyList<Pedido> Pedidos, int Total)> GetByCompradorAsync(
         Guid compradorId, int page, int pageSize)
     {
         var pedidosDoComprador = _context.Set<Pedido>()
             .AsNoTracking()
-            .Where(p => p.CompradorId == compradorId);
+            .Where(p => p.CompradorId == compradorId && p.Status != PedidoStatus.Cancelado);
 
         var total = await pedidosDoComprador.CountAsync();
 
@@ -123,6 +126,25 @@ public class PedidoRepository : IPedidoRepository
             .Where(p => p.Id == pedidoId && p.Status == PedidoStatus.Reservado)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(p => p.Status, PedidoStatus.Expirado)
+                .SetProperty(p => p.UpdatedAt, (DateTime?)agora));
+
+        return linhasAfetadas == 1;
+    }
+
+    // CANCELAR: UPDATE condicional (WHERE Status = Reservado AND Tipo = Reserva), no
+    // mesmo espirito de TryExpirarAsync. Se o pedido mudou de estado antes (expirou,
+    // foi concluido, ou ja foi cancelado por um duplo clique), nenhuma linha e afetada
+    // e o chamador NAO devolve o estoque -- evitando devolucao dupla.
+    public async Task<bool> TryCancelarAsync(Guid pedidoId)
+    {
+        var agora = DateTime.UtcNow;
+
+        var linhasAfetadas = await _context.Set<Pedido>()
+            .Where(p => p.Id == pedidoId
+                && p.Status == PedidoStatus.Reservado
+                && p.Tipo == TipoPedido.Reserva)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(p => p.Status, PedidoStatus.Cancelado)
                 .SetProperty(p => p.UpdatedAt, (DateTime?)agora));
 
         return linhasAfetadas == 1;

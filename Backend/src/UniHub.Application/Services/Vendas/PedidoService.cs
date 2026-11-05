@@ -289,4 +289,51 @@ public class PedidoService
 
         return (lista, total, page, pageSize);
     }
+
+    // CANCELAR: cancelamento de uma reserva pelo comprador. compradorId vem do token
+    // (claim "sub") no Controller, nunca da requisicao.
+    // Ordem: existe? -> o pedido e do usuario? -> a regra permite (so Reserva ainda
+    // Reservada)? -> gravacao atomica -> devolve o estoque (so quem ganhou a corrida).
+    public async Task<CancelarReservaResultDto> CancelarReservaAsync(Guid pedidoId, Guid compradorId)
+    {
+        var pedido = await _pedidoRepository.GetByIdAsync(pedidoId);
+        if (pedido is null)
+        {
+            return new CancelarReservaResultDto(CancelarReservaStatus.NaoEncontrado, "Pedido nao encontrado.");
+        }
+
+        // Anti-IDOR: so o comprador pode cancelar o proprio pedido. A checagem vem
+        // antes da regra de estado para nao revelar o status a quem nao e dono.
+        if (pedido.CompradorId != compradorId)
+        {
+            return new CancelarReservaResultDto(CancelarReservaStatus.Proibido, "Este pedido nao e seu.");
+        }
+
+        // A regra de transicao fica na entidade (so Reserva ainda Reservada). Aqui so
+        // validamos: nada e salvo por este objeto (a gravacao e o UPDATE abaixo).
+        try
+        {
+            pedido.Cancelar();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return new CancelarReservaResultDto(CancelarReservaStatus.Conflito, ex.Message);
+        }
+
+        // UPDATE condicional: se o pedido mudou de estado entre a leitura e a gravacao
+        // (expirou, foi concluido ou ja foi cancelado por um duplo clique), nenhuma
+        // linha e afetada e o estoque NAO e devolvido (ja foi, ou sera, pelo outro caminho).
+        if (!await _pedidoRepository.TryCancelarAsync(pedidoId))
+        {
+            return new CancelarReservaResultDto(CancelarReservaStatus.Conflito, "A reserva mudou de estado e nao pode mais ser cancelada.");
+        }
+
+        // So quem ganhou a corrida chega aqui: o estoque volta uma unica vez.
+        foreach (var item in pedido.Itens)
+        {
+            await _produtoRepository.IncrementarEstoqueAsync(item.ProdutoId, item.Quantidade);
+        }
+
+        return new CancelarReservaResultDto(CancelarReservaStatus.Sucesso, "Reserva cancelada com sucesso.");
+    }
 }
