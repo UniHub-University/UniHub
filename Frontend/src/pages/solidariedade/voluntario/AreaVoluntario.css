@@ -1,0 +1,195 @@
+/* Área do voluntário (Ação Solidária). Usa as variáveis da identidade visual. */
+
+.area-voluntario {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 20px 64px;
+  color: var(--cor-verde);
+}
+
+.area-voluntario__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.area-voluntario__topo h1 {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+}
+
+.area-voluntario__voltar {
+  font-size: 0.95rem;
+  color: var(--cor-tan);
+  white-space: nowrap;
+}
+
+/* ------------------------------ Avisos ------------------------------ */
+
+.area-voluntario__aviso {
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  background-color: var(--cor-superficie);
+  color: var(--cor-tan);
+}
+
+.area-voluntario__aviso--erro {
+  color: var(--cor-erro);
+  background-color: rgba(155, 44, 44, 0.08);
+  border: 1px solid rgba(155, 44, 44, 0.25);
+}
+
+.area-voluntario__aviso--ok {
+  color: var(--cor-verde);
+  background-color: rgba(42, 69, 21, 0.08);
+  border: 1px solid rgba(42, 69, 21, 0.2);
+}
+
+/* ------------------------------ Cartões ------------------------------ */
+
+.area-voluntario__cartao {
+  padding: 24px;
+  margin-bottom: 20px;
+  background-color: var(--cor-superficie);
+  border: 1px solid rgba(177, 149, 99, 0.3);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+}
+
+.area-voluntario__cartao h2 {
+  font-family: var(--fonte-titulo);
+  font-size: 1.3rem;
+  margin: 0 0 8px;
+}
+
+.area-voluntario__cabecalho-cartao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.area-voluntario__texto {
+  line-height: 1.6;
+  color: var(--cor-verde);
+  opacity: 0.9;
+  margin: 8px 0 18px;
+}
+
+.area-voluntario__selo {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.area-voluntario__selo--ativo {
+  background-color: var(--cor-verde);
+  color: var(--cor-creme);
+}
+
+.area-voluntario__selo--pausado {
+  background-color: rgba(177, 149, 99, 0.25);
+  color: #6b5a38;
+}
+
+/* ------------------------------ Áreas (checkboxes) ------------------------------ */
+
+.area-voluntario__areas {
+  border: 0;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 10px;
+}
+
+.area-voluntario__legenda {
+  padding: 0;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cor-tan);
+}
+
+.area-voluntario__opcao {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(177, 149, 99, 0.35);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.area-voluntario__opcao input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--cor-verde);
+}
+
+.area-voluntario__dica {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--cor-tan);
+}
+
+/* ------------------------------ Botões ------------------------------ */
+
+.area-voluntario__botao {
+  margin-top: 18px;
+  padding: 11px 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--cor-verde);
+  color: var(--cor-creme);
+  font-weight: 600;
+  font-family: var(--fonte-corpo);
+  cursor: pointer;
+}
+
+.area-voluntario__botao:hover:not(:disabled) {
+  background-color: var(--cor-verde-escuro);
+}
+
+.area-voluntario__botao:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.area-voluntario__botao--secundario {
+  background-color: transparent;
+  color: var(--cor-verde);
+  border: 2px solid var(--cor-verde);
+}
+
+.area-voluntario__botao--secundario:hover:not(:disabled) {
+  background-color: rgba(42, 69, 21, 0.08);
+}
+
+/* ------------------------------ Acessos ------------------------------ */
+
+.area-voluntario__acessos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.area-voluntario__link {
+  font-weight: 600;
+  color: var(--cor-verde);
+}
+
+@media (max-width: 520px) {
+  .area-voluntario__topo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
