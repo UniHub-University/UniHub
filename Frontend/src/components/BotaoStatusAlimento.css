@@ -39,3 +39,10 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+
+.botao-status-alimento .botao-status-alimento__aviso {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: var(--cor-tan, #8a7345);
+}
