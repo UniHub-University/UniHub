@@ -21,6 +21,7 @@ que já existe no projeto.
   - Galeria / múltiplas fotos por produto (apenas 1 por produto; galeria é melhoria futura).
   - Novo endpoint de upload (o `POST /api/upload/imagem?pasta=produtos` já existe e é reusado).
   - Edição/recorte de imagem no cliente.
+  - Remoção automática da imagem antiga do Cloudinary ao trocar/remover a foto (fica para o final da BRV — ver passo 4 e pendências).
 
 ## Decisões de design
 
@@ -80,6 +81,12 @@ simples (trocar a constante no front), decidido durante/após a implementação.
    `AlimentoService` (criar e editar). Na edição: ao **trocar** a imagem, remover a antiga
    do Cloudinary; ao **remover** (URL nula), apagar a antiga e deixar `ImagemUrl = null`.
    Reusar `_imageStorage.DeleteAsync` / `ExtrairPublicId` (padrão do `VendedorService`).
+4. **[Application/Service]** Persistir e mapear `ImagemUrl` no `AlimentoService` e no
+   `ItensBazarController` (o Bazar não tem service próprio — a lógica fica no controller),
+   tanto ao criar quanto ao editar. URL vazia é normalizada para `null`.
+   > A **remoção da imagem antiga** do Cloudinary (ao trocar/remover) foi adiada: exige
+   > injetar `IImageStorageService` no controller do Bazar e mexer em DI. Fica para o
+   > final da BRV (padrão a reusar: `VendedorService.RemoverImagemAntigaAsync`).
 5. **[Front/Bazar]** `FormularioItemBazar`: seletor de imagem + preview + opção de remover
    → no Salvar, faz upload (`pasta=produtos`) e envia a URL. Validação no front (máx. 3 MB
    + tipos). Molde: `Perfil.jsx`.
@@ -118,3 +125,4 @@ simples (trocar a constante no front), decidido durante/após a implementação.
 - **Colisão de arquivos no front:** as Frentes 3 e 4 também tocam formulários, cards e
   detalhe, mas em partes diferentes do arquivo (features distintas), então o Git tende a
   fazer o merge automático. Atenção leve: alinhar quem mergeia primeiro para reduzir retrabalho.
+- **Remoção de imagem órfã no Cloudinary:** adiada nesta leva. Ao trocar ou remover a foto de um produto, a antiga continua no Cloudinary por enquanto. Implementar no final da BRV, idealmente junto com o Perfil (que hoje remove) para padronizar.
