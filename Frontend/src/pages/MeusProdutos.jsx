@@ -3,18 +3,20 @@
 // Consome GET /api/perfil/vendedor/produtos (vendedor derivado do token) e lista
 // os produtos do vendedor em qualquer status, inclusive esgotados/inativos (que a
 // busca pública esconde). Cada item permite editar (reusa o formulário existente)
-// e excluir (reusa o BotaoExcluirItemBazar). Atalho para adicionar um novo produto.
+// e remover: item do Bazar é excluído (BotaoExcluirItemBazar); alimento é
+// inativado/reativado (BotaoStatusAlimento, BRV-192), pois é reversível.
+// Atalho para adicionar um novo produto.
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiPlusCircle, FiEdit2 } from 'react-icons/fi';
 
 import { listarMeusProdutos } from '../services/vendedor.js';
-import { inativarAlimento } from '../services/alimentos.js';
 import { excluirItemBazar } from '../services/itensBazar.js';
 import { ApiError } from '../services/api.js';
 import { rotuloStatus } from '../services/rotulosProduto.js';
 import BotaoExcluirItemBazar from '../components/BotaoExcluirItemBazar.jsx';
+import BotaoStatusAlimento from '../components/BotaoStatusAlimento.jsx';
 import './MeusProdutos.css';
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
@@ -33,12 +35,15 @@ export default function MeusProdutos() {
   const [produtos, setProdutos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
+  // Ao mudar, refaz a busca (usado depois de inativar/reativar um alimento).
+  const [recarregar, setRecarregar] = useState(0);
 
   useEffect(() => {
     let ativo = true;
 
     async function carregar() {
-      setCarregando(true);
+      // "Carregando…" só na primeira carga; nas recargas a lista continua visível.
+      if (recarregar === 0) setCarregando(true);
       setErro('');
       try {
         const dados = await listarMeusProdutos();
@@ -59,11 +64,16 @@ export default function MeusProdutos() {
     return () => {
       ativo = false;
     };
-  }, []);
+  }, [recarregar]);
 
-  // Remove da lista o item excluído, sem precisar recarregar a página.
+  // Remove da lista o item do Bazar excluído, sem precisar recarregar a página.
   function aoExcluir(id) {
     setProdutos((atuais) => atuais.filter((p) => p.id !== id));
+  }
+
+  // Alimento inativado/reativado: busca de novo para refletir o status do servidor.
+  function aoAlterarStatus() {
+    setRecarregar((n) => n + 1);
   }
 
   return (
@@ -132,12 +142,21 @@ export default function MeusProdutos() {
                   <FiEdit2 aria-hidden="true" />
                   Editar
                 </Link>
-                <BotaoExcluirItemBazar
-                  id={produto.id}
-                  nome={produto.nome}
-                  onExcluido={aoExcluir}
-                  aoExcluir={produto.tipo === 'lanche' ? inativarAlimento : excluirItemBazar}
-                />
+                {produto.tipo === 'lanche' ? (
+                  <BotaoStatusAlimento
+                    id={produto.id}
+                    nome={produto.nome}
+                    status={produto.status}
+                    onAlterado={aoAlterarStatus}
+                  />
+                ) : (
+                  <BotaoExcluirItemBazar
+                    id={produto.id}
+                    nome={produto.nome}
+                    onExcluido={aoExcluir}
+                    aoExcluir={excluirItemBazar}
+                  />
+                )}
               </div>
             </li>
           ))}
