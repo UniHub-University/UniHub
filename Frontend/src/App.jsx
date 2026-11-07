@@ -20,6 +20,7 @@ import Alimentacao from './pages/Alimentacao.jsx';
 import DetalheAlimentacao from './pages/DetalheAlimentacao.jsx';
 import SolidariedadeHub from './pages/solidariedade/SolidariedadeHub.jsx';
 import EmConstrucao from './pages/solidariedade/EmConstrucao.jsx';
+import NovaSolicitacao from './pages/solidariedade/solicitante/NovaSolicitacao.jsx';
 
 function App() {
   return (
@@ -122,7 +123,7 @@ function App() {
         />
         <Route
           path="/solidariedade/solicitar"
-          element={<Titulo texto="Pedir apoio"><EmConstrucao titulo="Pedir apoio" /></Titulo>}
+          element={<Titulo texto="Pedir apoio"><NovaSolicitacao /></Titulo>}
         />
         <Route
           path="/solidariedade/minhas"
