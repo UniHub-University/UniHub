@@ -6,6 +6,7 @@ namespace UniHub.Application.DTOs.Alimentacao;
 public record CriarAlimentoDto(
     string Nome,
     string? Descricao,
+    string? ImagemUrl,
     decimal Preco,
     int QuantidadeDisponivel,
     string Categoria,
@@ -16,6 +17,7 @@ public record CriarAlimentoDto(
 public record AtualizarAlimentoDto(
     string Nome,
     string? Descricao,
+    string? ImagemUrl,
     decimal Preco,
     int QuantidadeDisponivel,
     string Categoria,
@@ -27,6 +29,7 @@ public record AlimentoResumoDto(
     Guid Id,
     string Nome,
     string? Descricao,
+    string? ImagemUrl,
     decimal Preco,
     int QuantidadeDisponivel,
     string Categoria,
@@ -41,6 +44,7 @@ public record AlimentoRespostaDto(
     Guid Id,
     string Nome,
     string? Descricao,
+    string? ImagemUrl,
     decimal Preco,
     int QuantidadeDisponivel,
     string Categoria,
