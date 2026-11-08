@@ -6,6 +6,7 @@ namespace UniHub.Application.DTOs.Bazar;
 public record CriarItemBazarDto(
     string Nome,
     string? Descricao,
+    string? ImagemUrl,
     decimal Preco,
     int QuantidadeDisponivel,
     string Categoria,
@@ -15,6 +16,7 @@ public record CriarItemBazarDto(
 public record AtualizarItemBazarDto(
     string Nome,
     string? Descricao,
+    string? ImagemUrl,
     decimal Preco,
     int QuantidadeDisponivel,
     string Categoria,
@@ -26,6 +28,7 @@ public record ItemBazarResumoDto(
     Guid Id,
     string Nome,
     string? Descricao,
+    string? ImagemUrl,
     decimal Preco,
     int QuantidadeDisponivel,
     string Categoria,
@@ -39,6 +42,7 @@ public record ItemBazarRespostaDto(
     Guid Id,
     string Nome,
     string? Descricao,
+    string? ImagemUrl,
     decimal Preco,
     int QuantidadeDisponivel,
     string Categoria,
