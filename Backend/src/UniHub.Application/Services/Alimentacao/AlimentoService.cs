@@ -56,6 +56,7 @@ public class AlimentoService
         {
             Nome = dto.Nome.Trim(),
             Descricao = dto.Descricao?.Trim(),
+            ImagemUrl = string.IsNullOrWhiteSpace(dto.ImagemUrl) ? null : dto.ImagemUrl.Trim(),
             Preco = dto.Preco,
             QuantidadeDisponivel = dto.QuantidadeDisponivel,
             Categoria = dto.Categoria.Trim(),
@@ -107,6 +108,7 @@ public class AlimentoService
 
         alimento.Nome = dto.Nome.Trim();
         alimento.Descricao = dto.Descricao?.Trim();
+        alimento.ImagemUrl = string.IsNullOrWhiteSpace(dto.ImagemUrl) ? null : dto.ImagemUrl.Trim();
         alimento.Preco = dto.Preco;
         alimento.QuantidadeDisponivel = dto.QuantidadeDisponivel;
         alimento.Categoria = dto.Categoria.Trim();
@@ -221,6 +223,7 @@ public class AlimentoService
             alimento.Id,
             alimento.Nome,
             alimento.Descricao,
+            alimento.ImagemUrl,
             alimento.Preco,
             alimento.QuantidadeDisponivel,
             alimento.Categoria,
@@ -238,6 +241,7 @@ public class AlimentoService
             alimento.Id,
             alimento.Nome,
             alimento.Descricao,
+            alimento.ImagemUrl,
             alimento.Preco,
             alimento.QuantidadeDisponivel,
             alimento.Categoria,

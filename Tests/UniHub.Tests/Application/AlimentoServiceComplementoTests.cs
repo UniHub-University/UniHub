@@ -89,6 +89,7 @@ public class AlimentoServiceComplementoTests
         var dto = new CriarAlimentoDto(
             "Coxinha",
             null,
+            null,
             -1,              // preço negativo
             2,
             "Salgado",
@@ -107,6 +108,7 @@ public class AlimentoServiceComplementoTests
     {
         var dto = new CriarAlimentoDto(
             "Coxinha",
+            null,
             null,
             5,
             2,

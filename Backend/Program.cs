@@ -18,6 +18,7 @@ using UniHub.Application.Interfaces.Alimentacao;
 using UniHub.Application.Services.Alimentacao;
 using UniHub.Infrastructure.Repositories.Alimentacao;
 using UniHub.API.BackgroundServices;
+using UniHub.API.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,12 @@ if (!string.IsNullOrWhiteSpace(port))
 }
 
 builder.Services.AddControllers();
+
+// Frente 2 (BRV-185): SignalR para o Painel do Vendedor em tempo real.
+// O hub (PainelHub) agrupa cada conexao em "vendedor:{id}"; a emissao de
+// eventos chega nas tasks A3/A4. A leitura do JWT via access_token na query
+// string e o AllowCredentials() no CORS vem na task A2 (PR isolado).
+builder.Services.AddSignalR();
 
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("Cloudinary"));
@@ -56,6 +63,7 @@ builder.Services.AddScoped<VendedorService>();
 builder.Services.AddScoped<VoluntarioService>();
 
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+builder.Services.AddScoped<IVendedorConsultaRepository, VendedorConsultaRepository>();
 builder.Services.AddScoped<IProdutoBuscaRepository, ProdutoBuscaRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
@@ -97,6 +105,28 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero,
         RoleClaimType = "role"
     };
+
+    // SignalR (BRV-185/196): o handshake por WebSocket nao envia o header
+    // "Authorization" -- o cliente manda o JWT na query string (?access_token=...).
+    // Copiamos esse valor para o contexto APENAS quando a requisicao e para um
+    // hub (path iniciando em "/hubs"), para nao abrir um segundo canal de
+    // autenticacao nas rotas REST (essas continuam so pelo header).
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) &&
+                path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
+    };
 });
 // --- FIM DA CONFIGURAÇÃO JWT ---
 
@@ -126,9 +156,14 @@ builder.Services.AddCors(options =>
         // Verifica se o sistema está rodando em ambiente local (Development)
         if (builder.Environment.IsDevelopment())
         {
-            policy.AllowAnyOrigin()
+            // SignalR autenticado exige AllowCredentials(), que e INCOMPATIVEL
+            // com AllowAnyOrigin(). Em Development liberamos qualquer origem via
+            // SetIsOriginAllowed (equivalente ao "any", porem compativel com
+            // credenciais) para manter o fluxo de dev sem travar o hub.
+            policy.SetIsOriginAllowed(_ => true)
                   .AllowAnyMethod()
-                  .AllowAnyHeader();
+                  .AllowAnyHeader()
+                  .AllowCredentials();
         }
         else
         {
@@ -146,9 +181,12 @@ builder.Services.AddCors(options =>
                 allowedOrigins = ["https://unihub.com.br", "https://unihub-app.vercel.app"];
             }
 
+            // WithOrigins (lista fechada) + AllowCredentials: combinacao exigida
+            // pelo SignalR autenticado. Em producao a origem e a do front oficial.
             policy.WithOrigins(allowedOrigins)
                   .AllowAnyMethod()
-                  .AllowAnyHeader();
+                  .AllowAnyHeader()
+                  .AllowCredentials();
         }
     });
 });
@@ -170,6 +208,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Endpoint do hub do Painel do Vendedor (Frente 2 / BRV-185). O path
+// "/hubs/painel" e o combinado no contrato dos eventos (T0) com a trilha
+// do front. O [Authorize] no PainelHub exige JWT valido para conectar.
+app.MapHub<PainelHub>("/hubs/painel");
 
 // Health check leve e publico. Serve a dois propositos:
 // 1. Render usa para saber se o servico subiu com sucesso.

@@ -29,6 +29,11 @@ public abstract class Produto
 
     public string? Descricao { get; set; }
 
+    // URL pública da imagem do produto (1 foto por anúncio), hospedada no
+    // Cloudinary via POST /api/upload/imagem?pasta=produtos. 
+    // Opcional -> um produto pode não ter imagem
+    public string? ImagemUrl { get; set; }
+
     public decimal Preco { get; set; }
 
     public int QuantidadeDisponivel { get; set; }

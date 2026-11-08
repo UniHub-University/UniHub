@@ -22,6 +22,7 @@ import SolidariedadeHub from './pages/solidariedade/SolidariedadeHub.jsx';
 import EmConstrucao from './pages/solidariedade/EmConstrucao.jsx';
 import NovaSolicitacao from './pages/solidariedade/solicitante/NovaSolicitacao.jsx';
 import MinhasSolicitacoes from './pages/solidariedade/solicitante/MinhasSolicitacoes.jsx';
+import AreaVoluntario from './pages/solidariedade/voluntario/AreaVoluntario.jsx';
 
 function App() {
   return (
@@ -132,7 +133,7 @@ function App() {
         />
         <Route
           path="/solidariedade/voluntario"
-          element={<Titulo texto="Voluntário"><EmConstrucao titulo="Área do voluntário" /></Titulo>}
+          element={<Titulo texto="Área do voluntário"><AreaVoluntario /></Titulo>}
         />
         <Route
           path="/solidariedade/sugestoes"

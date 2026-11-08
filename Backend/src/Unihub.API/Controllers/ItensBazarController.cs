@@ -32,6 +32,7 @@ public class ItensBazarController : ControllerBase
         {
             Nome = dto.Nome,
             Descricao = dto.Descricao,
+            ImagemUrl = string.IsNullOrWhiteSpace(dto.ImagemUrl) ? null : dto.ImagemUrl,
             Preco = dto.Preco,
             QuantidadeDisponivel = dto.QuantidadeDisponivel,
             Categoria = dto.Categoria,
@@ -104,6 +105,7 @@ public class ItensBazarController : ControllerBase
 
         item.Nome = dto.Nome;
         item.Descricao = dto.Descricao;
+        item.ImagemUrl = string.IsNullOrWhiteSpace(dto.ImagemUrl) ? null : dto.ImagemUrl;
         item.Preco = dto.Preco;
         item.QuantidadeDisponivel = dto.QuantidadeDisponivel;
         item.Categoria = dto.Categoria;
@@ -139,6 +141,7 @@ public class ItensBazarController : ControllerBase
             item.Id, 
             item.Nome, 
             item.Descricao, 
+            item.ImagemUrl,
             item.Preco,
             item.QuantidadeDisponivel, 
             item.Categoria, 
@@ -153,6 +156,7 @@ public class ItensBazarController : ControllerBase
             item.Id,
             item.Nome,
             item.Descricao,
+            item.ImagemUrl,
             item.Preco,
             item.QuantidadeDisponivel,
             item.Categoria,

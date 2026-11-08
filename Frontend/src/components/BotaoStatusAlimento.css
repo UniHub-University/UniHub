@@ -1,0 +1,48 @@
+/* Botão "Reativar anúncio" do alimento do vendedor.
+   O botão "Inativar anúncio" reaproveita o estilo vermelho de
+   .formulario-bazar-botao-excluir (definido em FormularioBazar.css).
+
+   O seletor usa o wrapper (.botao-status-alimento) para ganhar especificidade
+   e não ser sobrescrito pelos estilos de .formulario-bazar-exclusao. */
+
+.botao-status-alimento .botao-status-alimento__reativar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 12px 18px;
+  border: 1px solid var(--cor-verde, #2a4515);
+  border-radius: 10px;
+  background: var(--cor-verde, #2a4515);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.botao-status-alimento .botao-status-alimento__reativar svg {
+  color: #fff;
+}
+
+.botao-status-alimento .botao-status-alimento__reativar:hover:not(:disabled) {
+  background: var(--cor-verde-escuro, #1d3110);
+  border-color: var(--cor-verde-escuro, #1d3110);
+}
+
+.botao-status-alimento .botao-status-alimento__reativar:focus-visible {
+  outline: 3px solid var(--cor-verde, #2a4515);
+  outline-offset: 3px;
+}
+
+.botao-status-alimento .botao-status-alimento__reativar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+.botao-status-alimento .botao-status-alimento__aviso {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: var(--cor-tan, #8a7345);
+}
