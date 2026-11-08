@@ -132,6 +132,45 @@
   letter-spacing: 0.5px;
 }
 
+.minhas-solicitacoes__match {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(42, 69, 21, 0.2);
+  border-radius: 10px;
+  background: rgba(177, 149, 99, 0.08);
+}
+
+.minhas-solicitacoes__match-info {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.minhas-solicitacoes__match-info:last-child {
+  margin-bottom: 0;
+}
+
+.minhas-solicitacoes__revelar {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cor-creme);
+  background: var(--cor-verde);
+  border: 1px solid var(--cor-verde);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+
+.minhas-solicitacoes__revelar:hover:not(:disabled) {
+  background: var(--cor-verde-escuro);
+}
+
+.minhas-solicitacoes__revelar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .minhas-solicitacoes__item-acoes {
   margin-top: 14px;
   display: flex;

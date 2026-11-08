@@ -77,6 +77,13 @@ export function listarSugestoes() {
   return api.get('/api/correspondencias/sugestoes');
 }
 
+// Correspondências das solicitações do SOLICITANTE logado (quem aceitou cada uma).
+// Nome/contato do voluntário só vêm preenchidos após o solicitante revelar sua
+// identidade; até lá, só o código público do voluntário.
+export function listarMinhasCorrespondencias() {
+  return api.get('/api/correspondencias/minhas');
+}
+
 // Voluntário aceita uma solicitação. 409 se outra pessoa aceitou primeiro.
 export function aceitarCorrespondencia(solicitacaoId) {
   return api.post('/api/correspondencias/aceitar', { solicitacaoId });

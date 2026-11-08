@@ -4,15 +4,25 @@
 // em qualquer status, para ele acompanhar o andamento, e permite cancelar as
 // que ainda estão abertas ou em andamento.
 //
-// LGPD: a lista mostra apenas dados da própria solicitação (código público,
-// categoria, descrição, status). Nenhuma identidade de terceiros é exposta.
+// LGPD: a lista mostra o voluntário por código público (pseudônimo). O nome/
+// contato do voluntário só aparece depois que o solicitante revela a própria
+// identidade — ação que parte sempre dele, nunca automática.
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { listarMinhasSolicitacoes, cancelarSolicitacao } from '../../../services/acaoSolidaria.js';
+import {
+  listarMinhasSolicitacoes,
+  cancelarSolicitacao,
+  listarMinhasCorrespondencias,
+  revelarIdentidade,
+} from '../../../services/acaoSolidaria.js';
 import { rotuloCategoria, rotuloStatusSolicitacao } from '../../../services/rotulosSolidariedade.js';
 import { ApiError } from '../../../services/api.js';
 import './MinhasSolicitacoes.css';
+
+// Status de correspondência: Aceita pelo voluntário (1) é quando faz sentido
+// o solicitante revelar a própria identidade.
+const CORRESPONDENCIA_ACEITA = 1;
 
 function formatarData(iso) {
   return new Date(iso).toLocaleDateString('pt-BR', { dateStyle: 'short' });
@@ -31,17 +41,35 @@ function podeCancelar(status) {
 
 export default function MinhasSolicitacoes() {
   const [solicitacoes, setSolicitacoes] = useState([]);
+  // Correspondências indexadas por solicitacaoId (pega a aceita, se houver).
+  const [correspondenciaPorSolicitacao, setCorrespondenciaPorSolicitacao] = useState({});
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [cancelandoId, setCancelandoId] = useState(null);
+  const [revelandoId, setRevelandoId] = useState(null);
 
   useEffect(() => {
     let cancelado = false;
 
-    listarMinhasSolicitacoes()
-      .then((dados) => {
+    // Busca solicitações e correspondências em paralelo. A falha nas
+    // correspondências não derruba a tela — só desativa a revelação.
+    Promise.all([
+      listarMinhasSolicitacoes(),
+      listarMinhasCorrespondencias().catch(() => []),
+    ])
+      .then(([listaSolicitacoes, listaCorrespondencias]) => {
         if (cancelado) return;
-        setSolicitacoes(Array.isArray(dados) ? dados : []);
+        setSolicitacoes(Array.isArray(listaSolicitacoes) ? listaSolicitacoes : []);
+
+        const indice = {};
+        (Array.isArray(listaCorrespondencias) ? listaCorrespondencias : []).forEach((c) => {
+          // Prioriza uma correspondência aceita/revelada sobre uma cancelada.
+          const atual = indice[c.solicitacaoId];
+          if (!atual || c.status === CORRESPONDENCIA_ACEITA || c.identidadeRevelada) {
+            indice[c.solicitacaoId] = c;
+          }
+        });
+        setCorrespondenciaPorSolicitacao(indice);
         setErro('');
       })
       .catch((e) => {
@@ -71,6 +99,27 @@ export default function MinhasSolicitacoes() {
       setErro(e instanceof ApiError ? e.message : 'Não foi possível cancelar a solicitação.');
     } finally {
       setCancelandoId(null);
+    }
+  }
+
+  async function aoRevelarIdentidade(correspondencia) {
+    setErro('');
+    setRevelandoId(correspondencia.id);
+    try {
+      await revelarIdentidade(correspondencia.id);
+      // Marca como revelada localmente. O nome/contato do voluntário só vêm
+      // numa nova busca; aqui sinalizamos que a identidade foi autorizada.
+      setCorrespondenciaPorSolicitacao((atual) => ({
+        ...atual,
+        [correspondencia.solicitacaoId]: {
+          ...atual[correspondencia.solicitacaoId],
+          identidadeRevelada: true,
+        },
+      }));
+    } catch (e) {
+      setErro(e instanceof ApiError ? e.message : 'Não foi possível revelar sua identidade.');
+    } finally {
+      setRevelandoId(null);
     }
   }
 
@@ -104,31 +153,66 @@ export default function MinhasSolicitacoes() {
 
       {!carregando && !erro && solicitacoes.length > 0 && (
         <ul className="minhas-solicitacoes__lista">
-          {solicitacoes.map((s) => (
-            <li key={s.id} className="minhas-solicitacoes__item">
-              <div className="minhas-solicitacoes__item-topo">
-                <span className="minhas-solicitacoes__categoria">{rotuloCategoria(s.categoria)}</span>
-                <span className={classeStatus(s.status)}>{rotuloStatusSolicitacao(s.status)}</span>
-              </div>
-              <p className="minhas-solicitacoes__descricao">{s.descricao}</p>
-              <div className="minhas-solicitacoes__item-base">
-                <span className="minhas-solicitacoes__codigo">{s.codigoPublico}</span>
-                <span className="minhas-solicitacoes__data">{formatarData(s.createdAt)}</span>
-              </div>
-              {podeCancelar(s.status) && (
-                <div className="minhas-solicitacoes__item-acoes">
-                  <button
-                    type="button"
-                    className="minhas-solicitacoes__cancelar"
-                    onClick={() => aoCancelar(s.id)}
-                    disabled={cancelandoId === s.id}
-                  >
-                    {cancelandoId === s.id ? 'Cancelando…' : 'Cancelar solicitação'}
-                  </button>
+          {solicitacoes.map((s) => {
+            const correspondencia = correspondenciaPorSolicitacao[s.id];
+            const temVoluntarioAceito =
+              correspondencia && correspondencia.status === CORRESPONDENCIA_ACEITA;
+
+            return (
+              <li key={s.id} className="minhas-solicitacoes__item">
+                <div className="minhas-solicitacoes__item-topo">
+                  <span className="minhas-solicitacoes__categoria">{rotuloCategoria(s.categoria)}</span>
+                  <span className={classeStatus(s.status)}>{rotuloStatusSolicitacao(s.status)}</span>
                 </div>
-              )}
-            </li>
-          ))}
+                <p className="minhas-solicitacoes__descricao">{s.descricao}</p>
+                <div className="minhas-solicitacoes__item-base">
+                  <span className="minhas-solicitacoes__codigo">{s.codigoPublico}</span>
+                  <span className="minhas-solicitacoes__data">{formatarData(s.createdAt)}</span>
+                </div>
+
+                {/* Correspondência: um voluntário aceitou ajudar nesta solicitação. */}
+                {temVoluntarioAceito && (
+                  <div className="minhas-solicitacoes__match">
+                    {correspondencia.identidadeRevelada ? (
+                      <p className="minhas-solicitacoes__match-info">
+                        Identidade revelada ao voluntário{' '}
+                        <strong>{correspondencia.nomeVoluntario || correspondencia.codigoPublicoVoluntario}</strong>
+                        {correspondencia.contatoVoluntario ? ` · ${correspondencia.contatoVoluntario}` : ''}.
+                      </p>
+                    ) : (
+                      <>
+                        <p className="minhas-solicitacoes__match-info">
+                          O voluntário <strong>{correspondencia.codigoPublicoVoluntario}</strong> aceitou
+                          ajudar. Para combinar os detalhes, você pode revelar sua identidade a ele.
+                        </p>
+                        <button
+                          type="button"
+                          className="minhas-solicitacoes__revelar"
+                          onClick={() => aoRevelarIdentidade(correspondencia)}
+                          disabled={revelandoId === correspondencia.id}
+                        >
+                          {revelandoId === correspondencia.id ? 'Revelando…' : 'Revelar minha identidade'}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {podeCancelar(s.status) && (
+                  <div className="minhas-solicitacoes__item-acoes">
+                    <button
+                      type="button"
+                      className="minhas-solicitacoes__cancelar"
+                      onClick={() => aoCancelar(s.id)}
+                      disabled={cancelandoId === s.id}
+                    >
+                      {cancelandoId === s.id ? 'Cancelando…' : 'Cancelar solicitação'}
+                    </button>
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </main>
