@@ -132,6 +132,33 @@
   letter-spacing: 0.5px;
 }
 
+.minhas-solicitacoes__item-acoes {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.minhas-solicitacoes__cancelar {
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cor-erro);
+  background: transparent;
+  border: 1px solid rgba(155, 44, 44, 0.4);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+
+.minhas-solicitacoes__cancelar:hover:not(:disabled) {
+  background: rgba(155, 44, 44, 0.08);
+}
+
+.minhas-solicitacoes__cancelar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .minhas-solicitacoes :focus-visible {
   outline: 3px solid var(--cor-tan);
   outline-offset: 3px;

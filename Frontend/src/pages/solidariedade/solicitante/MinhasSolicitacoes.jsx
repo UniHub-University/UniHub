@@ -1,16 +1,15 @@
 // Tela "Minhas solicitações" do lado SOLICITANTE da Ação Solidária.
 //
 // Lista as solicitações do próprio usuário (GET /api/SolicitacaoApoio/minhas),
-// em qualquer status, para ele acompanhar o andamento. Esta entrega cobre a
-// listagem e a exibição de status; as ações (cancelar, revelar identidade)
-// entram em commits seguintes.
+// em qualquer status, para ele acompanhar o andamento, e permite cancelar as
+// que ainda estão abertas ou em andamento.
 //
 // LGPD: a lista mostra apenas dados da própria solicitação (código público,
 // categoria, descrição, status). Nenhuma identidade de terceiros é exposta.
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { listarMinhasSolicitacoes } from '../../../services/acaoSolidaria.js';
+import { listarMinhasSolicitacoes, cancelarSolicitacao } from '../../../services/acaoSolidaria.js';
 import { rotuloCategoria, rotuloStatusSolicitacao } from '../../../services/rotulosSolidariedade.js';
 import { ApiError } from '../../../services/api.js';
 import './MinhasSolicitacoes.css';
@@ -24,10 +23,17 @@ function classeStatus(status) {
   return `minhas-solicitacoes__status minhas-solicitacoes__status--${status}`;
 }
 
+// Status que ainda permitem cancelamento: Aberta (0) e Em andamento (1).
+// Concluída (2) e Cancelada (3) não podem ser canceladas.
+function podeCancelar(status) {
+  return status === 0 || status === 1;
+}
+
 export default function MinhasSolicitacoes() {
   const [solicitacoes, setSolicitacoes] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
+  const [cancelandoId, setCancelandoId] = useState(null);
 
   useEffect(() => {
     let cancelado = false;
@@ -51,6 +57,22 @@ export default function MinhasSolicitacoes() {
       cancelado = true;
     };
   }, []);
+
+  async function aoCancelar(id) {
+    setErro('');
+    setCancelandoId(id);
+    try {
+      await cancelarSolicitacao(id);
+      // Reflete o novo status na lista sem refazer a busca inteira.
+      setSolicitacoes((atual) =>
+        atual.map((s) => (s.id === id ? { ...s, status: 3 } : s)),
+      );
+    } catch (e) {
+      setErro(e instanceof ApiError ? e.message : 'Não foi possível cancelar a solicitação.');
+    } finally {
+      setCancelandoId(null);
+    }
+  }
 
   return (
     <main className="minhas-solicitacoes">
@@ -93,6 +115,18 @@ export default function MinhasSolicitacoes() {
                 <span className="minhas-solicitacoes__codigo">{s.codigoPublico}</span>
                 <span className="minhas-solicitacoes__data">{formatarData(s.createdAt)}</span>
               </div>
+              {podeCancelar(s.status) && (
+                <div className="minhas-solicitacoes__item-acoes">
+                  <button
+                    type="button"
+                    className="minhas-solicitacoes__cancelar"
+                    onClick={() => aoCancelar(s.id)}
+                    disabled={cancelandoId === s.id}
+                  >
+                    {cancelandoId === s.id ? 'Cancelando…' : 'Cancelar solicitação'}
+                  </button>
+                </div>
+              )}
             </li>
           ))}
         </ul>
