@@ -1,0 +1,138 @@
+/* Tela "Minhas solicitações" (lado solicitante da Ação Solidária).
+   Cores e fontes vêm da identidade visual (variáveis em index.css). */
+
+.minhas-solicitacoes {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 20px 64px;
+  color: var(--cor-verde);
+}
+
+.minhas-solicitacoes__cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.minhas-solicitacoes__titulo {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+}
+
+.minhas-solicitacoes__subtitulo {
+  margin: 10px 0 0;
+  line-height: 1.6;
+  color: var(--cor-tan);
+}
+
+.minhas-solicitacoes__nova {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--cor-creme);
+  background: var(--cor-verde);
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background-color 0.18s ease;
+}
+
+.minhas-solicitacoes__nova:hover {
+  background: var(--cor-verde-escuro);
+}
+
+.minhas-solicitacoes__status-msg,
+.minhas-solicitacoes__vazio {
+  margin-top: 28px;
+  color: var(--cor-tan);
+  line-height: 1.6;
+}
+
+.minhas-solicitacoes__erro {
+  margin-top: 28px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  color: var(--cor-erro);
+  background: rgba(155, 44, 44, 0.08);
+  border: 1px solid rgba(155, 44, 44, 0.25);
+  border-radius: 10px;
+}
+
+.minhas-solicitacoes__lista {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.minhas-solicitacoes__item {
+  padding: 18px;
+  border: 1px solid #d5d9cc;
+  border-radius: 14px;
+  background: var(--cor-superficie);
+}
+
+.minhas-solicitacoes__item-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.minhas-solicitacoes__categoria {
+  font-weight: 600;
+}
+
+.minhas-solicitacoes__status {
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* Cores por status: 0 Aberta, 1 Em andamento, 2 Concluída, 3 Cancelada. */
+.minhas-solicitacoes__status--0 {
+  color: var(--cor-verde);
+  background: rgba(177, 149, 99, 0.22);
+}
+.minhas-solicitacoes__status--1 {
+  color: #7a4f00;
+  background: rgba(214, 158, 46, 0.2);
+}
+.minhas-solicitacoes__status--2 {
+  color: var(--cor-creme);
+  background: var(--cor-verde);
+}
+.minhas-solicitacoes__status--3 {
+  color: var(--cor-erro);
+  background: rgba(155, 44, 44, 0.1);
+}
+
+.minhas-solicitacoes__descricao {
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+.minhas-solicitacoes__item-base {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.82rem;
+  color: var(--cor-tan);
+}
+
+.minhas-solicitacoes__codigo {
+  font-family: ui-monospace, 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+
+.minhas-solicitacoes :focus-visible {
+  outline: 3px solid var(--cor-tan);
+  outline-offset: 3px;
+}
