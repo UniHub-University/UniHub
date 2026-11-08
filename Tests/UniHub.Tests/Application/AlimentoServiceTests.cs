@@ -74,6 +74,7 @@ public class AlimentoServiceTests
         var dto = new CriarAlimentoDto(
             "Coxinha",
             "Coxinha de frango",
+            null,
             5,
             3,
             "Salgado",
@@ -118,6 +119,7 @@ public class AlimentoServiceTests
         var dto = new CriarAlimentoDto(
             "Suco",
             null,
+            null,
             4,
             0,
             "Bebida",
@@ -138,6 +140,7 @@ public class AlimentoServiceTests
         var dto = new CriarAlimentoDto(
             "Coxinha",
             null,
+            null,
             5,
             -1,
             "Salgado",
@@ -156,6 +159,7 @@ public class AlimentoServiceTests
     {
         var dto = new CriarAlimentoDto(
             "Coxinha",
+            null,
             null,
             5,
             2,
@@ -182,6 +186,7 @@ public class AlimentoServiceTests
 
         var dto = new CriarAlimentoDto(
             "Coxinha",
+            null,
             null,
             5,
             2,
@@ -215,6 +220,7 @@ public class AlimentoServiceTests
 
         var dto = new AtualizarAlimentoDto(
             "Novo nome",
+            null,
             null,
             6,
             2,
