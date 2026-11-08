@@ -1,0 +1,144 @@
+/* Sugestões para o voluntário (Ação Solidária). Identidade visual do projeto. */
+
+.sugestoes {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 20px 64px;
+  color: var(--cor-verde);
+}
+
+.sugestoes__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.sugestoes__topo h1 {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+}
+
+.sugestoes__voltar {
+  font-size: 0.95rem;
+  color: var(--cor-tan);
+  white-space: nowrap;
+}
+
+.sugestoes__aviso {
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  background-color: var(--cor-superficie);
+  color: var(--cor-tan);
+}
+
+.sugestoes__aviso--erro {
+  color: var(--cor-erro);
+  background-color: rgba(155, 44, 44, 0.08);
+  border: 1px solid rgba(155, 44, 44, 0.25);
+}
+
+.sugestoes__aviso--ok {
+  color: var(--cor-verde);
+  background-color: rgba(42, 69, 21, 0.08);
+  border: 1px solid rgba(42, 69, 21, 0.2);
+}
+
+.sugestoes__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ------------------------------ Card da sugestão ------------------------------ */
+
+.sugestao {
+  padding: 20px;
+  background-color: var(--cor-superficie);
+  border: 1px solid rgba(177, 149, 99, 0.3);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+}
+
+.sugestao__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.sugestao__categoria {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: rgba(42, 69, 21, 0.1);
+  color: var(--cor-verde);
+}
+
+.sugestao__codigo {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--cor-tan);
+  letter-spacing: 0.03em;
+}
+
+.sugestao__descricao {
+  margin: 0 0 16px;
+  line-height: 1.6;
+  color: var(--cor-verde);
+  opacity: 0.9;
+  overflow-wrap: anywhere;
+}
+
+.sugestao__base {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sugestao__data {
+  font-size: 0.85rem;
+  color: var(--cor-tan);
+}
+
+.sugestao__aceitar {
+  padding: 9px 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--cor-verde);
+  color: var(--cor-creme);
+  font-weight: 600;
+  font-family: var(--fonte-corpo);
+  cursor: pointer;
+}
+
+.sugestao__aceitar:hover:not(:disabled) {
+  background-color: var(--cor-verde-escuro);
+}
+
+.sugestao__aceitar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+  .sugestoes__topo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sugestao__base {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
