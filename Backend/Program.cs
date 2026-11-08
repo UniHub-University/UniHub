@@ -105,6 +105,28 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero,
         RoleClaimType = "role"
     };
+
+    // SignalR (BRV-185/196): o handshake por WebSocket nao envia o header
+    // "Authorization" -- o cliente manda o JWT na query string (?access_token=...).
+    // Copiamos esse valor para o contexto APENAS quando a requisicao e para um
+    // hub (path iniciando em "/hubs"), para nao abrir um segundo canal de
+    // autenticacao nas rotas REST (essas continuam so pelo header).
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) &&
+                path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
+    };
 });
 // --- FIM DA CONFIGURAÇÃO JWT ---
 
@@ -134,9 +156,14 @@ builder.Services.AddCors(options =>
         // Verifica se o sistema está rodando em ambiente local (Development)
         if (builder.Environment.IsDevelopment())
         {
-            policy.AllowAnyOrigin()
+            // SignalR autenticado exige AllowCredentials(), que e INCOMPATIVEL
+            // com AllowAnyOrigin(). Em Development liberamos qualquer origem via
+            // SetIsOriginAllowed (equivalente ao "any", porem compativel com
+            // credenciais) para manter o fluxo de dev sem travar o hub.
+            policy.SetIsOriginAllowed(_ => true)
                   .AllowAnyMethod()
-                  .AllowAnyHeader();
+                  .AllowAnyHeader()
+                  .AllowCredentials();
         }
         else
         {
@@ -154,9 +181,12 @@ builder.Services.AddCors(options =>
                 allowedOrigins = ["https://unihub.com.br", "https://unihub-app.vercel.app"];
             }
 
+            // WithOrigins (lista fechada) + AllowCredentials: combinacao exigida
+            // pelo SignalR autenticado. Em producao a origem e a do front oficial.
             policy.WithOrigins(allowedOrigins)
                   .AllowAnyMethod()
-                  .AllowAnyHeader();
+                  .AllowAnyHeader()
+                  .AllowCredentials();
         }
     });
 });
