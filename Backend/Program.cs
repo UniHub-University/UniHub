@@ -18,6 +18,7 @@ using UniHub.Application.Interfaces.Alimentacao;
 using UniHub.Application.Services.Alimentacao;
 using UniHub.Infrastructure.Repositories.Alimentacao;
 using UniHub.API.BackgroundServices;
+using UniHub.API.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,12 @@ if (!string.IsNullOrWhiteSpace(port))
 }
 
 builder.Services.AddControllers();
+
+// Frente 2 (BRV-185): SignalR para o Painel do Vendedor em tempo real.
+// O hub (PainelHub) agrupa cada conexao em "vendedor:{id}"; a emissao de
+// eventos chega nas tasks A3/A4. A leitura do JWT via access_token na query
+// string e o AllowCredentials() no CORS vem na task A2 (PR isolado).
+builder.Services.AddSignalR();
 
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("Cloudinary"));
@@ -56,6 +63,7 @@ builder.Services.AddScoped<VendedorService>();
 builder.Services.AddScoped<VoluntarioService>();
 
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+builder.Services.AddScoped<IVendedorConsultaRepository, VendedorConsultaRepository>();
 builder.Services.AddScoped<IProdutoBuscaRepository, ProdutoBuscaRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
@@ -170,6 +178,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Endpoint do hub do Painel do Vendedor (Frente 2 / BRV-185). O path
+// "/hubs/painel" e o combinado no contrato dos eventos (T0) com a trilha
+// do front. O [Authorize] no PainelHub exige JWT valido para conectar.
+app.MapHub<PainelHub>("/hubs/painel");
 
 // Health check leve e publico. Serve a dois propositos:
 // 1. Render usa para saber se o servico subiu com sucesso.
