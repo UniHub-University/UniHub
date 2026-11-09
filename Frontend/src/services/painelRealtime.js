@@ -5,8 +5,10 @@
 // Reusa a URL base de config/env.js e o JWT de authStorage.js — o mesmo token
 // usado pelo wrapper REST (services/api.js).
 //
-// Contrato de eventos (fechado com o backend, Fase 0 do plano):
-//   - "EstoqueAtualizado": { produtoId, quantidadeDisponivel, status }
+// Contrato de eventos (fechado com o backend, Fase 0 do plano). Payloads em
+// camelCase; "status" chega como ENUM NUMÉRICO (ProdutoStatus), igual ao estado
+// inicial (MeuProdutoDto.Status) — o projeto não serializa enum como string:
+//   - "EstoqueAtualizado": { produtoId, quantidadeDisponivel, status }  // status: number
 //   - "NovoPedido":        { pedidoId, produtoId, nomeProduto, quantidade, quandoUtc }
 // Hub em: {API_BASE_URL}/hubs/painel
 
@@ -32,7 +34,7 @@ let conexao = null;
  * Abre (ou reusa) a conexão com o PainelHub e registra os handlers de evento.
  *
  * @param {object} handlers
- * @param {(payload: {produtoId: string, quantidadeDisponivel: number, status: string}) => void} [handlers.onEstoqueAtualizado]
+ * @param {(payload: {produtoId: string, quantidadeDisponivel: number, status: number}) => void} [handlers.onEstoqueAtualizado]
  * @param {(payload: {pedidoId: string, produtoId: string, nomeProduto: string, quantidade: number, quandoUtc: string}) => void} [handlers.onNovoPedido]
  * @param {(estado: 'conectado' | 'reconectando' | 'desconectado') => void} [handlers.onMudancaConexao]
  * @returns {Promise<void>}
