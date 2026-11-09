@@ -28,7 +28,10 @@ public class ProdutoService
     // Valida e normaliza os filtros vindos da API antes de consultar o
     // repositorio. Lanca ArgumentException em entrada invalida (o controller
     // converte para 400), evitando 500 por enum/formato invalido.
-    public async Task<PaginatedResultDto<ProdutoResumoDto>> BuscarAsync(BuscaProdutosQueryDto query)
+    // vendedorId (opcional) restringe a busca aos anuncios de um vendedor; vem da
+    // ROTA (/api/vendedores/{id}/produtos), nunca da query string.
+    public async Task<PaginatedResultDto<ProdutoResumoDto>> BuscarAsync(
+        BuscaProdutosQueryDto query, Guid? vendedorId = null)
     {
         TipoProduto? tipo = null;
         if (!string.IsNullOrWhiteSpace(query.Tipo))
@@ -72,7 +75,8 @@ public class ProdutoService
             dia,
             hora,
             page,
-            pageSize);
+            pageSize,
+            vendedorId);
 
         return await _produtoBuscaRepository.BuscarAsync(filtros);
     }

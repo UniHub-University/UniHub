@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UniHub.Application.DTOs.Common;
+using UniHub.Application.DTOs.Produtos;
 using UniHub.Application.DTOs.Vendas;
 using UniHub.Application.Services.Vendas;
 
@@ -14,10 +15,12 @@ namespace UniHub.API.Controllers;
 public class VendedoresController : ControllerBase
 {
     private readonly VendedorPublicoService _vendedorPublicoService;
+    private readonly ProdutoService _produtoService;
 
-    public VendedoresController(VendedorPublicoService vendedorPublicoService)
+    public VendedoresController(VendedorPublicoService vendedorPublicoService, ProdutoService produtoService)
     {
         _vendedorPublicoService = vendedorPublicoService;
+        _produtoService = produtoService;
     }
 
     // GET api/vendedores?page=1&pageSize=12
@@ -44,5 +47,26 @@ public class VendedoresController : ControllerBase
             return NotFound(new { mensagem = "Vendedor nao encontrado." });
 
         return Ok(perfil);
+    }
+
+    // GET api/vendedores/{id}/produtos?termo=&tipo=bazar&precoMin=&precoMax=&page=1&pageSize=12
+    // Anuncios disponiveis de UM vendedor, com os mesmos filtros e a mesma
+    // paginacao de GET /api/produtos. 200 | 400 filtro invalido | 404 vendedor inexistente.
+    [HttpGet("{id:guid}/produtos")]
+    public async Task<ActionResult<PaginatedResultDto<ProdutoResumoDto>>> ListarProdutos(
+        Guid id, [FromQuery] BuscaProdutosQueryDto query)
+    {
+        if (await _vendedorPublicoService.ObterPerfilAsync(id) is null)
+            return NotFound(new { mensagem = "Vendedor nao encontrado." });
+
+        try
+        {
+            var resultado = await _produtoService.BuscarAsync(query, id);
+            return Ok(resultado);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
     }
 }

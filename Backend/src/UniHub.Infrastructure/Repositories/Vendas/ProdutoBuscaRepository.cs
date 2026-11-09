@@ -31,6 +31,9 @@ public class ProdutoBuscaRepository : IProdutoBuscaRepository
                      && p.QuantidadeDisponivel > 0
                      && p.Vendedor!.Usuario!.IsActive);
 
+        if (f.VendedorId.HasValue)
+            query = query.Where(p => p.VendedorId == f.VendedorId.Value);
+
         if (!string.IsNullOrWhiteSpace(f.Termo))
         {
             var padrao = $"%{f.Termo}%";
