@@ -1,0 +1,175 @@
+/* ---------------------------------------------------------------------------
+   Lista publica de vendedores (/vendedores).
+   Cores e fontes vem da identidade visual (variaveis em index.css).
+   --------------------------------------------------------------------------- */
+
+.vendedores {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+
+.vendedores__cabecalho {
+  margin-bottom: 24px;
+}
+
+.vendedores__titulo {
+  font-family: var(--fonte-titulo);
+  font-size: 2.2rem;
+  line-height: 1.1;
+}
+
+.vendedores__subtitulo {
+  margin: 6px 0 0;
+  font-size: 0.98rem;
+  color: var(--cor-tan);
+}
+
+.vendedores__status,
+.vendedores__vazio {
+  padding: 24px 0;
+  font-size: 0.95rem;
+  color: var(--cor-tan);
+}
+
+.vendedores__erro {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  color: var(--cor-erro);
+  background-color: rgba(155, 44, 44, 0.08);
+  border: 1px solid rgba(155, 44, 44, 0.25);
+  border-radius: 10px;
+}
+
+/* =============================== Grade =============================== */
+
+.vendedores__grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.vendedores__cartao {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 18px 18px;
+  text-align: center;
+  background-color: var(--cor-superficie);
+  border: 1px solid rgba(177, 149, 99, 0.35);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.vendedores__cartao:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 34px rgba(42, 69, 21, 0.16);
+}
+
+.vendedores__foto {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid rgba(177, 149, 99, 0.5);
+}
+
+.vendedores__foto--inicial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fonte-titulo);
+  font-size: 1.8rem;
+  color: var(--cor-creme);
+  background-color: var(--cor-verde);
+}
+
+.vendedores__nome {
+  font-family: var(--fonte-titulo);
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.vendedores__nome a {
+  color: var(--cor-verde);
+  text-decoration: none;
+}
+
+.vendedores__nome a:hover {
+  text-decoration: underline;
+}
+
+.vendedores__nota {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--cor-tan);
+}
+
+.vendedores__descricao {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--cor-verde);
+  opacity: 0.8;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vendedores__ver {
+  margin-top: auto;
+  padding-top: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--cor-verde);
+}
+
+/* ============================== Paginacao ============================== */
+
+.vendedores__paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 32px;
+}
+
+.vendedores__botao {
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--cor-verde);
+  background-color: transparent;
+  border: 1px solid var(--cor-verde);
+  border-radius: 10px;
+  transition: background-color 0.18s ease;
+}
+
+.vendedores__botao:hover:not(:disabled) {
+  background-color: rgba(42, 69, 21, 0.08);
+}
+
+.vendedores__botao:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vendedores__pagina-info {
+  font-size: 0.9rem;
+  color: var(--cor-verde);
+}
+
+@media (max-width: 600px) {
+  .vendedores {
+    padding: 28px 16px 48px;
+  }
+
+  .vendedores__titulo {
+    font-size: 1.8rem;
+  }
+}

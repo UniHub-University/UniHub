@@ -11,6 +11,7 @@ export const LINKS_NAV = [
   { para: '/bazar', rotulo: 'Bazar' },
   { para: '/produtos', rotulo: 'Pesquisar' },
   { para: '/alimentacao', rotulo: 'Alimentação' },
+  { para: '/vendedores', rotulo: 'Vendedores' },
   { para: '/solidariedade', rotulo: 'Ação Solidária' },
   { para: '/perfil', rotulo: 'Perfil' },
 ];

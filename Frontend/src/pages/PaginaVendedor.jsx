@@ -82,7 +82,7 @@ function PerfilDoVendedor({ id }) {
     return (
       <main className="vendedor-pagina">
         <p className="vendedor-pagina__erro" role="alert">{erro}</p>
-        <Link to="/produtos" className="vendedor-pagina__voltar">← Buscar produtos</Link>
+        <Link to="/vendedores" className="vendedor-pagina__voltar">← Ver vendedores</Link>
       </main>
     );
   }
