@@ -15,6 +15,17 @@ public record VendedorPublicoDto(
     List<HorarioVendaPublicoDto> Horarios
 );
 
+// Item da LISTA publica de vendedores: so o necessario para o cartao
+// (o perfil completo vem de GET /api/vendedores/{id}). Mesmas regras de LGPD.
+public record VendedorResumoDto(
+    Guid Id,
+    string Nome,
+    string? FotoUrl,
+    string? DescricaoNegocio,
+    decimal NotaMedia,
+    int QtdAvaliacoes
+);
+
 public record LocalVendaPublicoDto(string Campus, string PontoDeEncontro);
 
 // DiaSemana: 0 = Domingo ... 6 = Sabado. Horas no formato "HH:mm".

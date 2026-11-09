@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UniHub.Application.DTOs.Common;
 using UniHub.Application.DTOs.Vendas;
 using UniHub.Application.Services.Vendas;
 
@@ -17,6 +18,18 @@ public class VendedoresController : ControllerBase
     public VendedoresController(VendedorPublicoService vendedorPublicoService)
     {
         _vendedorPublicoService = vendedorPublicoService;
+    }
+
+    // GET api/vendedores?page=1&pageSize=12
+    // Lista publica e paginada de vendedores que tem anuncio disponivel, do mais
+    // bem avaliado para o menos. O Service ajusta page/pageSize (padrao 12, maximo 50).
+    // Nao expoe telefone, e-mail nem chave PIX.
+    [HttpGet]
+    public async Task<ActionResult<PaginatedResultDto<VendedorResumoDto>>> Listar(
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
+    {
+        var resultado = await _vendedorPublicoService.ListarAsync(page, pageSize);
+        return Ok(resultado);
     }
 
     // GET api/vendedores/{id}
