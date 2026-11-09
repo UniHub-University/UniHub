@@ -4,6 +4,7 @@ import { obterItemBazar } from '../services/anuncios.js';
 import { ApiError } from '../services/api.js';
 import { criarPedido, TIPO_PEDIDO } from '../services/pedidos.js';
 import { rotuloStatus, rotuloCondicao } from '../services/rotulosProduto.js';
+import BlocoVendedor from '../components/BlocoVendedor.jsx';
 import './DetalheBazar.css';
 
 const moeda = new Intl.NumberFormat('pt-BR', {
@@ -198,6 +199,8 @@ function ConsultaDetalhe({ id }) {
             <dt>Quantidade disponível</dt>
             <dd>{item.quantidadeDisponivel ?? 'Não informada'}</dd>
           </dl>
+
+          <BlocoVendedor vendedorId={item.vendedorId} />
 
           <AcoesPedido item={item} />
         </article>
