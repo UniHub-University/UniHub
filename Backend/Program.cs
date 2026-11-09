@@ -64,6 +64,7 @@ builder.Services.AddScoped<VoluntarioService>();
 
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IVendedorConsultaRepository, VendedorConsultaRepository>();
+builder.Services.AddScoped<INotificadorPainel, NotificadorPainelSignalR>();
 builder.Services.AddScoped<IProdutoBuscaRepository, ProdutoBuscaRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
