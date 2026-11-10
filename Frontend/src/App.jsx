@@ -12,6 +12,8 @@ import Home from './pages/Home.jsx';
 import Bazar from './pages/Bazar.jsx';
 import Perfil from './pages/Perfil.jsx';
 import BuscaProdutos from './pages/BuscaProdutos.jsx';
+import PaginaVendedor from './pages/PaginaVendedor.jsx';
+import ListaVendedores from './pages/ListaVendedores.jsx';
 import HistoricoPedidos from './pages/HistoricoPedidos.jsx';
 import LayoutApp from './components/LayoutApp.jsx';
 import RotaProtegida from './auth/RotaProtegida.jsx';
@@ -108,6 +110,8 @@ function App() {
         <Route path="/bazar" element={<Titulo texto="Bazar"><Bazar /></Titulo>} />
         <Route path="/bazar/:id" element={<Titulo texto="Detalhe do item"><DetalheBazar /></Titulo>} />
         <Route path="/produtos" element={<Titulo texto="Buscar produtos"><BuscaProdutos /></Titulo>} />
+        <Route path="/vendedores" element={<Titulo texto="Vendedores"><ListaVendedores /></Titulo>} />
+        <Route path="/vendedores/:id" element={<Titulo texto="Vendedor"><PaginaVendedor /></Titulo>} />
         <Route path="/pedidos" element={<Titulo texto="Meus pedidos"><HistoricoPedidos /></Titulo>} />
         <Route path="/perfil" element={<Titulo texto="Meu perfil"><Perfil /></Titulo>} />
         <Route path="/alimentacao" element={ <Titulo texto="Alimentação"><Alimentacao /></Titulo>}/>

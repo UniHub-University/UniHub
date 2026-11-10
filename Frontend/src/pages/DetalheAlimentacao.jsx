@@ -10,6 +10,7 @@ import { obterAlimento } from '../services/alimentos.js';
 import { criarPedido, TIPO_PEDIDO } from '../services/pedidos.js';
 import { ApiError } from '../services/api.js';
 import { rotuloStatus } from '../services/rotulosProduto.js';
+import BlocoVendedor from '../components/BlocoVendedor.jsx';
 
 import './DetalheAlimentacao.css';
 
@@ -202,6 +203,8 @@ function ConsultaDetalhe({ id }) {
               {alimento.quantidadeDisponivel ?? 'Não informada'}
             </dd>
           </dl>
+
+          <BlocoVendedor vendedorId={alimento.vendedorId} />
 
           {alimentoDisponivel(alimento) ? (
             compraRealizada ? (

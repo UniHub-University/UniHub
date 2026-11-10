@@ -15,6 +15,7 @@ export default function ProdutoCard({ produto }) {
     preco,
     tipo,
     nomeVendedor,
+    vendedorId,
     campi = [],
     quantidadeDisponivel,
   } = produto;
@@ -34,7 +35,15 @@ export default function ProdutoCard({ produto }) {
       <dl className="produto-card__detalhes">
         <div className="produto-card__detalhe">
           <dt>Vendedor</dt>
-          <dd>{nomeVendedor}</dd>
+          <dd>
+            {vendedorId ? (
+              <Link className="produto-card__vendedor" to={`/vendedores/${encodeURIComponent(vendedorId)}`}>
+                {nomeVendedor}
+              </Link>
+            ) : (
+              nomeVendedor
+            )}
+          </dd>
         </div>
         {campi.length > 0 && (
           <div className="produto-card__detalhe">
@@ -48,6 +57,7 @@ export default function ProdutoCard({ produto }) {
         </div>
       </dl>
       {tipo === 'bazar' && <Link to={`/bazar/${encodeURIComponent(produto.id)}`} aria-label={`Ver anúncio: ${nome}`}>Ver anúncio →</Link>}
+      {tipo === 'lanche' && <Link to={`/alimentacao/${encodeURIComponent(produto.id)}`} aria-label={`Ver anúncio: ${nome}`}>Ver anúncio →</Link>}
     </article>
   );
 }

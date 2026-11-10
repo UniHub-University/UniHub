@@ -87,3 +87,15 @@
   text-align: right;
   color: var(--cor-verde);
 }
+
+/* Nome do vendedor: link para o perfil publico dele. */
+.produto-card__vendedor {
+  font-weight: 600;
+  color: var(--cor-verde);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.produto-card__vendedor:hover {
+  color: var(--cor-verde-escuro);
+}

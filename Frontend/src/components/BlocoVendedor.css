@@ -1,0 +1,33 @@
+/* Bloco "Vendedor" nos detalhes de anuncio. */
+
+.bloco-vendedor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin: 16px 0;
+  padding: 12px 14px;
+  background-color: var(--cor-superficie);
+  border: 1px solid rgba(177, 149, 99, 0.35);
+  border-radius: 10px;
+}
+
+.bloco-vendedor__rotulo {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--cor-tan);
+}
+
+.bloco-vendedor__nome {
+  font-weight: 600;
+  color: var(--cor-verde);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.bloco-vendedor__nota {
+  font-size: 0.88rem;
+  color: var(--cor-tan);
+}

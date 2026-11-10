@@ -33,5 +33,6 @@ public record FiltrosBuscaProdutos(
     DiaSemana? DiaSemana,
     TimeSpan? Hora,
     int Page,
-    int PageSize
+    int PageSize,
+    Guid? VendedorId = null   // so os anuncios deste vendedor (usado em /api/vendedores/{id}/produtos)
 );
