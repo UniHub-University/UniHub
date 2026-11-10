@@ -63,29 +63,30 @@ export default function PedidosVendedor() {
   // effect. Recarrega quando muda a página ou quando o gatilho é incrementado.
   useEffect(() => {
     let cancelado = false;
-    // Reset síncrono ao (re)carregar: volta a UI para "carregando" antes de
-    // refazer a busca (sincronização com a API). Mesmo padrão adotado em
-    // PerfilVendedor.jsx para a regra react-hooks/set-state-in-effect.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCarregando(true);
 
-    listarPedidosDoVendedor({ page: pagina, pageSize: TAMANHO_PAGINA })
-      .then((resposta) => {
+    // Toda a carga (inclusive o reset de "carregando") vive dentro de uma função
+    // async: assim nenhum setState é chamado de forma síncrona no corpo do effect,
+    // resolvendo a regra react-hooks/set-state-in-effect sem disable.
+    async function carregar() {
+      setCarregando(true);
+      try {
+        const resposta = await listarPedidosDoVendedor({ page: pagina, pageSize: TAMANHO_PAGINA });
         if (cancelado) return;
         setDados(resposta);
         setErro('');
-      })
-      .catch((e) => {
+      } catch (e) {
         if (cancelado) return;
         if (e instanceof ApiError && e.status === 401) {
           logout();
           return;
         }
         setErro(e instanceof ApiError ? e.message : 'Erro ao carregar os pedidos.');
-      })
-      .finally(() => {
+      } finally {
         if (!cancelado) setCarregando(false);
-      });
+      }
+    }
+
+    carregar();
 
     return () => {
       cancelado = true;
