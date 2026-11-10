@@ -12,15 +12,20 @@ public class PedidoService
 {
     private readonly IProdutoRepository _produtoRepository;
     private readonly IPedidoRepository _pedidoRepository;
+    private readonly INotificadorPainel _notificadorPainel;
 
     // Quanto tempo uma Reserva vale antes de expirar (ExpiraEm = agora + TTL).
     // Publico para o job de expiracao (P4) reutilizar o mesmo valor.
     public static readonly TimeSpan TtlReserva = TimeSpan.FromHours(48);
 
-    public PedidoService(IProdutoRepository produtoRepository, IPedidoRepository pedidoRepository)
+    public PedidoService(
+        IProdutoRepository produtoRepository,
+        IPedidoRepository pedidoRepository,
+        INotificadorPainel notificadorPainel)
     {
         _produtoRepository = produtoRepository;
         _pedidoRepository = pedidoRepository;
+        _notificadorPainel = notificadorPainel;
     }
 
     public async Task<PedidoResultDto> CreatePedidoAsync(Guid compradorId, CreatePedidoDto request)
