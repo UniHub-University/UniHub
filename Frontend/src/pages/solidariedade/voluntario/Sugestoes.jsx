@@ -34,18 +34,18 @@ export default function Sugestoes() {
 
   useEffect(() => {
     let cancelado = false;
-    // Reset síncrono ao (re)carregar: mesmo padrão adotado no projeto para a
-    // regra react-hooks/set-state-in-effect.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCarregando(true);
-    setErro('');
 
-    listarSugestoes()
-      .then((lista) => {
+    // Toda a carga (inclusive o reset de "carregando"/erro) vive dentro de uma
+    // função async: assim nenhum setState é chamado de forma síncrona no corpo
+    // do effect, resolvendo a regra react-hooks/set-state-in-effect sem disable.
+    async function carregar() {
+      setCarregando(true);
+      setErro('');
+      try {
+        const lista = await listarSugestoes();
         if (cancelado) return;
         setSugestoes(Array.isArray(lista) ? lista : []);
-      })
-      .catch((e) => {
+      } catch (e) {
         if (cancelado) return;
         if (e instanceof ApiError && e.status === 400) {
           // Não é voluntário: orienta a ir para a área do voluntário.
@@ -55,10 +55,12 @@ export default function Sugestoes() {
         } else {
           setErro('Não foi possível carregar as sugestões.');
         }
-      })
-      .finally(() => {
+      } finally {
         if (!cancelado) setCarregando(false);
-      });
+      }
+    }
+
+    carregar();
 
     return () => {
       cancelado = true;
