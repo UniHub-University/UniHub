@@ -12,17 +12,16 @@ import { listarItensBazar } from '../services/anuncios.js';
 import { ApiError } from '../services/api.js';
 import { ordenarPorMaisRecente } from '../services/anunciosUtils.js';
 import CardAnuncio from '../components/CardAnuncio.jsx';
+import BuscaAnuncios from '../components/BuscaAnuncios.jsx';
 import './Bazar.css';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { usePerfilVendedor } from '../auth/PerfilVendedor.jsx';
 
 export default function Bazar() {
   const { ehVendedor } = usePerfilVendedor();
-  const navigate = useNavigate();
   const [itens, setItens] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
-  const [busca, setBusca] = useState('');
 
   useEffect(() => {
     let ativo = true;
@@ -52,12 +51,6 @@ export default function Bazar() {
   }, []);
 
   const itensFiltrados = ordenarPorMaisRecente(itens);
-  function pesquisar(evento) {
-    evento.preventDefault();
-    const parametros = new URLSearchParams({ tipo: 'bazar' });
-    if (busca.trim()) parametros.set('termo', busca.trim());
-    navigate(`/produtos?${parametros.toString()}`);
-  }
 
   // Texto do contador de resultados (reflete a lista filtrada e exibida).
   const totalExibido = itensFiltrados.length;
@@ -76,11 +69,7 @@ export default function Bazar() {
 
         {ehVendedor && <Link className="bazar__adicionar" to="/vendedor/produtos/novo">Adicionar produto</Link>}
 
-        <form className="bazar__pesquisa" onSubmit={pesquisar} role="search" aria-label="Pesquisar no Bazar">
-          <input type="search" className="bazar__busca" placeholder="Buscar anúncios…"
-            value={busca} onChange={(e) => setBusca(e.target.value)} aria-label="Buscar anúncios" />
-          <button className="bazar__pesquisar" type="submit">Pesquisar</button>
-        </form>
+        <BuscaAnuncios tipo="bazar" />
       </header>
 
       {carregando && <p className="bazar__status">Carregando anúncios…</p>}

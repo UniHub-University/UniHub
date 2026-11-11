@@ -1,0 +1,50 @@
+/* Caixa de pesquisa compartilhada das abas Bazar e Alimentação. */
+
+.busca-anuncios {
+  display: flex;
+  flex: 1 1 360px;
+  gap: 10px;
+  min-width: 0;
+}
+
+.busca-anuncios__campo {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: 14px 18px;
+  border: 1px solid #d5d9cc;
+  border-radius: 12px;
+  font: inherit;
+  color: #243322;
+  background: #fffdf7;
+}
+
+.busca-anuncios__campo:focus-visible {
+  outline: 3px solid var(--cor-verde);
+  outline-offset: 3px;
+}
+
+.busca-anuncios__botao {
+  padding: 12px 18px;
+  border: 1px solid var(--cor-verde);
+  border-radius: 12px;
+  background: var(--cor-verde);
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+
+.busca-anuncios__botao:hover {
+  background: var(--cor-verde-escuro);
+}
+
+.busca-anuncios__botao:focus-visible {
+  outline: 3px solid var(--cor-tan);
+  outline-offset: 3px;
+}
+
+@media (max-width: 420px) {
+  .busca-anuncios {
+    flex-direction: column;
+  }
+}
