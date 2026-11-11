@@ -186,3 +186,54 @@
     width: 100%;
   }
 }
+
+/* Tempo real (Frente 2 / SignalR) */
+
+.meus-produtos__cabecalho-acoes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Indicador de conexão: ponto + texto. Cor comunica o estado ao vivo. */
+.meus-produtos__realtime {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background-color: rgba(89, 100, 82, 0.12);
+  color: #596452;
+}
+
+.meus-produtos__realtime::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.meus-produtos__realtime--conectado {
+  background-color: rgba(42, 69, 21, 0.12);
+  color: var(--cor-verde);
+}
+
+.meus-produtos__realtime--reconectando {
+  background-color: rgba(177, 149, 99, 0.18);
+  color: #8a6d3b;
+}
+
+/* Aviso discreto de novo pedido (evento NovoPedido). */
+.meus-produtos__novo-pedido {
+  margin: 0 0 20px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-left: 3px solid var(--cor-verde);
+  background-color: rgba(42, 69, 21, 0.08);
+  color: var(--cor-verde);
+  font-size: 0.9rem;
+}

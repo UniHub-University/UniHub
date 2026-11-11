@@ -15,6 +15,7 @@ import { listarMeusProdutos } from '../services/vendedor.js';
 import { excluirItemBazar } from '../services/itensBazar.js';
 import { ApiError } from '../services/api.js';
 import { rotuloStatus } from '../services/rotulosProduto.js';
+import { conectar, desconectar } from '../services/painelRealtime.js';
 import BotaoExcluirItemBazar from '../components/BotaoExcluirItemBazar.jsx';
 import BotaoStatusAlimento from '../components/BotaoStatusAlimento.jsx';
 import './MeusProdutos.css';
@@ -31,12 +32,18 @@ function formatarPreco(valor) {
 
 const TIPO_ROTULO = { bazar: 'Bazar', lanche: 'Alimentação' };
 
+// Tempo que o aviso de "novo pedido" fica visível antes de sumir sozinho.
+const MS_AVISO_NOVO_PEDIDO = 6000;
+
 export default function MeusProdutos() {
   const [produtos, setProdutos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   // Ao mudar, refaz a busca (usado depois de inativar/reativar um alimento).
   const [recarregar, setRecarregar] = useState(0);
+  // Tempo real (Frente 2 / SignalR): estado da conexão e aviso de novo pedido.
+  const [conexaoRealtime, setConexaoRealtime] = useState('desconectado');
+  const [avisoNovoPedido, setAvisoNovoPedido] = useState('');
 
   useEffect(() => {
     let ativo = true;
@@ -66,6 +73,56 @@ export default function MeusProdutos() {
     };
   }, [recarregar]);
 
+  // Tempo real (B3): conecta ao PainelHub e atualiza os cards sem refresh.
+  // Roda uma vez no ciclo de vida da tela; o estado inicial (REST) acima segue
+  // funcionando mesmo que o hub caia (degradação graciosa — corte seguro).
+  useEffect(() => {
+    // Flag de montagem: em StrictMode (dev) o React monta→desmonta→remonta, o
+    // que encadeia conectar()→desconectar()→conectar() sobre a mesma conexão.
+    // Esta guarda impede que callbacks de uma conexão órfã atualizem o estado
+    // depois do unmount (evita o warning de corrida e setState fora de tela).
+    let ativo = true;
+    // Timer do aviso de novo pedido, para limpá-lo no cleanup.
+    let timerAviso;
+
+    conectar({
+      // Estoque mudou (alguém comprou/reservou): atualiza quantidade e status
+      // do card correspondente em memória. produtoId casa com produto.id.
+      onEstoqueAtualizado: ({ produtoId, quantidadeDisponivel, status }) => {
+        if (!ativo) return;
+        setProdutos((atuais) =>
+          atuais.map((p) =>
+            p.id === produtoId
+              ? { ...p, quantidadeDisponivel, status }
+              : p,
+          ),
+        );
+      },
+      // Novo pedido afetou um produto do vendedor: aviso discreto e temporário
+      // (some sozinho após MS_AVISO_NOVO_PEDIDO).
+      onNovoPedido: ({ nomeProduto, quantidade }) => {
+        if (!ativo) return;
+        setAvisoNovoPedido(`Novo pedido: ${quantidade}× ${nomeProduto}.`);
+        clearTimeout(timerAviso);
+        timerAviso = setTimeout(() => {
+          if (ativo) setAvisoNovoPedido('');
+        }, MS_AVISO_NOVO_PEDIDO);
+      },
+      onMudancaConexao: (estado) => {
+        if (ativo) setConexaoRealtime(estado);
+      },
+    }).catch(() => {
+      // Falha ao conectar não quebra o painel: segue com o estado inicial REST.
+      if (ativo) setConexaoRealtime('desconectado');
+    });
+
+    return () => {
+      ativo = false;
+      clearTimeout(timerAviso);
+      desconectar();
+    };
+  }, []);
+
   // Remove da lista o item do Bazar excluído, sem precisar recarregar a página.
   function aoExcluir(id) {
     setProdutos((atuais) => atuais.filter((p) => p.id !== id));
@@ -83,11 +140,29 @@ export default function MeusProdutos() {
           <h1 id="meus-produtos-titulo">Meus produtos</h1>
           <p>Visualize e gerencie os anúncios que você publicou.</p>
         </div>
-        <Link className="meus-produtos__novo" to="/vendedor/produtos/novo">
-          <FiPlusCircle aria-hidden="true" />
-          Adicionar produto
-        </Link>
+        <div className="meus-produtos__cabecalho-acoes">
+          <span
+            className={`meus-produtos__realtime meus-produtos__realtime--${conexaoRealtime}`}
+            role="status"
+          >
+            {conexaoRealtime === 'conectado'
+              ? 'Ao vivo'
+              : conexaoRealtime === 'reconectando'
+              ? 'Reconectando…'
+              : 'Offline'}
+          </span>
+          <Link className="meus-produtos__novo" to="/vendedor/produtos/novo">
+            <FiPlusCircle aria-hidden="true" />
+            Adicionar produto
+          </Link>
+        </div>
       </header>
+
+      {avisoNovoPedido && (
+        <p className="meus-produtos__novo-pedido" role="status">
+          {avisoNovoPedido}
+        </p>
+      )}
 
       {carregando && <p className="meus-produtos__status">Carregando seus produtos…</p>}
 
