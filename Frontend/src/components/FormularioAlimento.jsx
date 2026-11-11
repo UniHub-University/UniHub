@@ -1,5 +1,8 @@
 import { useRef, useState } from 'react';
-import { ApiError } from '../services/api.js';
+import { ApiError, api } from '../services/api.js';
+
+const TAMANHO_MAXIMO_IMAGEM = 3 * 1024 * 1024;
+const TIPOS_DE_IMAGEM_PERMITIDOS = ['image/jpeg', 'image/png', 'image/webp'];
 
 function horarioParaInput(valor) {
   if (!valor || typeof valor !== 'string') return '';
@@ -35,10 +38,38 @@ export default function FormularioAlimento({ alimento, onSalvar, onOcupado, onSe
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
   const emCurso = useRef(false);
+  const [imagemSelecionada, setImagemSelecionada] = useState(null);
+  const [previewImagem, setPreviewImagem] = useState(alimento?.imagemUrl ?? '');
+  const [removerImagem, setRemoverImagem] = useState(false);
 
   function alterar(evento) {
     const { name, value } = evento.target;
     setDados((anterior) => ({ ...anterior, [name]: value }));
+  }
+
+  function selecionarImagem(evento) {
+    const arquivo = evento.target.files?.[0];
+    if (!arquivo) return;
+    if (!TIPOS_DE_IMAGEM_PERMITIDOS.includes(arquivo.type)) {
+      setErro('Formato não permitido. Use JPG, JPEG, PNG ou WEBP.');
+      evento.target.value = '';
+      return;
+    }
+    if (arquivo.size > TAMANHO_MAXIMO_IMAGEM) {
+      setErro('A imagem deve ter no máximo 3 MB.');
+      evento.target.value = '';
+      return;
+    }
+    setErro('');
+    setImagemSelecionada(arquivo);
+    setPreviewImagem(URL.createObjectURL(arquivo));
+    setRemoverImagem(false);
+  }
+
+  function removerImagemSelecionada() {
+    setImagemSelecionada(null);
+    setPreviewImagem('');
+    setRemoverImagem(true);
   }
 
   async function enviar(evento) {
@@ -62,22 +93,34 @@ export default function FormularioAlimento({ alimento, onSalvar, onOcupado, onSe
       return;
     }
 
-    // O backend espera HorarioDisponibilidade como TimeSpan ("HH:mm:ss").
-    const corpo = {
-      nome: dados.nome.trim(),
-      descricao: dados.descricao.trim() || null,
-      preco,
-      quantidadeDisponivel: quantidade,
-      categoria: dados.categoria.trim(),
-      restricoes: dados.restricoes.trim() || null,
-      horarioDisponibilidade: `${dados.horarioDisponibilidade}:00`,
-    };
-
     emCurso.current = true;
     setEnviando(true);
     onOcupado?.(true);
     setErro('');
     try {
+      let imagemUrl = alimento?.imagemUrl ?? null;
+      if (imagemSelecionada) {
+        const dadosImagem = new FormData();
+        dadosImagem.append('arquivo', imagemSelecionada);
+        const respostaUpload = await api.post('/api/upload/imagem?pasta=produtos', dadosImagem);
+        imagemUrl = respostaUpload?.url ?? respostaUpload?.Url;
+        if (!imagemUrl) throw new Error('A API não retornou a URL da imagem.');
+      } else if (removerImagem) {
+        imagemUrl = null;
+      }
+
+      // O backend espera HorarioDisponibilidade como TimeSpan ("HH:mm:ss").
+      const corpo = {
+        nome: dados.nome.trim(),
+        descricao: dados.descricao.trim() || null,
+        imagemUrl,
+        preco,
+        quantidadeDisponivel: quantidade,
+        categoria: dados.categoria.trim(),
+        restricoes: dados.restricoes.trim() || null,
+        horarioDisponibilidade: `${dados.horarioDisponibilidade}:00`,
+      };
+      
       await onSalvar(corpo);
     } catch (e) {
       if (e.status === 403 && onSemAutorizacao) onSemAutorizacao();
@@ -95,6 +138,17 @@ export default function FormularioAlimento({ alimento, onSalvar, onOcupado, onSe
       {erro && <p role="alert" className="formulario-bazar-erro">{erro}</p>}
       <fieldset disabled={enviando || disabled}>
         <legend>Dados do alimento</legend>
+
+        <label htmlFor="formulario-alimento-imagem">Imagem do alimento</label>
+        {previewImagem && (
+          <div className="formulario-bazar-imagem-previa">
+            <img src={previewImagem} alt="Pré-visualização da imagem do alimento" />
+            <button type="button" onClick={removerImagemSelecionada}>Remover imagem</button>
+          </div>
+        )}
+        <input id="formulario-alimento-imagem" name="imagem" type="file"
+          accept="image/jpeg,image/png,image/webp" onChange={selecionarImagem} />
+        <p className="formulario-bazar-ajuda">JPG, PNG ou WEBP, até 3 MB. Opcional.</p>
 
         <label htmlFor="formulario-alimento-nome">Nome *</label>
         <input id="formulario-alimento-nome" name="nome" value={dados.nome} onChange={alterar} required />
