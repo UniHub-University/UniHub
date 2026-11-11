@@ -32,6 +32,9 @@ function formatarPreco(valor) {
 
 const TIPO_ROTULO = { bazar: 'Bazar', lanche: 'Alimentação' };
 
+// Tempo que o aviso de "novo pedido" fica visível antes de sumir sozinho.
+const MS_AVISO_NOVO_PEDIDO = 6000;
+
 export default function MeusProdutos() {
   const [produtos, setProdutos] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -74,10 +77,19 @@ export default function MeusProdutos() {
   // Roda uma vez no ciclo de vida da tela; o estado inicial (REST) acima segue
   // funcionando mesmo que o hub caia (degradação graciosa — corte seguro).
   useEffect(() => {
+    // Flag de montagem: em StrictMode (dev) o React monta→desmonta→remonta, o
+    // que encadeia conectar()→desconectar()→conectar() sobre a mesma conexão.
+    // Esta guarda impede que callbacks de uma conexão órfã atualizem o estado
+    // depois do unmount (evita o warning de corrida e setState fora de tela).
+    let ativo = true;
+    // Timer do aviso de novo pedido, para limpá-lo no cleanup.
+    let timerAviso;
+
     conectar({
       // Estoque mudou (alguém comprou/reservou): atualiza quantidade e status
       // do card correspondente em memória. produtoId casa com produto.id.
       onEstoqueAtualizado: ({ produtoId, quantidadeDisponivel, status }) => {
+        if (!ativo) return;
         setProdutos((atuais) =>
           atuais.map((p) =>
             p.id === produtoId
@@ -86,19 +98,27 @@ export default function MeusProdutos() {
           ),
         );
       },
-      // Novo pedido afetou um produto do vendedor: aviso discreto e temporário.
+      // Novo pedido afetou um produto do vendedor: aviso discreto e temporário
+      // (some sozinho após MS_AVISO_NOVO_PEDIDO).
       onNovoPedido: ({ nomeProduto, quantidade }) => {
-        setAvisoNovoPedido(
-          `Novo pedido: ${quantidade}× ${nomeProduto}.`,
-        );
+        if (!ativo) return;
+        setAvisoNovoPedido(`Novo pedido: ${quantidade}× ${nomeProduto}.`);
+        clearTimeout(timerAviso);
+        timerAviso = setTimeout(() => {
+          if (ativo) setAvisoNovoPedido('');
+        }, MS_AVISO_NOVO_PEDIDO);
       },
-      onMudancaConexao: (estado) => setConexaoRealtime(estado),
+      onMudancaConexao: (estado) => {
+        if (ativo) setConexaoRealtime(estado);
+      },
     }).catch(() => {
       // Falha ao conectar não quebra o painel: segue com o estado inicial REST.
-      setConexaoRealtime('desconectado');
+      if (ativo) setConexaoRealtime('desconectado');
     });
 
     return () => {
+      ativo = false;
+      clearTimeout(timerAviso);
       desconectar();
     };
   }, []);
