@@ -220,4 +220,9 @@
   object-fit: cover;
   border-radius: 12px;
   margin-bottom: 4px;
+  transition: transform 200ms ease;
+}
+
+.alimentacao__card:hover .alimentacao__imagem{
+  transform: scale(1.03);
 }

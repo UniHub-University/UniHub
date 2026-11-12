@@ -133,4 +133,9 @@
   object-fit: cover;
   border-radius: 12px;
   margin-bottom: 4px;
+  transition: transform 200ms ease;
+}
+
+.cartao-anuncio:hover .cartao-anuncio__imagem {
+  transform: scale(1.03);
 }
