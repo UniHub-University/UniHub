@@ -117,6 +117,14 @@ export default function Alimentacao() {
                 <ul className="alimentacao__grade">
                     {alimentos.map((alimento) => (
                         <li className="alimentacao__card" key={alimento.id}>
+                             {alimento.imagemUrl && (
+                                <img
+                                    className="alimentacao__imagem"
+                                    src={alimento.imagemUrl}
+                                    alt={alimento.nome}
+                                    loading="lazy"
+                                />
+                            )}
                             <div className="alimentacao__card-conteudo">
                             <h2 className="alimentacao__nome">
                                 <Link
