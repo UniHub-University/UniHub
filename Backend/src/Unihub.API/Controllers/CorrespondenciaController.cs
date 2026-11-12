@@ -50,6 +50,35 @@ public class CorrespondenciaController : ControllerBase
         return Ok(sugestoes);
     }
 
+    // GET /api/correspondencias/minhas
+    // Lista as correspondencias do voluntario logado (as que ele aceitou/estao em
+    // andamento, concluidas ou canceladas), para ele acompanhar e concluir.
+    // LGPD: projeta direto para o DTO anonimo (so CodigoPublico/categoria), SEM
+    // .Include(s => s.Solicitacao.Solicitante) -- mesmo padrao de sugestoes.
+    [HttpGet("minhas")]
+    public async Task<ActionResult<IEnumerable<CorrespondenciaRespostaDto>>> Minhas()
+    {
+        var voluntario = await ObterVoluntarioLogado();
+        if (voluntario is null)
+            return BadRequest(new { mensagem = "Usuario precisa ser voluntario para ver suas correspondencias." });
+
+        var minhas = await _context.Correspondencias
+            .AsNoTracking()
+            .Where(c => c.VoluntarioId == voluntario.Id)
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => new CorrespondenciaRespostaDto(
+                c.Id,
+                c.Solicitacao!.CodigoPublico, // so o pseudonimo, nunca o Solicitante
+                c.Solicitacao!.Categoria,
+                c.Status,
+                c.CreatedAt,
+                c.AceitaEm,
+                c.IdentidadeRevelada))
+            .ToListAsync();
+
+        return Ok(minhas);
+    }
+
     // POST /api/correspondencias/aceitar
     [HttpPost("aceitar")]
     public async Task<ActionResult<CorrespondenciaRespostaDto>> Aceitar([FromBody] AceitarSolicitacaoDto dto)
