@@ -3,15 +3,19 @@
 // Esta tela consome o endpoint GET /api/alimentos e exibe apenas alimentos
 // disponíveis para compra. Trata os estados de carregamento, erro e lista vazia.
 //
+// A pesquisa é encaminhada para a tela unificada /produtos, com tipo=lanche
+// (mesmo comportamento da aba Bazar, via <BuscaAnuncios>).
+//
 // A compra é realizada na tela de detalhes do alimento.
 // Alimentação usa somente o tipo Compra; Reserva não faz parte deste módulo.
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { listarAlimentos } from '../services/alimentos.js';
 import { ApiError } from '../services/api.js';
 import { usePerfilVendedor } from '../auth/PerfilVendedor.jsx';
+import BuscaAnuncios from '../components/BuscaAnuncios.jsx';
 import './Alimentacao.css';
 
 function formatarPreco(preco) {
@@ -26,7 +30,6 @@ export default function Alimentacao() {
     const [alimentos, setAlimentos] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState('');
-    const [busca, setBusca] = useState('');
 
     // Carrega os alimentos disponíveis quando a página é aberta
     useEffect(() => {
@@ -64,29 +67,7 @@ export default function Alimentacao() {
         };
     }, []);
 
-    const alimentosFiltrados = useMemo(() => {
-        const termo = busca.trim().toLowerCase();
-
-        if (!termo) {
-            return alimentos;
-        }
-
-        return alimentos.filter((alimento) => {
-            const textoPesquisavel = [
-            alimento.nome,
-            alimento.descricao,
-            alimento.categoria,
-            alimento.restricoes,
-            ]
-            .filter(Boolean)
-            .join(' ')
-            .toLowerCase();
-
-            return textoPesquisavel.includes(termo);
-        });
-    }, [alimentos, busca]);
-
-    const totalExibido = alimentosFiltrados.length;
+    const totalExibido = alimentos.length;
     const textoContador =
         totalExibido === 1 ? '1 anúncio' : `${totalExibido} anúncios`;
     
@@ -106,14 +87,7 @@ export default function Alimentacao() {
             </Link>
             )}
 
-            <input
-            type="search"
-            className="alimentacao__busca"
-            placeholder="Buscar alimentos..."
-            value={busca}
-            onChange={(evento) => setBusca(evento.target.value)}
-            aria-label="Buscar alimentos"
-            />
+            <BuscaAnuncios tipo="lanche" />
         </header>
 
         {carregando && (
@@ -134,13 +108,6 @@ export default function Alimentacao() {
             </p>
         )}
 
-        {!carregando && !erro && alimentos.length > 0 &&
-            alimentosFiltrados.length === 0 && (
-                <p className="alimentacao__status">
-                Nenhum alimento encontrado para “{busca}”.
-                </p>
-            )}
-
         {!carregando && !erro && alimentos.length > 0 && (
             <>
                 <p className="alimentacao__contador" aria-live="polite">
@@ -148,7 +115,7 @@ export default function Alimentacao() {
                 </p>
 
                 <ul className="alimentacao__grade">
-                    {alimentosFiltrados.map((alimento) => (
+                    {alimentos.map((alimento) => (
                         <li className="alimentacao__card" key={alimento.id}>
                             <div className="alimentacao__card-conteudo">
                             <h2 className="alimentacao__nome">
