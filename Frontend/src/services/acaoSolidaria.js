@@ -75,6 +75,12 @@ export function listarSugestoes() {
   return api.get('/api/correspondencias/sugestoes');
 }
 
+// Correspondências que o voluntário logado já aceitou (para acompanhar/concluir).
+// Resposta anônima (só código público + categoria da solicitação — LGPD).
+export function listarMinhasCorrespondencias() {
+  return api.get('/api/correspondencias/minhas');
+}
+
 // Voluntário aceita uma solicitação. 409 se outra pessoa aceitou primeiro.
 export function aceitarCorrespondencia(solicitacaoId) {
   return api.post('/api/correspondencias/aceitar', { solicitacaoId });
