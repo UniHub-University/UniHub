@@ -138,6 +138,7 @@ export default function Perfil() {
   const [alterandoDisponibilidade, setAlterandoDisponibilidade] = useState(false);
   const [resumoPedidos, setResumoPedidos] = useState([]);
   const [carregandoPedidos, setCarregandoPedidos] = useState(true);
+  const [erroPedidos, setErroPedidos] = useState(false);
 
   useEffect(() => {
     async function carregarPerfil() {
@@ -175,8 +176,12 @@ export default function Perfil() {
         if (!cancelado) setResumoPedidos(resposta?.items ?? []);
       })
       .catch(() => {
-        // Falha no resumo não deve travar o perfil inteiro — só mostra vazio.
-        if (!cancelado) setResumoPedidos([]);
+        // Falha no resumo não deve travar o perfil inteiro; só avisa no próprio
+        // cartão (sem confundir com "ainda não fez pedidos").
+        if (!cancelado) {
+          setResumoPedidos([]);
+          setErroPedidos(true);
+        }
       })
       .finally(() => {
         if (!cancelado) setCarregandoPedidos(false);
@@ -633,11 +638,17 @@ export default function Perfil() {
               <p className="perfil__card-vazio">Carregando…</p>
             )}
 
-            {!carregandoPedidos && resumoPedidos.length === 0 && (
+            {!carregandoPedidos && erroPedidos && (
+              <p className="perfil__mensagem perfil__mensagem--erro" role="alert">
+                Não foi possível carregar suas compras. Tente recarregar a página.
+              </p>
+            )}
+
+            {!carregandoPedidos && !erroPedidos && resumoPedidos.length === 0 && (
               <p className="perfil__card-vazio">Você ainda não fez pedidos.</p>
             )}
 
-            {!carregandoPedidos && resumoPedidos.length > 0 && (
+            {!carregandoPedidos && !erroPedidos && resumoPedidos.length > 0 && (
               <ul className="perfil__pedidos-lista">
                 {resumoPedidos.map((pedido) => (
                   <li key={pedido.pedidoId} className="perfil__pedido-item">
