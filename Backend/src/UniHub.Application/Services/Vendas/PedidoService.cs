@@ -56,6 +56,10 @@ public class PedidoService
 
         var decrementados = new List<(Guid ProdutoId, int Quantidade)>();
 
+        // Dados para notificar o painel APOS o sucesso (nunca durante o loop, para
+        // nao notificar uma mudanca que um rollback posterior desfaria).
+        var estoqueParaNotificar = new List<(Guid VendedorId, EstoqueAtualizadoDto Evento)>();
+
         foreach (var item in request.Itens)
         {
             var produto = await _produtoRepository.GetByIdAsync(item.ProdutoId);
@@ -97,9 +101,38 @@ public class PedidoService
                 Quantidade = item.Quantidade,
                 PrecoUnitarioNaCompra = produto.Preco
             });
+
+            // Quantidade resultante (o decremento e atomico no banco; o service ja
+            // conhece a anterior e a decrementada -- AGENTS Secao 7, sem ida extra).
+            var quantidadeResultante = produto.QuantidadeDisponivel - item.Quantidade;
+
+            // Status do evento: o decremento NAO altera o Status no banco, mas o
+            // painel deve refletir "Esgotado" quando zera (decisao de produto).
+            // Derivamos so no payload do evento -- a regra de estoque (Secao 7) nao muda.
+            var statusEvento = quantidadeResultante <= 0 ? ProdutoStatus.Esgotado : produto.Status;
+
+            estoqueParaNotificar.Add((
+                produto.VendedorId,
+                new EstoqueAtualizadoDto(produto.Id, quantidadeResultante, statusEvento)));
         }
 
         var salvo = await _pedidoRepository.AddAsync(pedido);
+
+        // Notifica o painel do vendedor em tempo real. Uma falha do hub NUNCA pode
+        // derrubar a venda (ja persistida) -- por isso o try/catch por evento.
+        foreach (var (vendedorId, evento) in estoqueParaNotificar)
+        {
+            try
+            {
+                await _notificadorPainel.NotificarEstoqueAsync(vendedorId, evento);
+            }
+            catch
+            {
+                // Best-effort: o painel se reconcilia no proximo carregamento REST.
+                // (Logging estruturado pode ser adicionado quando houver ILogger aqui.)
+            }
+        }
+
         return new PedidoResultDto(true, "Pedido reservado com sucesso.", salvo.Id);
 
     }
