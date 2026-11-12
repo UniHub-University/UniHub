@@ -181,6 +181,13 @@ function ConsultaDetalhe({ id }) {
         </div>
       ) : item ? (
         <article>
+          {item.imagemUrl && (
+            <img
+              className="detalhe-bazar__imagem"
+              src={item.imagemUrl}
+              alt={item.nome}
+            />
+          )}
           <h2>{item.nome}</h2>
           <p>{item.descricao || 'Descrição não informada.'}</p>
           <dl>

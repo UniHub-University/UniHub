@@ -233,3 +233,15 @@
   font-weight: 600;
   color: var(--cor-verde);
 }
+
+.detalhe-bazar__imagem {
+  width: 100%;
+  max-width: 380px;
+  max-height: 380px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
