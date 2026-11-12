@@ -24,6 +24,14 @@ export default function CardAnuncio({ item }) {
 
   return (
     <li className="cartao-anuncio">
+      {item.imagemUrl && (
+        <img
+          className="cartao-anuncio__imagem"
+          src={item.imagemUrl}
+          alt={item.nome}
+          loading="lazy"
+        />
+      )}
       <div className="cartao-anuncio__topo">
         <h2 className="cartao-anuncio__nome">
           <Link className="cartao-anuncio__link" to={`/bazar/${item.id}`}>
