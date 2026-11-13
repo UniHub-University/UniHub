@@ -1,5 +1,9 @@
 import { useRef, useState } from 'react';
 import { mensagemErroItem, normalizarEnumItem } from '../services/itensBazar.js';
+import { api } from '../services/api.js';
+
+const TAMANHO_MAXIMO_IMAGEM = 3 * 1024 * 1024;
+const TIPOS_DE_IMAGEM_PERMITIDOS = ['image/jpeg', 'image/png', 'image/webp'];
 
 export default function FormularioItemBazar({ item, onSalvar, onOcupado, onSemAutorizacao, disabled = false }) {
   const editando = Boolean(item);
@@ -12,10 +16,38 @@ export default function FormularioItemBazar({ item, onSalvar, onOcupado, onSemAu
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
   const emCurso = useRef(false);
+  const [imagemSelecionada, setImagemSelecionada] = useState(null);
+  const [previewImagem, setPreviewImagem] = useState(item?.imagemUrl ?? '');
+  const [removerImagem, setRemoverImagem] = useState(false);
 
   function alterar(evento) {
     const { name, value } = evento.target;
     setDados((anterior) => ({ ...anterior, [name]: value }));
+  }
+
+  function selecionarImagem(evento) {
+    const arquivo = evento.target.files?.[0];
+    if (!arquivo) return;
+    if (!TIPOS_DE_IMAGEM_PERMITIDOS.includes(arquivo.type)) {
+      setErro('Formato não permitido. Use JPG, JPEG, PNG ou WEBP.');
+      evento.target.value = '';
+      return;
+    }
+    if (arquivo.size > TAMANHO_MAXIMO_IMAGEM) {
+      setErro('A imagem deve ter no máximo 3 MB.');
+      evento.target.value = '';
+      return;
+    }
+    setErro('');
+    setImagemSelecionada(arquivo);
+    setPreviewImagem(URL.createObjectURL(arquivo));
+    setRemoverImagem(false);
+  }
+
+  function removerImagemSelecionada() {
+    setImagemSelecionada(null);
+    setPreviewImagem('');
+    setRemoverImagem(true);
   }
 
   async function enviar(evento) {
@@ -33,16 +65,29 @@ export default function FormularioItemBazar({ item, onSalvar, onOcupado, onSemAu
     if (dados.condicao === '' || ![0, 1, 2].includes(Number(dados.condicao)) || (editando && (dados.status === '' || ![0, 1, 2].includes(Number(dados.status))))) {
       setErro('Selecione uma condição e um status válidos.'); return;
     }
-    const corpo = {
-      nome: dados.nome.trim(), descricao: dados.descricao.trim() || null, preco,
-      quantidadeDisponivel: quantidade, categoria: dados.categoria.trim(), condicao: Number(dados.condicao),
-      ...(editando ? { status: Number(dados.status) } : {}),
-    };
     emCurso.current = true;
     setEnviando(true);
     onOcupado?.(true);
     setErro('');
-    try { await onSalvar(corpo); }
+    try {
+      let imagemUrl = item?.imagemUrl ?? null;
+      if (imagemSelecionada) {
+        const dadosImagem = new FormData();
+        dadosImagem.append('arquivo', imagemSelecionada);
+        const respostaUpload = await api.post('/api/upload/imagem?pasta=produtos', dadosImagem);
+        imagemUrl = respostaUpload?.url ?? respostaUpload?.Url;
+        if (!imagemUrl) throw new Error('A API não retornou a URL da imagem.');
+      } else if (removerImagem) {
+        imagemUrl = null;
+      }
+
+      const corpo = {
+        nome: dados.nome.trim(), descricao: dados.descricao.trim() || null, imagemUrl, preco,
+        quantidadeDisponivel: quantidade, categoria: dados.categoria.trim(), condicao: Number(dados.condicao),
+        ...(editando ? { status: Number(dados.status) } : {}),
+      };
+      await onSalvar(corpo);
+    }
     catch (e) {
       if (e.status === 403 && onSemAutorizacao) onSemAutorizacao();
       else setErro(mensagemErroItem(e));
@@ -56,6 +101,16 @@ export default function FormularioItemBazar({ item, onSalvar, onOcupado, onSemAu
       {erro && <p role="alert" className="formulario-bazar-erro">{erro}</p>}
       <fieldset disabled={enviando || disabled}>
         <legend>Dados do item</legend>
+        <label htmlFor="formulario-bazar-imagem">Imagem do produto</label>
+        {previewImagem && (
+          <div className="formulario-bazar-imagem-previa">
+            <img src={previewImagem} alt="Pré-visualização da imagem do produto" />
+            <button type="button" onClick={removerImagemSelecionada}>Remover imagem</button>
+          </div>
+        )}
+        <input id="formulario-bazar-imagem" name="imagem" type="file"
+          accept="image/jpeg,image/png,image/webp" onChange={selecionarImagem} />
+        <p className="formulario-bazar-ajuda">JPG, PNG ou WEBP, até 3 MB. Opcional.</p>
         <label htmlFor="formulario-bazar-nome">Nome *</label>
         <input id="formulario-bazar-nome" name="nome" value={dados.nome} onChange={alterar} required />
         <label htmlFor="formulario-bazar-descricao">Descrição</label>

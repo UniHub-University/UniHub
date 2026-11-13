@@ -33,3 +33,5 @@
 .formulario-bazar-exclusao [role="alert"] { padding: 12px; background: #fff4f2; border-left: 4px solid #a32323; border-radius: 6px; }
 .formulario-bazar-ajuda { font-size: .9rem; line-height: 1.5; }
 @media (max-width: 520px) { .formulario-bazar-botao-excluir { width: 100%; } }
+.formulario-bazar-imagem-previa { margin: 8px 0; }
+.formulario-bazar-imagem-previa img { max-width: 200px; max-height: 200px; border-radius: 8px; display: block; margin-bottom: 8px; }

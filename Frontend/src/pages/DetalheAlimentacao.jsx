@@ -170,6 +170,13 @@ function ConsultaDetalhe({ id }) {
         </div>
       ) : alimento ? (
         <article className="detalhe-alimentacao__cartao">
+          {alimento.imagemUrl && (
+            <img
+              className="detalhe-alimentacao__imagem"
+              src={alimento.imagemUrl}
+              alt={alimento.nome}
+            />
+          )}
           <h2>{alimento.nome}</h2>
 
           <p className="detalhe-alimentacao__descricao">
