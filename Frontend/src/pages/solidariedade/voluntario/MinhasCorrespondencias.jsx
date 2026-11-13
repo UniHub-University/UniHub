@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 
 import { ApiError } from '../../../services/api.js';
 import {
-  listarMinhasCorrespondencias,
+  listarMinhasCorrespondenciasVoluntario,
   concluirCorrespondencia,
   cancelarCorrespondencia,
 } from '../../../services/acaoSolidaria.js';
