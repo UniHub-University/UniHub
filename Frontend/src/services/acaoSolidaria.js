@@ -77,6 +77,12 @@ export function listarSugestoes() {
   return api.get('/api/correspondencias/sugestoes');
 }
 
+// Correspondências que o voluntário logado já aceitou (para acompanhar/concluir).
+// Resposta anônima (só código público + categoria da solicitação — LGPD).
+export function listarMinhasCorrespondenciasVoluntario() {
+  return api.get('/api/correspondencias/minhas');
+}
+
 // Correspondências das solicitações do SOLICITANTE logado (quem aceitou cada uma).
 // Nome/contato do voluntário só vêm preenchidos após o solicitante revelar sua
 // identidade; até lá, só o código público do voluntário.

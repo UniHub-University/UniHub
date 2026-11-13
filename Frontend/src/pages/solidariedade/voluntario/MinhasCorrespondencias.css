@@ -1,0 +1,188 @@
+/* Minhas correspondências (Ação Solidária). Identidade visual do projeto. */
+
+.minhas-correspondencias {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 20px 64px;
+  color: var(--cor-verde);
+}
+
+.minhas-correspondencias__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.minhas-correspondencias__topo h1 {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+}
+
+.minhas-correspondencias__voltar {
+  font-size: 0.95rem;
+  color: var(--cor-tan);
+  white-space: nowrap;
+}
+
+.minhas-correspondencias__aviso {
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  background-color: var(--cor-superficie);
+  color: var(--cor-tan);
+}
+
+.minhas-correspondencias__aviso--erro {
+  color: var(--cor-erro);
+  background-color: rgba(155, 44, 44, 0.08);
+  border: 1px solid rgba(155, 44, 44, 0.25);
+}
+
+.minhas-correspondencias__aviso--ok {
+  color: var(--cor-verde);
+  background-color: rgba(42, 69, 21, 0.08);
+  border: 1px solid rgba(42, 69, 21, 0.2);
+}
+
+.minhas-correspondencias__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ------------------------------ Card ------------------------------ */
+
+.correspondencia {
+  padding: 20px;
+  background-color: var(--cor-superficie);
+  border: 1px solid rgba(177, 149, 99, 0.3);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+}
+
+.correspondencia__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.correspondencia__categoria {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: rgba(42, 69, 21, 0.1);
+  color: var(--cor-verde);
+}
+
+.correspondencia__status {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: var(--cor-creme);
+  color: var(--cor-verde);
+}
+
+/* 1 Aceita (verde), 2 Concluída (verde cheio), 3 Cancelada (vermelho). */
+.correspondencia__status--2 {
+  background-color: var(--cor-verde);
+  color: var(--cor-creme);
+}
+
+.correspondencia__status--3 {
+  background-color: rgba(155, 44, 44, 0.12);
+  color: var(--cor-erro);
+}
+
+.correspondencia__codigo {
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--cor-tan);
+  letter-spacing: 0.02em;
+}
+
+.correspondencia__datas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 0 0 16px;
+}
+
+.correspondencia__datas dt {
+  font-size: 0.75rem;
+  color: var(--cor-tan);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.correspondencia__datas dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+/* ------------------------------ Ações ------------------------------ */
+
+.correspondencia__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.correspondencia__botao {
+  padding: 9px 18px;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--cor-verde);
+  color: var(--cor-creme);
+  font-weight: 600;
+  font-family: var(--fonte-corpo);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.correspondencia__botao:hover:not(:disabled) {
+  background-color: var(--cor-verde-escuro);
+}
+
+.correspondencia__botao:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.correspondencia__botao--secundario {
+  background-color: transparent;
+  color: var(--cor-verde);
+  border: 2px solid var(--cor-verde);
+}
+
+.correspondencia__botao--secundario:hover {
+  background-color: rgba(42, 69, 21, 0.08);
+}
+
+.correspondencia__botao--perigo {
+  background-color: transparent;
+  color: var(--cor-erro);
+  border: 2px solid var(--cor-erro);
+}
+
+.correspondencia__botao--perigo:hover:not(:disabled) {
+  background-color: rgba(155, 44, 44, 0.08);
+}
+
+@media (max-width: 520px) {
+  .minhas-correspondencias__topo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -247,6 +247,9 @@ export default function AreaVoluntario() {
             <Link to="/solidariedade/sugestoes" className="area-voluntario__link">
               Ver sugestões para você →
             </Link>
+            <Link to="/solidariedade/correspondencias" className="area-voluntario__link">
+              Minhas correspondências →
+            </Link>
             <Link to="/solidariedade/doacoes" className="area-voluntario__link">
               Minhas doações →
             </Link>

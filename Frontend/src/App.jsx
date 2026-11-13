@@ -26,6 +26,7 @@ import NovaSolicitacao from './pages/solidariedade/solicitante/NovaSolicitacao.j
 import MinhasSolicitacoes from './pages/solidariedade/solicitante/MinhasSolicitacoes.jsx';
 import AreaVoluntario from './pages/solidariedade/voluntario/AreaVoluntario.jsx';
 import Sugestoes from './pages/solidariedade/voluntario/Sugestoes.jsx';
+import MinhasCorrespondencias from './pages/solidariedade/voluntario/MinhasCorrespondencias.jsx';
 
 function App() {
   return (
@@ -143,6 +144,10 @@ function App() {
         <Route
           path="/solidariedade/sugestoes"
           element={<Titulo texto="Sugestões"><Sugestoes /></Titulo>}
+        />
+        <Route
+          path="/solidariedade/correspondencias"
+          element={<Titulo texto="Minhas correspondências"><MinhasCorrespondencias /></Titulo>}
         />
         <Route
           path="/solidariedade/doacoes"
