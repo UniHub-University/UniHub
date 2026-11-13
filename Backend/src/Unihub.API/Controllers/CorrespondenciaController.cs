@@ -50,12 +50,14 @@ public class CorrespondenciaController : ControllerBase
         return Ok(sugestoes);
     }
 
-    // GET /api/correspondencias/minhas
+    // GET /api/correspondencias/minhas-do-solicitante
     // Correspondencias das solicitacoes do SOLICITANTE autenticado, para ele
     // acompanhar quem aceitou e, se quiser, revelar a propria identidade.
+    // Rota separada de "minhas" (que e a visao do VOLUNTARIO) para nao haver
+    // duas actions no mesmo path -> evitaria AmbiguousMatchException em runtime.
     // LGPD: nome/contato do voluntario so saem quando IdentidadeRevelada for true.
-    [HttpGet("minhas")]
-    public async Task<ActionResult<IEnumerable<MinhaCorrespondenciaDto>>> Minhas()
+    [HttpGet("minhas-do-solicitante")]
+    public async Task<ActionResult<IEnumerable<MinhaCorrespondenciaDto>>> MinhasDoSolicitante()
     {
         var usuarioId = ObterUsuarioIdLogado();
 
