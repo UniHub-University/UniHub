@@ -222,9 +222,29 @@
   color: var(--cor-verde);
 }
 
+.meus-produtos__realtime--conectando,
 .meus-produtos__realtime--reconectando {
   background-color: rgba(177, 149, 99, 0.18);
   color: #8a6d3b;
+}
+
+/* Enquanto (re)conecta, o ponto pulsa para comunicar "tentando". Respeita quem
+   prefere menos movimento (prefers-reduced-motion). */
+.meus-produtos__realtime--conectando::before,
+.meus-produtos__realtime--reconectando::before {
+  animation: meus-produtos-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes meus-produtos-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meus-produtos__realtime--conectando::before,
+  .meus-produtos__realtime--reconectando::before {
+    animation: none;
+  }
 }
 
 /* Aviso discreto de novo pedido (evento NovoPedido). */
