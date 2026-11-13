@@ -81,7 +81,7 @@ export function listarSugestoes() {
 // Nome/contato do voluntário só vêm preenchidos após o solicitante revelar sua
 // identidade; até lá, só o código público do voluntário.
 export function listarMinhasCorrespondencias() {
-  return api.get('/api/correspondencias/minhas');
+  return api.get('/api/correspondencias/minhas-do-solicitante');
 }
 
 // Voluntário aceita uma solicitação. 409 se outra pessoa aceitou primeiro.
