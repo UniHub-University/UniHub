@@ -12,15 +12,20 @@ public class PedidoService
 {
     private readonly IProdutoRepository _produtoRepository;
     private readonly IPedidoRepository _pedidoRepository;
+    private readonly INotificadorPainel _notificadorPainel;
 
     // Quanto tempo uma Reserva vale antes de expirar (ExpiraEm = agora + TTL).
     // Publico para o job de expiracao (P4) reutilizar o mesmo valor.
     public static readonly TimeSpan TtlReserva = TimeSpan.FromHours(48);
 
-    public PedidoService(IProdutoRepository produtoRepository, IPedidoRepository pedidoRepository)
+    public PedidoService(
+        IProdutoRepository produtoRepository,
+        IPedidoRepository pedidoRepository,
+        INotificadorPainel notificadorPainel)
     {
         _produtoRepository = produtoRepository;
         _pedidoRepository = pedidoRepository;
+        _notificadorPainel = notificadorPainel;
     }
 
     public async Task<PedidoResultDto> CreatePedidoAsync(Guid compradorId, CreatePedidoDto request)
@@ -50,6 +55,11 @@ public class PedidoService
         // interrompe e devolve os itens já decrementados com sucesso
 
         var decrementados = new List<(Guid ProdutoId, int Quantidade)>();
+
+        // Dados para notificar o painel APOS o sucesso (nunca durante o loop, para
+        // nao notificar uma mudanca que um rollback posterior desfaria). Uma unica
+        // lista alimenta os dois eventos (EstoqueAtualizado e NovoPedido).
+        var paraNotificar = new List<(Guid VendedorId, EstoqueAtualizadoDto Estoque, Guid ProdutoId, string NomeProduto, int Quantidade)>();
 
         foreach (var item in request.Itens)
         {
@@ -92,9 +102,53 @@ public class PedidoService
                 Quantidade = item.Quantidade,
                 PrecoUnitarioNaCompra = produto.Preco
             });
+
+            // Quantidade resultante (o decremento e atomico no banco; o service ja
+            // conhece a anterior e a decrementada -- AGENTS Secao 7, sem ida extra).
+            var quantidadeResultante = produto.QuantidadeDisponivel - item.Quantidade;
+
+            // Status do evento: o decremento NAO altera o Status no banco, mas o
+            // painel deve refletir "Esgotado" quando zera (decisao de produto).
+            // Derivamos so no payload do evento -- a regra de estoque (Secao 7) nao muda.
+            var statusEvento = quantidadeResultante <= 0 ? ProdutoStatus.Esgotado : produto.Status;
+
+            paraNotificar.Add((
+                produto.VendedorId,
+                new EstoqueAtualizadoDto(produto.Id, quantidadeResultante, statusEvento),
+                produto.Id,
+                produto.Nome,
+                item.Quantidade));
         }
 
         var salvo = await _pedidoRepository.AddAsync(pedido);
+
+        // Notifica o painel do vendedor em tempo real. Uma falha do hub NUNCA pode
+        // derrubar a venda (ja persistida) -- por isso o try/catch por evento.
+        // QuandoUtc usa o carimbo real do pedido persistido (CreatedAt, em UTC).
+        foreach (var n in paraNotificar)
+        {
+            try
+            {
+                await _notificadorPainel.NotificarEstoqueAsync(n.VendedorId, n.Estoque);
+            }
+            catch
+            {
+                // Best-effort: o painel se reconcilia no proximo carregamento REST.
+                // (Logging estruturado pode ser adicionado quando houver ILogger aqui.)
+            }
+
+            try
+            {
+                await _notificadorPainel.NotificarNovoPedidoAsync(
+                    n.VendedorId,
+                    new NovoPedidoDto(salvo.Id, n.ProdutoId, n.NomeProduto, n.Quantidade, salvo.CreatedAt));
+            }
+            catch
+            {
+                // Best-effort: idem. A falha de um evento nao impede o outro.
+            }
+        }
+
         return new PedidoResultDto(true, "Pedido reservado com sucesso.", salvo.Id);
 
     }

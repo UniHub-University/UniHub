@@ -15,8 +15,9 @@ public class PedidoServiceCancelarTests
 {
     private readonly IProdutoRepository _produtoRepo = Substitute.For<IProdutoRepository>();
     private readonly IPedidoRepository _pedidoRepo = Substitute.For<IPedidoRepository>();
+    private readonly INotificadorPainel _notificadorPainel = Substitute.For<INotificadorPainel>();
 
-    private PedidoService CriarService() => new(_produtoRepo, _pedidoRepo);
+    private PedidoService CriarService() => new(_produtoRepo, _pedidoRepo, _notificadorPainel);
 
     private static readonly Guid ProdutoA = Guid.NewGuid();
     private static readonly Guid ProdutoB = Guid.NewGuid();

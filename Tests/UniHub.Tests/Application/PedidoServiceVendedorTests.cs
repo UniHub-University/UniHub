@@ -15,8 +15,9 @@ public class PedidoServiceVendedorTests
 {
     private readonly IProdutoRepository _produtoRepo = Substitute.For<IProdutoRepository>();
     private readonly IPedidoRepository _pedidoRepo = Substitute.For<IPedidoRepository>();
+    private readonly INotificadorPainel _notificadorPainel = Substitute.For<INotificadorPainel>();
 
-    private PedidoService CriarService() => new(_produtoRepo, _pedidoRepo);
+    private PedidoService CriarService() => new(_produtoRepo, _pedidoRepo, _notificadorPainel);
 
     // Produto cujo Vendedor pertence ao usuario informado (Vendedor.UsuarioId).
     private static ItemBazar NovoProdutoDoVendedor(Guid usuarioDoVendedor, string nome = "Produto", decimal preco = 10m)
