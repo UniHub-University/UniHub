@@ -42,7 +42,9 @@ export default function MeusProdutos() {
   // Ao mudar, refaz a busca (usado depois de inativar/reativar um alimento).
   const [recarregar, setRecarregar] = useState(0);
   // Tempo real (Frente 2 / SignalR): estado da conexão e aviso de novo pedido.
-  const [conexaoRealtime, setConexaoRealtime] = useState('desconectado');
+  // Começa em "conectando" (não "offline") para distinguir o handshake inicial
+  // de uma falha real — só vira "desconectado" se o connect falhar ou o hub cair.
+  const [conexaoRealtime, setConexaoRealtime] = useState('conectando');
   const [avisoNovoPedido, setAvisoNovoPedido] = useState('');
 
   useEffect(() => {
@@ -149,6 +151,8 @@ export default function MeusProdutos() {
               ? 'Ao vivo'
               : conexaoRealtime === 'reconectando'
               ? 'Reconectando…'
+              : conexaoRealtime === 'conectando'
+              ? 'Conectando…'
               : 'Offline'}
           </span>
           <Link className="meus-produtos__novo" to="/vendedor/produtos/novo">
