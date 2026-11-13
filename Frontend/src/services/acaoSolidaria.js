@@ -34,9 +34,11 @@ export function cancelarSolicitacao(id) {
   return api.patch(`/api/SolicitacaoApoio/${encodeURIComponent(id)}/cancelar`);
 }
 
-// NOTA: não existe (ainda) um endpoint "minhas solicitações" para o solicitante
-// acompanhar o status das próprias. Gap de backend a confirmar com o squad/floater.
-// Quando existir, adicionar aqui (ex.: listarMinhasSolicitacoes()).
+// Lista as solicitações do próprio usuário autenticado, em qualquer status,
+// para acompanhar o andamento. O backend filtra pelo token (claim "sub").
+export function listarMinhasSolicitacoes() {
+  return api.get('/api/SolicitacaoApoio/minhas');
+}
 
 // ---------------------------------------------------------------------------
 // Perfil de voluntário (lado do VOLUNTÁRIO) — VoluntarioController
@@ -79,6 +81,11 @@ export function listarSugestoes() {
 // Resposta anônima (só código público + categoria da solicitação — LGPD).
 export function listarMinhasCorrespondencias() {
   return api.get('/api/correspondencias/minhas');
+// Correspondências das solicitações do SOLICITANTE logado (quem aceitou cada uma).
+// Nome/contato do voluntário só vêm preenchidos após o solicitante revelar sua
+// identidade; até lá, só o código público do voluntário.
+export function listarMinhasCorrespondencias() {
+  return api.get('/api/correspondencias/minhas-do-solicitante');
 }
 
 // Voluntário aceita uma solicitação. 409 se outra pessoa aceitou primeiro.

@@ -77,6 +77,36 @@ public class CorrespondenciaController : ControllerBase
             .ToListAsync();
 
         return Ok(minhas);
+    // GET /api/correspondencias/minhas-do-solicitante
+    // Correspondencias das solicitacoes do SOLICITANTE autenticado, para ele
+    // acompanhar quem aceitou e, se quiser, revelar a propria identidade.
+    // Rota separada de "minhas" (que e a visao do VOLUNTARIO) para nao haver
+    // duas actions no mesmo path -> evitaria AmbiguousMatchException em runtime.
+    // LGPD: nome/contato do voluntario so saem quando IdentidadeRevelada for true.
+    [HttpGet("minhas-do-solicitante")]
+    public async Task<ActionResult<IEnumerable<MinhaCorrespondenciaDto>>> MinhasDoSolicitante()
+    {
+        var usuarioId = ObterUsuarioIdLogado();
+
+        var correspondencias = await _context.Correspondencias
+            .AsNoTracking()
+            .Where(c => c.Solicitacao!.SolicitanteId == usuarioId)
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => new MinhaCorrespondenciaDto(
+                c.Id,
+                c.SolicitacaoId,
+                c.Solicitacao!.CodigoPublico,
+                c.Solicitacao.Categoria,
+                c.Status,
+                c.IdentidadeRevelada,
+                c.CreatedAt,
+                c.AceitaEm,
+                c.Voluntario!.CodigoPublico,
+                c.IdentidadeRevelada ? c.Voluntario.Usuario!.NomeCompleto : null,
+                c.IdentidadeRevelada ? c.Voluntario.Usuario!.Telefone : null))
+            .ToListAsync();
+
+        return Ok(correspondencias);
     }
 
     // POST /api/correspondencias/aceitar

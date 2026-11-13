@@ -22,6 +22,8 @@ import Alimentacao from './pages/Alimentacao.jsx';
 import DetalheAlimentacao from './pages/DetalheAlimentacao.jsx';
 import SolidariedadeHub from './pages/solidariedade/SolidariedadeHub.jsx';
 import EmConstrucao from './pages/solidariedade/EmConstrucao.jsx';
+import NovaSolicitacao from './pages/solidariedade/solicitante/NovaSolicitacao.jsx';
+import MinhasSolicitacoes from './pages/solidariedade/solicitante/MinhasSolicitacoes.jsx';
 import AreaVoluntario from './pages/solidariedade/voluntario/AreaVoluntario.jsx';
 import Sugestoes from './pages/solidariedade/voluntario/Sugestoes.jsx';
 import MinhasCorrespondencias from './pages/solidariedade/voluntario/MinhasCorrespondencias.jsx';
@@ -129,11 +131,11 @@ function App() {
         />
         <Route
           path="/solidariedade/solicitar"
-          element={<Titulo texto="Pedir apoio"><EmConstrucao titulo="Pedir apoio" /></Titulo>}
+          element={<Titulo texto="Pedir apoio"><NovaSolicitacao /></Titulo>}
         />
         <Route
           path="/solidariedade/minhas"
-          element={<Titulo texto="Minhas solicitações"><EmConstrucao titulo="Minhas solicitações" /></Titulo>}
+          element={<Titulo texto="Minhas solicitações"><MinhasSolicitacoes /></Titulo>}
         />
         <Route
           path="/solidariedade/voluntario"
