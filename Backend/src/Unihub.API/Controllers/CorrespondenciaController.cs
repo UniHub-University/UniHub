@@ -77,6 +77,7 @@ public class CorrespondenciaController : ControllerBase
             .ToListAsync();
 
         return Ok(minhas);
+     }   
     // GET /api/correspondencias/minhas-do-solicitante
     // Correspondencias das solicitacoes do SOLICITANTE autenticado, para ele
     // acompanhar quem aceitou e, se quiser, revelar a propria identidade.
