@@ -45,7 +45,7 @@ export default function MinhasCorrespondencias() {
       setCarregando(true);
       setErro('');
       try {
-        const lista = await listarMinhasCorrespondencias();
+        const lista = await listarMinhasCorrespondenciasVoluntario();
         if (cancelado) return;
         setCorrespondencias(Array.isArray(lista) ? lista : []);
       } catch (e) {
