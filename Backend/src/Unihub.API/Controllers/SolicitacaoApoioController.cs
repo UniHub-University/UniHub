@@ -83,6 +83,36 @@ public class SolicitacaoApoioController : ControllerBase
     }
 
     /// <summary>
+    /// Lista as solicitações do próprio usuário autenticado, em qualquer status,
+    /// para ele acompanhar o andamento das suas. O dono vem do token (claim
+    /// "sub"), nunca de um id na requisição. Expõe apenas o código público.
+    /// </summary>
+    [HttpGet("minhas")]
+    public async Task<IActionResult> ObterMinhas()
+    {
+        var usuarioIdClaim = User.FindFirst("sub")?.Value;
+        if (string.IsNullOrEmpty(usuarioIdClaim) || !Guid.TryParse(usuarioIdClaim, out var usuarioId))
+            return Unauthorized(new { mensagem = "Usuário não autenticado ou token inválido." });
+
+        // Regra LGPD: filtra pelo SolicitanteId do token, sem .Include(s => s.Solicitante).
+        var solicitacoes = await _context.SolicitacoesApoio
+            .AsNoTracking()
+            .Where(s => s.SolicitanteId == usuarioId)
+            .OrderByDescending(s => s.CreatedAt)
+            .Select(s => new SolicitacaoApoioRespostaDto(
+                s.Id,
+                s.CodigoPublico,
+                s.Categoria,
+                s.Descricao,
+                s.Status,
+                s.CreatedAt
+            ))
+            .ToListAsync();
+
+        return Ok(solicitacoes);
+    }
+
+    /// <summary>
     /// Obtém os detalhes públicos de uma solicitação pelo ID.
     /// </summary>
     [HttpGet("{id:guid}")]
