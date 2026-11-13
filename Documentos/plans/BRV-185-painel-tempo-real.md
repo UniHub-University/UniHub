@@ -3,7 +3,12 @@
 > Este `.md` registra o COMO da Frente 2. O board (YouTrack) continua sendo a
 > fonte do O QUE/quando. A frente é dividida em trilhas A (Backend/Hub) e B
 > (Frontend/Consumo); este documento foca a **trilha A** e marca o progresso de
-> cada task. A task em andamento aqui é a **A1**.
+> cada task.
+>
+> **STATUS (T-docs):** trilha A (A1–A5) e trilha B (B1–B4) implementadas e
+> mergeadas/em PR. Falta a validação em runtime da integração (T-int/T-recon) —
+> os critérios de aceite que dependem de runtime estão marcados abaixo como
+> "a validar na T-int". A convenção de SignalR foi registrada no `AGENTS.md §7.1`.
 
 ## Objetivo
 Entregar um painel do vendedor que reflita, ao vivo e sem refresh, a
@@ -121,17 +126,27 @@ Validação:
 - [ ] Teste manual de conexão autenticada contra o front da trilha B (depende da
       A2 para o handshake WebSocket com `access_token`) — fica para A2/integração.
 
-## Critérios de aceite (frente completa — referência)
-- [ ] Vendedor vê seus produtos (estado inicial via REST), mesmo sem SignalR.
+## Critérios de aceite (frente completa)
+
+Implementado (verificável por código/build/lint):
+- [x] Vendedor vê seus produtos (estado inicial via REST), mesmo sem SignalR
+      (reusa `MeusProdutos.jsx` + `GET /api/perfil/vendedor/produtos`).
+- [x] Hub exige JWT válido — `[Authorize]` + `Context.Abort()` sem `sub` (A1).
+- [x] Isolamento por grupo no código — `vendedor:{id}`, emissão só ao grupo (A1/A3).
+- [x] Falha/queda do hub não derruba a criação de pedido (try/catch na emissão, A4)
+      nem quebra o painel (`.catch` no front mantém o estado REST, B3/B4).
+- [x] Reconexão automática — `withAutomaticReconnect()` no front (B1).
+- [x] `dotnet build` limpo (back) e `npm run lint`/`npm run build` limpos (front).
+- [x] `Program.cs` em PR isolado (A2).
+
+A validar na T-int (runtime — teste manual, ainda não executado):
 - [ ] Pedido que consome estoque atualiza o card sem refresh (< ~2s).
 - [ ] Estoque zerado reflete status `Esgotado` ao vivo.
 - [ ] `NovoPedido` dispara indicador discreto no painel do dono.
-- [ ] Isolamento por grupo (um vendedor não recebe eventos de outro).
-- [ ] Hub exige JWT válido (conexão sem token rejeitada).
-- [ ] Falha/queda do hub não derruba a criação de pedido nem quebra o painel.
-- [ ] Reconexão automática após queda/cold start.
-- [ ] `dotnet build` limpo (back) e `npm run lint`/`npm run build` limpos (front).
-- [ ] PRs pequenos revisados; `Program.cs` em PR isolado (AGENTS §9/§10).
+- [ ] Isolamento confirmado end-to-end (um vendedor não recebe evento de outro).
+- [ ] Reconexão confirmada após queda/cold start do Render (~50s) e multi-aba.
+- [ ] Cálculo da nova quantidade bate com o banco sob concorrência (dois pedidos
+      simultâneos) — ver pendência da A4.
 
 ## Pendências / dúvidas em aberto
 - **A2 é pré-requisito do teste real de conexão:** o handshake do SignalR por

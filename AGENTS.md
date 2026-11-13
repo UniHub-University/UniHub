@@ -224,6 +224,41 @@ reservas (`TryExpirarAsync`: `WHERE Status = Reservado`). `RowVersion` foi avali
 > `true` — evita devolução dupla quando o job (P4) e a checagem lazy (P5) tocam a
 > mesma reserva ao mesmo tempo.
 
+## 7.1. Tempo real / SignalR (Painel do Vendedor)
+
+Padrão estabelecido na Frente 2 da Sprint 5 (BRV-185). Vale para qualquer recurso
+de tempo real novo.
+
+- **Hub na camada API** (`Backend/src/Unihub.API/Hubs/`), com `[Authorize]`. Ex.:
+  `PainelHub`, mapeado em `/hubs/painel`.
+- **Direção de dependência (§3):** um Service (Application) NÃO depende de
+  `IHubContext` (API). Crie uma **interface de notificação na Application**
+  (ex.: `INotificadorPainel`) e a implementação na API
+  (ex.: `NotificadorPainelSignalR` usando `IHubContext<T>`). Registre no DI do
+  `Program.cs`. Assim a emissão de evento entra no Service por injeção, sem inverter
+  a dependência.
+- **Identidade na conexão:** no `OnConnectedAsync`, resolva o usuário via claim
+  `"sub"` (§4, nunca `ClaimTypes.NameIdentifier`). Sem `sub` válido, `Context.Abort()`.
+- **Isolamento por grupo:** agrupe conexões por dono (ex.: `vendedor:{VendedorId}`)
+  e emita eventos **só ao grupo**, nunca broadcast global. Quem não é dono conecta
+  mas fica sem grupo (não recebe nada). Exponha um helper estático para o nome do
+  grupo, evitando string mágica divergente entre o hub e o notificador.
+- **JWT no handshake:** WebSocket não manda header `Authorization`. No
+  `JwtBearerEvents.OnMessageReceived`, para paths `/hubs/`, copie
+  `Request.Query["access_token"]` para `context.Token`. No front, use
+  `accessTokenFactory` passando o mesmo JWT do wrapper REST.
+- **CORS:** a política de produção precisa de `.AllowCredentials()`; **não** combine
+  com `AllowAnyOrigin()`. Mudança no `Program.cs` → PR pequeno e isolado (§9).
+- **Emissão não derruba o fluxo:** emitir evento é efeito colateral de notificação.
+  Envolva em try/catch e logue — uma falha no hub **nunca** pode quebrar a operação
+  de negócio (ex.: a criação do pedido). O tempo real é incremento, não pré-requisito.
+- **DTOs de evento** na Application, serializados em camelCase (padrão do projeto).
+  Enums vão como **número** (o projeto não usa `JsonStringEnumConverter`), para o
+  front consumir igual ao estado inicial REST.
+- **Front:** encapsule a conexão num serviço único (ex.: `services/painelRealtime.js`),
+  não espalhe `HubConnection` pelas telas (§14). Use `withAutomaticReconnect()` e
+  trate degradação graciosa: se o hub cair, a tela segue com o estado inicial REST.
+
 ## 8. Privacidade / LGPD (módulo Ação Solidária)
 
 - A identidade do solicitante é protegida por `CodigoPublico` pseudonimizado.
