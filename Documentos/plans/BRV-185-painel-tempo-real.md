@@ -6,9 +6,9 @@
 > cada task.
 >
 > **STATUS (T-docs):** trilha A (A1–A5) e trilha B (B1–B4) implementadas e
-> mergeadas/em PR. Falta a validação em runtime da integração (T-int/T-recon) —
-> os critérios de aceite que dependem de runtime estão marcados abaixo como
-> "a validar na T-int". A convenção de SignalR foi registrada no `AGENTS.md §7.1`.
+> mergeadas. Integração validada em runtime (T-int/T-recon, teste manual local
+> em 15/11/2026): todos os critérios de aceite da frente completa passaram. A
+> convenção de SignalR foi registrada no `AGENTS.md §7.1`.
 
 ## Objetivo
 Entregar um painel do vendedor que reflita, ao vivo e sem refresh, a
@@ -139,14 +139,24 @@ Implementado (verificável por código/build/lint):
 - [x] `dotnet build` limpo (back) e `npm run lint`/`npm run build` limpos (front).
 - [x] `Program.cs` em PR isolado (A2).
 
-A validar na T-int (runtime — teste manual, ainda não executado):
-- [ ] Pedido que consome estoque atualiza o card sem refresh (< ~2s).
-- [ ] Estoque zerado reflete status `Esgotado` ao vivo.
-- [ ] `NovoPedido` dispara indicador discreto no painel do dono.
-- [ ] Isolamento confirmado end-to-end (um vendedor não recebe evento de outro).
-- [ ] Reconexão confirmada após queda/cold start do Render (~50s) e multi-aba.
-- [ ] Cálculo da nova quantidade bate com o banco sob concorrência (dois pedidos
-      simultâneos) — ver pendência da A4.
+Validado na T-int/T-recon (teste manual, 15/11/2026):
+- [x] Pedido que consome estoque atualiza o card sem refresh (< ~2s).
+- [x] Estoque zerado reflete status `Esgotado` ao vivo.
+- [x] `NovoPedido` dispara indicador discreto no painel do dono.
+- [x] Isolamento confirmado end-to-end (um vendedor não recebe evento de outro).
+- [x] Reconexão confirmada após queda/subida da API e multi-aba.
+- [x] Cálculo da nova quantidade bate com o banco sob concorrência (dois pedidos
+      simultâneos).
+
+> Nota da integração (CORS/origem do WebSocket): o tempo real funciona nos dois
+> ambientes "coerentes" — **tudo local** (front e API em localhost, CORS
+> `AllowAnyOrigin` em Development) e a **aplicação oficial em deploy** (front
+> hospedado + API de produção no Render, origem já liberada). O único cenário que
+> falha é o **misto**: front em `localhost` apontando para a API de **produção** —
+> aí o WebSocket não sobe (cai para polling; os eventos só chegam ao interagir com
+> a página), porque a origem `localhost` não está em `Cors:AllowedOrigins` da
+> produção. Lição: para testar o painel contra uma API remota, a origem do front
+> precisa estar liberada no CORS com `AllowCredentials()` (ver AGENTS §7.1).
 
 ## Pendências / dúvidas em aberto
 - **A2 é pré-requisito do teste real de conexão:** o handshake do SignalR por
