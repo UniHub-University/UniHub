@@ -137,6 +137,10 @@ export default function MinhasCorrespondencias() {
                   Solicitação {c.codigoPublicoSolicitacao}
                 </p>
 
+                {c.descricaoSolicitacao && (
+                  <p className="correspondencia__descricao">{c.descricaoSolicitacao}</p>
+                )}
+
                 <dl className="correspondencia__datas">
                   <div>
                     <dt>Aceita em</dt>

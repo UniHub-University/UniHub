@@ -1,60 +1,54 @@
-# Plano — Ação Solidária (voluntário): Doações (Task 5)
+# Plano — Ação Solidária (voluntário): Doações (Task 5) — ATUALIZADO
 
 ## Objetivo
-Dar ao voluntário a tela `/solidariedade/doacoes` para registrar uma doação para uma
-solicitação que já aceitou e acompanhar as próprias doações (status + confirmar
-entrega / cancelar). Fecha a ponta "doação → concluir" do fluxo do voluntário.
+Fechar o lado do voluntário: registrar uma doação a partir de uma correspondência
+aceita e acompanhar/gerenciar as próprias doações (confirmar entrega / cancelar).
+Última ponta da Frente 1 (lado voluntário).
 
 ## Escopo
 - **Inclui:**
-  - Tela `Doacoes` em `pages/solidariedade/voluntario/`.
-  - Listar minhas doações (`GET /api/doacoes/minhas`) com status e datas.
-  - Registrar nova doação (`POST /api/doacoes` com `{ solicitacaoId, descricao }`).
-  - Confirmar entrega (`POST /api/doacoes/{id}/confirmar-entrega`) e cancelar
-    (`POST /api/doacoes/{id}/cancelar`).
+  - **Backend:** `POST /api/doacoes` passa a aceitar `CorrespondenciaId` (além do
+    `SolicitacaoId`, mantido por compatibilidade). O id da solicitação é resolvido a
+    partir da correspondência do voluntário logado — o front NÃO manuseia `solicitacaoId`
+    (LGPD + simplicidade).
+  - **Front:** tela `/solidariedade/doacoes` — lista "minhas doações" + registra a partir
+    do gancho `?solicitacao={correspondenciaId}` (vindo do card da Task 4) + confirmar
+    entrega / cancelar.
   - Trocar o placeholder `<EmConstrucao>` de `/solidariedade/doacoes` pela tela real.
-- **NÃO inclui:**
-  - Lista de correspondências aceitas + concluir (Task 4).
-  - Backend (pronto). Mudança de schema (nenhuma).
+- **NÃO inclui:** mudança de schema (nenhuma); lado solicitante (Lucas).
 
 ## Decisões de design
-- **Endpoints (via acaoSolidaria.js):**
-  - `listarMinhasDoacoes()` → lista de `DoacaoRespostaDto`
-    `{ id, codigoPublicoSolicitacao, descricao, status, createdAt, entregueEm }`.
-  - `criarDoacao({ solicitacaoId, descricao })` → 201 (criada) | 400 (não é voluntário)
-    | 409 (não aceitou a solicitação antes).
-  - `confirmarEntregaDoacao(id)` / `cancelarDoacao(id)` → 204 | 403 (não é dona) | 409 (estado inválido).
-- **LGPD:** o DTO só traz `CodigoPublicoSolicitacao` — a tela exibe apenas isso, nunca
-  identidade do solicitante. (Há teste de backend que quebra se vazar.)
-- **Como o voluntário informa a solicitacaoId ao doar:** o backend exige que ele já
-  tenha ACEITO a solicitação. Nesta tela, o campo é o **CÓDIGO PÚBLICO**? Não — o
-  `criarDoacao` espera o `solicitacaoId` (GUID). Decisão: v1 pede o `solicitacaoId`
-  num campo (vindo da tela de sugestões/correspondências ao aceitar). Para não travar,
-  aceitamos o id colado/manual nesta v1; a ligação fluida "aceitar → doar" com o id já
-  preenchido fica para a integração com a Task 4 (quando houver a lista de aceitas).
-  ⚠️ Confirmar com o fluxo: idealmente o botão "Registrar doação" nasce a partir de uma
-  correspondência aceita (Task 4). Enquanto a Task 4 não existe, a tela de doações
-  permite registrar informando a solicitação.
-- **Status:** usar `rotuloStatusDoacao` (Pendente/Concluída/Cancelada) dos rótulos compartilhados.
-- **Ações por estado:** "Confirmar entrega" e "Cancelar" só aparecem quando `Pendente`.
-- **Trade-offs:** recarregar a lista após cada ação (simples, sempre correto) vs mutação
-  local — escolhido recarregar via gatilho, pela robustez.
+- **Backend — `CriarDoacaoDto`:** adiciona `CorrespondenciaId` (Guid?, opcional). Regra:
+  - Se vier `CorrespondenciaId`: busca a correspondência; valida que é do voluntário
+    logado e está `AceitaPeloVoluntario`; usa a `SolicitacaoId` dela. (403/409 se não.)
+  - Senão, cai no comportamento antigo (valida aceite por `SolicitacaoId`). Mantém
+    compatibilidade com quem já usa o contrato antigo.
+  - Resolver o id no backend evita expor `SolicitacaoId` ao front (só circula código público).
+- **Front — service:** `criarDoacao` passa a aceitar `{ correspondenciaId, descricao }`.
+- **Front — tela Doacoes:**
+  - Lê `?solicitacao=<correspondenciaId>` da URL (gancho da Task 4) → abre o form de
+    registro já vinculado àquela correspondência.
+  - Lista minhas doações (`GET /doacoes/minhas`) com status (`rotuloStatusDoacao`) e datas.
+  - Ações "Confirmar entrega"/"Cancelar" só quando `Pendente`.
+  - `useEffect` com função async (sem eslint-disable — padrão corrigido).
+- **LGPD:** `DoacaoRespostaDto` só traz `CodigoPublicoSolicitacao` — exibir só isso.
+- **Impacto concorrência:** nenhum novo.
+- **Trade-offs:** `CorrespondenciaId` opcional (aditivo, não quebra contrato) vs novo
+  endpoint `/correspondencias/{id}/doar` — escolhido o aditivo, menos superfície.
 
 ## Passos de implementação
-1. `pages/solidariedade/voluntario/Doacoes.jsx` + `.css`.
-2. Form de nova doação (solicitacaoId + descrição) → `criarDoacao`; tratar 409 (não aceitou).
-3. Lista de minhas doações (`listarMinhasDoacoes`) com status + ações por estado.
-4. `App.jsx`: trocar o placeholder de `/solidariedade/doacoes` pelo componente real.
-   ⚠️ Coordenar com o Lucas (arquivo compartilhado).
+1. **Backend:** `CriarDoacaoDto` + `DoacaoController.Criar` resolvendo por `CorrespondenciaId`.
+2. **Front service:** `criarDoacao({ correspondenciaId, descricao })`.
+3. **Front tela:** `pages/solidariedade/voluntario/Doacoes.jsx` + `.css`.
+4. **App.jsx:** rota `/solidariedade/doacoes` → `Doacoes` (remove placeholder).
 
 ## Critérios de aceite
-- [ ] Voluntário vê suas doações com status e datas (só código público — LGPD).
-- [ ] Registrar doação de uma solicitação aceita funciona; 409 (não aceitou) mostra mensagem.
-- [ ] Confirmar entrega muda status para Concluída; cancelar muda para Cancelada.
-- [ ] Ações aparecem só quando faz sentido (Pendente).
-- [ ] `npm run lint` limpo (effect com função async, sem eslint-disable); fluxo validado no `npm run dev`.
+- [ ] A partir de uma correspondência aceita, "Registrar doação" abre o form e cria a doação.
+- [ ] 409 (correspondência não aceita / não é do voluntário) tratado com mensagem.
+- [ ] Lista "minhas doações" com status e datas (só código público — LGPD).
+- [ ] Confirmar entrega → Concluída; cancelar → Cancelada; ações só quando Pendente.
+- [ ] `dotnet build` limpo; `npm run lint` limpo; fluxo validado no `npm run dev`.
 
 ## Pendências / dúvidas em aberto
-- Ligar "doar" diretamente a partir de uma correspondência aceita (Task 4) — melhora o
-  fluxo (id já preenchido). Enquanto a Task 4 não existe, a tela aceita a solicitação informada.
-- Confirmar com a dupla se o registro de doação deve viver aqui ou dentro da Task 4.
+- Teste de unidade do novo caminho (CorrespondenciaId) — o Criar usa AppDbContext direto;
+  avaliar teste de integração com o squad/floater.
