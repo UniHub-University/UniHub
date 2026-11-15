@@ -6,8 +6,14 @@ namespace UniHub.Application.DTOs.Solidariedade;
 
 public class CriarDoacaoDto
 {
-    [Required]
-    public Guid SolicitacaoId { get; set; }
+    // Caminho preferido do front: a doação parte de uma correspondência ACEITA do
+    // voluntário logado. O backend resolve a SolicitacaoId a partir dela, para o
+    // front nunca manusear o id da solicitacao (so circula o codigo publico — LGPD).
+    public Guid? CorrespondenciaId { get; set; }
+
+    // Compatibilidade: ainda aceito o SolicitacaoId direto (contrato antigo).
+    // Informar CorrespondenciaId OU SolicitacaoId (o controller valida).
+    public Guid? SolicitacaoId { get; set; }
 
     [Required, StringLength(500, MinimumLength = 3)]
     public string Descricao { get; set; } = string.Empty;

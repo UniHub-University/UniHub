@@ -30,18 +30,46 @@ public class DoacaoController : ControllerBase
         if (voluntario is null)
             return BadRequest(new { mensagem = "Usuario precisa ser voluntario para registrar doacoes." });
 
-        // Só pode doar quem tem uma correspondência ACEITA para essa solicitação.
-        var temAceite = await _context.Correspondencias.AnyAsync(c =>
-            c.SolicitacaoId == dto.SolicitacaoId &&
-            c.VoluntarioId == voluntario.Id &&
-            c.Status == StatusCorrespondencia.AceitaPeloVoluntario);
+        // Determina a solicitacao: pelo caminho preferido (CorrespondenciaId, o
+        // backend resolve) ou pelo contrato antigo (SolicitacaoId direto).
+        Guid solicitacaoId;
 
-        if (!temAceite)
-            return Conflict(new { mensagem = "Voce precisa ter aceitado a solicitacao antes de registrar uma doacao." });
+        if (dto.CorrespondenciaId is Guid correspondenciaId)
+        {
+            // A correspondencia precisa ser do voluntario logado e estar ACEITA.
+            var correspondencia = await _context.Correspondencias
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == correspondenciaId && c.VoluntarioId == voluntario.Id);
+
+            if (correspondencia is null)
+                return NotFound(new { mensagem = "Correspondencia nao encontrada." });
+
+            if (correspondencia.Status != StatusCorrespondencia.AceitaPeloVoluntario)
+                return Conflict(new { mensagem = "So e possivel doar para uma correspondencia aceita." });
+
+            solicitacaoId = correspondencia.SolicitacaoId;
+        }
+        else if (dto.SolicitacaoId is Guid solicitacaoInformada)
+        {
+            // Contrato antigo: valida que ha uma correspondencia aceita para essa solicitacao.
+            var temAceite = await _context.Correspondencias.AnyAsync(c =>
+                c.SolicitacaoId == solicitacaoInformada &&
+                c.VoluntarioId == voluntario.Id &&
+                c.Status == StatusCorrespondencia.AceitaPeloVoluntario);
+
+            if (!temAceite)
+                return Conflict(new { mensagem = "Voce precisa ter aceitado a solicitacao antes de registrar uma doacao." });
+
+            solicitacaoId = solicitacaoInformada;
+        }
+        else
+        {
+            return BadRequest(new { mensagem = "Informe a correspondencia (ou a solicitacao) da doacao." });
+        }
 
         var doacao = new Doacao
         {
-            SolicitacaoId = dto.SolicitacaoId,
+            SolicitacaoId = solicitacaoId,
             VoluntarioId = voluntario.Id,
             Descricao = dto.Descricao
         };
