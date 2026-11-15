@@ -70,6 +70,7 @@ public class CorrespondenciaController : ControllerBase
                 c.Id,
                 c.Solicitacao!.CodigoPublico, // so o pseudonimo, nunca o Solicitante
                 c.Solicitacao!.Categoria,
+                c.Solicitacao!.Descricao,     // texto do pedido (nao e identidade)
                 c.Status,
                 c.CreatedAt,
                 c.AceitaEm,
@@ -152,6 +153,7 @@ public class CorrespondenciaController : ControllerBase
                 correspondencia.Id,
                 solicitacao.CodigoPublico,
                 solicitacao.Categoria,
+                solicitacao.Descricao,
                 correspondencia.Status,
                 correspondencia.CreatedAt,
                 correspondencia.AceitaEm,

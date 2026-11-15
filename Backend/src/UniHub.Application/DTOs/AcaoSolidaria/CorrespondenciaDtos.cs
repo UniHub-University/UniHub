@@ -9,11 +9,14 @@ public class AceitarSolicitacaoDto
     public Guid SolicitacaoId { get; set; }
 }
 
-// nao expor nome/telefone do solicitante aqui, só depois que ele autorizar
+// nao expor nome/telefone do solicitante aqui, só depois que ele autorizar.
+// DescricaoSolicitacao é o texto do pedido (NÃO é identidade) — o voluntário já
+// a vê nas sugestões antes de aceitar; mostrá-la aqui dá contexto, sem vazar nada novo.
 public record CorrespondenciaRespostaDto(
     Guid Id,
     string CodigoPublicoSolicitacao,
     CategoriaApoio CategoriaSolicitacao,
+    string DescricaoSolicitacao,
     StatusCorrespondencia Status,
     DateTime CreatedAt,
     DateTime? AceitaEm,
