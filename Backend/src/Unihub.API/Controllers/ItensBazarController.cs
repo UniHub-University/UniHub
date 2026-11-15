@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using UniHub.Application.DTOs.Bazar;
+using UniHub.Application.Interfaces;
 using UniHub.Domain.Entities;
 using UniHub.Infrastructure.Data;
 
@@ -13,10 +14,12 @@ namespace UniHub.API.Controllers;
 public class ItensBazarController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IImageStorageService _imageStorage;
 
-    public ItensBazarController(AppDbContext context)
+    public ItensBazarController(AppDbContext context, IImageStorageService imageStorage)
     {
         _context = context;
+        _imageStorage = imageStorage;
     }
 
         // CREATE: POST /api/itens-bazar
@@ -103,9 +106,16 @@ public class ItensBazarController : ControllerBase
         if (vendedor is null || item.VendedorId != vendedor.Id)
             return Forbid(); // 403: item existe, mas nao pertence a esse usuario
 
+        var novaImagemUrl = string.IsNullOrWhiteSpace(dto.ImagemUrl) ? null : dto.ImagemUrl;
+        // Se a imagem mudou (troca ou remoção), apaga a antiga do Cloudinary.
+        if (item.ImagemUrl != novaImagemUrl)
+        {
+            await RemoverImagemAntigaAsync(item.ImagemUrl);
+        }
+
         item.Nome = dto.Nome;
         item.Descricao = dto.Descricao;
-        item.ImagemUrl = string.IsNullOrWhiteSpace(dto.ImagemUrl) ? null : dto.ImagemUrl;
+        item.ImagemUrl = novaImagemUrl;
         item.Preco = dto.Preco;
         item.QuantidadeDisponivel = dto.QuantidadeDisponivel;
         item.Categoria = dto.Categoria;
@@ -166,4 +176,15 @@ public class ItensBazarController : ControllerBase
             item.VendedorId,
             item.Vendedor?.ChavePix // Adicionado: pega o PIX caso o vendedor esteja carregado
         );
+
+    private async Task RemoverImagemAntigaAsync(string? urlAntiga)
+    {
+        if (string.IsNullOrWhiteSpace(urlAntiga)) return;
+
+        var publicId = _imageStorage.ExtrairPublicId(urlAntiga);
+        if (publicId is not null)
+        {
+            await _imageStorage.DeleteAsync(publicId);
+        }
+    }
 }
