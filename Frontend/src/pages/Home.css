@@ -23,38 +23,103 @@
   color: #596452;
 }
 
+.home__secao {
+  --secao-fundo: #f1f1d8;
+  --secao-borda: #d9dcb8;
+  --secao-destaque: var(--cor-verde);
+  --secao-destaque-texto: #fef6c7;
+
+  padding: clamp(18px, 3vw, 32px);
+  border: 1px solid var(--secao-borda);
+  border-radius: 24px;
+  background: linear-gradient(165deg, #fffdf2 0%, var(--secao-fundo) 100%);
+  box-shadow: var(--sombra);
+}
+
+.home__secao--alimentacao {
+  --secao-fundo: #f8e6b4;
+  --secao-borda: #e6d19a;
+  --secao-destaque: #7a5c27;
+  --secao-destaque-texto: #fff4d6;
+}
+
 .home__secao-topo {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 14px 20px;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--secao-borda);
+}
+
+.home__secao-identidade {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.home__secao-icone {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--secao-destaque);
+  color: var(--secao-destaque-texto);
+  box-shadow: 0 6px 14px rgb(35 51 30 / 22%);
+}
+
+.home__secao-icone svg {
+  width: 24px;
+  height: 24px;
 }
 
 .home__secao-titulo {
-  font-family: var(--fonte-corpo);
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #243322;
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.35rem, 2.5vw, 1.7rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--secao-destaque);
+}
+
+.home__secao-descricao {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #596452;
 }
 
 .home__ver-todos {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--cor-verde);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid var(--secao-destaque);
+  border-radius: 999px;
+  background: #fffdf2;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--secao-destaque);
   text-decoration: none;
   white-space: nowrap;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
 }
 
 .home__ver-todos:hover {
-  text-decoration: underline;
+  background: var(--secao-destaque);
+  color: var(--secao-destaque-texto);
 }
 
 .home__ver-todos:focus-visible {
-  outline: 2px solid var(--cor-verde);
+  outline: 3px solid var(--cor-tan);
   outline-offset: 3px;
-  border-radius: 4px;
 }
 
 .home__status,
@@ -72,13 +137,27 @@
   border: 1px solid #e4bdbd;
 }
 
-.home__grade {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+.home__secao + .home__secao {
+  margin-top: 32px;
+}
+
+/* Uma linha só por categoria: os cards ficam lado a lado e, quando não cabem,
+   a linha rola na horizontal (o "Ver todos" leva à lista completa). */
+.home__linha {
+  display: flex;
   gap: 24px;
   list-style: none;
-  margin: 0;
-  padding: 0;
+  margin: 0 -6px;
+  padding: 6px 6px 16px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--secao-destaque) transparent;
+}
+
+.home__linha > li {
+  flex: 0 0 clamp(240px, calc((100% - 96px) / 4), 300px);
+  scroll-snap-align: start;
 }
 
 /* Banner de entrada: arte em CSS, sem imagens externas. */
@@ -98,6 +177,23 @@
 .home__banner-cartao--livro { top: 4px; left: 0; transform: rotate(-9deg); color: #284428; background: #f9efcf; }
 .home__banner-cartao--sacola { right: -4px; top: 112px; transform: rotate(8deg); color: #29462e; background: #d5e0bc; }
 .home__banner-selo { display: inline-flex; gap: 8px; align-items: center; position: absolute; bottom: -10px; left: 0; color: #e3d4a9; font-size: .8rem; }
+@media (max-width: 520px) {
+  .home__secao-icone {
+    width: 40px;
+    height: 40px;
+  }
+
+  .home__secao-descricao {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home__ver-todos {
+    transition: none;
+  }
+}
+
 @media (max-width: 760px) {
   .home__banner { grid-template-columns: 1fr; }
   .home__banner-arte { width: min(100%, 340px); min-height: 300px; justify-self: center; margin-top: 14px; }

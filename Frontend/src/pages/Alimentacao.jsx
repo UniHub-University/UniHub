@@ -16,14 +16,8 @@ import { listarAlimentos } from '../services/alimentos.js';
 import { ApiError } from '../services/api.js';
 import { usePerfilVendedor } from '../auth/PerfilVendedor.jsx';
 import BuscaAnuncios from '../components/BuscaAnuncios.jsx';
+import CardAlimento from '../components/CardAlimento.jsx';
 import './Alimentacao.css';
-
-function formatarPreco(preco) {
-  return Number(preco).toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
-}
 
 export default function Alimentacao() {
     const { ehVendedor } = usePerfilVendedor();
@@ -116,59 +110,7 @@ export default function Alimentacao() {
 
                 <ul className="alimentacao__grade">
                     {alimentos.map((alimento) => (
-                        <li className="alimentacao__card" key={alimento.id}>
-                             {alimento.imagemUrl && (
-                                <img
-                                    className="alimentacao__imagem"
-                                    src={alimento.imagemUrl}
-                                    alt={alimento.nome}
-                                    loading="lazy"
-                                />
-                            )}
-                            <div className="alimentacao__card-conteudo">
-                            <h2 className="alimentacao__nome">
-                                <Link
-                                    className="alimentacao__card-link"
-                                    to={`/alimentacao/${alimento.id}`}
-                                >
-                                    {alimento.nome}
-                                </Link>
-                            </h2>
-
-                            <div className="alimentacao__tags">
-                                {alimento.categoria && (
-                                <span className="alimentacao__categoria">
-                                    {alimento.categoria}
-                                </span>
-                                )}
-                            </div>
-
-                            {alimento.descricao && (
-                                <p className="alimentacao__descricao">
-                                    {alimento.descricao}
-                                </p>
-                            )}
-
-                            {alimento.restricoes && alimento.restricoes !== 'null' && (
-                                <p className="alimentacao__restricoes">
-                                    Restrições: {alimento.restricoes}
-                                </p>
-                            )}
-                            </div>
-
-                            <div className="alimentacao__rodape">
-                                <span className="alimentacao__preco">
-                                    {formatarPreco(alimento.preco)}
-                                </span>
-
-                                <span className="alimentacao__status">
-                                    {alimento.quantidadeDisponivel}{' '}
-                                    {alimento.quantidadeDisponivel === 1
-                                    ? 'unidade'
-                                    : 'unidades'}
-                                </span>
-                            </div>
-                        </li>
+                        <CardAlimento key={alimento.id} alimento={alimento} />
                     ))}
                 </ul>
             </>
