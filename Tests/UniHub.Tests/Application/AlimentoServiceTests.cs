@@ -1,5 +1,6 @@
 using NSubstitute;
 using UniHub.Application.DTOs.Alimentacao;
+using UniHub.Application.Interfaces;
 using UniHub.Application.Interfaces.Alimentacao;
 using UniHub.Application.Services.Alimentacao;
 using UniHub.Domain.Entities;
@@ -39,10 +40,12 @@ public class AlimentoServiceTests
 {
     private readonly IAlimentoRepository _repository =
         Substitute.For<IAlimentoRepository>();
+    private readonly IImageStorageService _imageStorage =
+        Substitute.For<IImageStorageService>();
 
     private AlimentoService CriarService()
     {
-        return new AlimentoService(_repository);
+        return new AlimentoService(_repository, _imageStorage);
     }
 
     [Fact]

@@ -1,5 +1,6 @@
 using NSubstitute;
 using UniHub.Application.DTOs.Alimentacao;
+using UniHub.Application.Interfaces;
 using UniHub.Application.Interfaces.Alimentacao;
 using UniHub.Application.Services.Alimentacao;
 using UniHub.Domain.Entities;
@@ -20,8 +21,11 @@ public class AlimentoServiceComplementoTests
 {
     private readonly IAlimentoRepository _repository =
         Substitute.For<IAlimentoRepository>();
+    private readonly IImageStorageService _imageStorage =
+        Substitute.For<IImageStorageService>();
 
-    private AlimentoService CriarService() => new AlimentoService(_repository);
+
+    private AlimentoService CriarService() => new AlimentoService(_repository, _imageStorage);
 
     // ---------- Posse: não-dono em Inativar ----------
     [Fact]
@@ -121,4 +125,87 @@ public class AlimentoServiceComplementoTests
 
         await _repository.DidNotReceive().AdicionarAsync(Arg.Any<Alimento>());
     }
+
+    // ---------- BRV-226: remoção de imagem órfã ----------
+    // Helper: cria um alimento existente, do vendedor, para os testes de edição.
+    private (Guid usuarioId, Guid vendedorId, Guid alimentoId, Alimento alimento) PrepararAlimentoExistente(string? imagemAtual)
+    {
+        var usuarioId = Guid.NewGuid();
+        var vendedorId = Guid.NewGuid();
+        var alimentoId = Guid.NewGuid();
+        var alimento = new Alimento
+        {
+            Id = alimentoId,
+            Nome = "Bolo",
+            Categoria = "Doce",
+            Preco = 10,
+            QuantidadeDisponivel = 5,
+            HorarioDisponibilidade = new TimeSpan(12, 0, 0),
+            ImagemUrl = imagemAtual,
+            Status = ProdutoStatus.Disponivel,
+            VendedorId = vendedorId,
+        };
+        _repository.ObterVendedorIdPorUsuarioAsync(usuarioId).Returns(vendedorId);
+        _repository.ObterDoVendedorAsync(alimentoId, vendedorId).Returns(alimento);
+
+        return (usuarioId, vendedorId, alimentoId, alimento);
+    }
+
+    private static AtualizarAlimentoDto DtoComImagem(string? imagemUrl) =>
+        new("Bolo", null, imagemUrl, 10, 5, "Doce", null, new TimeSpan(12, 0, 0));
+
+    [Fact]
+    public async Task Atualizar_TrocandoImagem_RemoveImagemAntigaDoCloudinary()
+    {
+        var (usuarioId, _, alimentoId, _) =
+            PrepararAlimentoExistente("https://cloud/antiga.jpg");
+        _imageStorage.ExtrairPublicId("https://cloud/antiga.jpg").Returns("public-antiga");
+
+        var dto = DtoComImagem("https://cloud/nova.jpg");
+
+        await CriarService().AtualizarAsync(usuarioId, alimentoId, dto);
+
+        await _imageStorage.Received(1).DeleteAsync("public-antiga");
+    }
+
+    [Fact]
+    public async Task Atualizar_RemovendoImagem_RemoveImagemAntigaDoCloudinary()
+    {
+        var (usuarioId, _, alimentoId, _) =
+            PrepararAlimentoExistente("https://cloud/antiga.jpg");
+        _imageStorage.ExtrairPublicId("https://cloud/antiga.jpg").Returns("public-antiga");
+
+        var dto = DtoComImagem(null); // remove a imagem
+
+        await CriarService().AtualizarAsync(usuarioId, alimentoId, dto);
+
+        await _imageStorage.Received(1).DeleteAsync("public-antiga");
+    }
+
+    [Fact]
+    public async Task Atualizar_MantendoMesmaImagem_NaoRemoveDoCloudinary()
+    {
+        var (usuarioId, _, alimentoId, _) =
+            PrepararAlimentoExistente("https://cloud/mesma.jpg");
+
+        var dto = DtoComImagem("https://cloud/mesma.jpg"); // mesma URL
+
+        await CriarService().AtualizarAsync(usuarioId, alimentoId, dto);
+
+        await _imageStorage.DidNotReceive().DeleteAsync(Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task Atualizar_AlimentoSemImagem_NaoRemoveDoCloudinary()
+    {
+        var (usuarioId, _, alimentoId, _) =
+            PrepararAlimentoExistente(null); // não tinha imagem
+
+        var dto = DtoComImagem("https://cloud/nova.jpg"); // adiciona a primeira
+
+        await CriarService().AtualizarAsync(usuarioId, alimentoId, dto);
+
+        await _imageStorage.DidNotReceive().DeleteAsync(Arg.Any<string>());
+    }
+
 }
