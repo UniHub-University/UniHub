@@ -112,10 +112,13 @@ export function revelarIdentidade(id) {
 // Doações — DoacaoController
 // ---------------------------------------------------------------------------
 
-// Voluntário registra uma doação para uma solicitação que já aceitou.
-// dto: { solicitacaoId: guid, descricao: string }.
-export function criarDoacao({ solicitacaoId, descricao }) {
-  return api.post('/api/doacoes', { solicitacaoId, descricao });
+// Voluntário registra uma doação. Caminho preferido: a partir de uma
+// correspondência aceita (o backend resolve a solicitação — o front não manuseia
+// o id da solicitação, só circula o código público). `solicitacaoId` segue
+// aceito por compatibilidade.
+// dto: { correspondenciaId?: guid, solicitacaoId?: guid, descricao: string }.
+export function criarDoacao({ correspondenciaId, solicitacaoId, descricao }) {
+  return api.post('/api/doacoes', { correspondenciaId, solicitacaoId, descricao });
 }
 
 // Doações do voluntário logado.
