@@ -50,13 +50,13 @@ o comportamento que o Perfil já adota.
 
 ## Critérios de aceite
 
-- [ ] Ao trocar a imagem de um alimento, a antiga é removida do Cloudinary.
-- [ ] Ao trocar a imagem de um item do bazar, a antiga é removida do Cloudinary.
-- [ ] Ao remover a imagem (URL nula), a antiga é removida e o produto fica sem foto.
-- [ ] Manter a mesma imagem (URL inalterada) NÃO dispara remoção.
-- [ ] Inativar um produto NÃO remove a imagem (preserva para possível reativação).
-- [ ] `IImageStorageService` registrado no DI (confirmado).
-- [ ] `dotnet build` limpo + testes unitários passando.
+- [x] Ao trocar a imagem de um alimento, a antiga é removida do Cloudinary.
+- [x] Ao trocar a imagem de um item do bazar, a antiga é removida do Cloudinary. <!-- validado manualmente; Bazar não tem service unit-testável -->
+- [x] Ao remover a imagem (URL nula), a antiga é removida e o produto fica sem foto.
+- [x] Manter a mesma imagem (URL inalterada) NÃO dispara remoção.
+- [x] Inativar um produto NÃO remove a imagem (preserva para possível reativação).
+- [x] `IImageStorageService` registrado no DI (confirmado).
+- [x] `dotnet build` limpo + testes unitários passando.
 
 ## Decisões confirmadas
 
