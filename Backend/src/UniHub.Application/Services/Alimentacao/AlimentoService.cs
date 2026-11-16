@@ -1,4 +1,5 @@
 using UniHub.Application.DTOs.Alimentacao;
+using UniHub.Application.Interfaces;
 using UniHub.Application.Interfaces.Alimentacao;
 using UniHub.Domain.Entities;
 
@@ -7,10 +8,12 @@ namespace UniHub.Application.Services.Alimentacao;
 public class AlimentoService
 {
     private readonly IAlimentoRepository _alimentoRepository;
+    private readonly IImageStorageService _imageStorage;
 
-    public AlimentoService(IAlimentoRepository alimentoRepository)
+    public AlimentoService(IAlimentoRepository alimentoRepository, IImageStorageService imageStorage)
     {
         _alimentoRepository = alimentoRepository;
+        _imageStorage = imageStorage;
     }
 
     public async Task<IReadOnlyList<AlimentoResumoDto>> ObterDisponiveisAsync()
@@ -106,9 +109,15 @@ public class AlimentoService
             return false;
         }
 
+        var novaImagemUrl = string.IsNullOrWhiteSpace(dto.ImagemUrl) ? null : dto.ImagemUrl.Trim();
+        // Se a imagem mudou (troca ou remoção), apaga a antiga do Cloudinary
+        if (alimento.ImagemUrl != novaImagemUrl)
+        {
+            await RemoverImagemAntigaAsync(alimento.ImagemUrl);
+        }
         alimento.Nome = dto.Nome.Trim();
         alimento.Descricao = dto.Descricao?.Trim();
-        alimento.ImagemUrl = string.IsNullOrWhiteSpace(dto.ImagemUrl) ? null : dto.ImagemUrl.Trim();
+        alimento.ImagemUrl = novaImagemUrl;
         alimento.Preco = dto.Preco;
         alimento.QuantidadeDisponivel = dto.QuantidadeDisponivel;
         alimento.Categoria = dto.Categoria.Trim();
@@ -251,5 +260,16 @@ public class AlimentoService
             alimento.DataPublicacao,
             alimento.VendedorId,
             alimento.Vendedor?.ChavePix);
+    }
+
+    private async Task RemoverImagemAntigaAsync(string? urlAntiga)
+    {
+        if (string.IsNullOrWhiteSpace(urlAntiga)) return;
+
+        var publicId = _imageStorage.ExtrairPublicId(urlAntiga);
+        if (publicId is not null)
+        {
+            await _imageStorage.DeleteAsync(publicId);
+        }
     }
 }
