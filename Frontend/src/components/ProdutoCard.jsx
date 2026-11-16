@@ -15,10 +15,13 @@ export default function ProdutoCard({ produto }) {
     preco,
     tipo,
     nomeVendedor,
+    fotoVendedorUrl,
     vendedorId,
     campi = [],
     quantidadeDisponivel,
   } = produto;
+  const nomeVendedorExibido = nomeVendedor?.trim();
+
 
   return (
     <article className="produto-card">
@@ -32,17 +35,31 @@ export default function ProdutoCard({ produto }) {
 
       <p className="produto-card__preco">{formatadorPreco.format(preco)}</p>
 
-      <dl className="produto-card__detalhes">
+       <dl className="produto-card__detalhes">
         <div className="produto-card__detalhe">
           <dt>Vendedor</dt>
           <dd>
-            {vendedorId ? (
-              <Link className="produto-card__vendedor" to={`/vendedores/${encodeURIComponent(vendedorId)}`}>
-                {nomeVendedor}
-              </Link>
-            ) : (
-              nomeVendedor
-            )}
+            <span className="produto-card__vendedor-identidade">
+              {fotoVendedorUrl ? (
+                <img
+                  className="produto-card__foto-vendedor"
+                  src={fotoVendedorUrl}
+                  alt={`Foto de ${nomeVendedorExibido || 'vendedor'}`}
+                  loading="lazy"
+                />
+              ) : nomeVendedorExibido ? (
+                <span className="produto-card__avatar-vendedor" aria-hidden="true">
+                  {nomeVendedorExibido.charAt(0).toUpperCase()}
+                </span>
+              ) : null}
+              {vendedorId ? (
+                <Link className="produto-card__vendedor" to={`/vendedores/${encodeURIComponent(vendedorId)}`}>
+                  {nomeVendedorExibido || 'Vendedor'}
+                </Link>
+              ) : (
+                <span>{nomeVendedorExibido || 'Vendedor'}</span>
+              )}
+            </span>
           </dd>
         </div>
         {campi.length > 0 && (

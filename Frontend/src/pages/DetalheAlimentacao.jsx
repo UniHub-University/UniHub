@@ -14,6 +14,8 @@ import BlocoVendedor from '../components/BlocoVendedor.jsx';
 
 import './DetalheAlimentacao.css';
 
+
+
 const moeda = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
   currency: 'BRL',
@@ -211,8 +213,11 @@ function ConsultaDetalhe({ id }) {
             </dd>
           </dl>
 
-          <BlocoVendedor vendedorId={alimento.vendedorId} />
-
+         <BlocoVendedor
+            vendedorId={alimento.vendedorId}
+            chavePix={alimento.chavePix}
+          />
+          
           {alimentoDisponivel(alimento) ? (
             compraRealizada ? (
               <div

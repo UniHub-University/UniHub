@@ -56,11 +56,15 @@ public class ItensBazarController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ItemBazarResumoDto>>> ObterTodos()
     {
-        var itens = await _context.ItensBazar.AsNoTracking().ToListAsync();
+        var itens = await _context.ItensBazar
+            .AsNoTracking()
+            .Include(i => i.Vendedor)
+                .ThenInclude(v => v!.Usuario)
+            .ToListAsync();
         var resposta = itens.Select(MapearParaResumoDto);
         return Ok(resposta);
     }
-
+    
     // READ: GET /api/itens-bazar/{id}
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ItemBazarRespostaDto>> ObterPorId(Guid id)
@@ -146,7 +150,7 @@ public class ItensBazarController : ControllerBase
         return NoContent();
     }
     
-    private static ItemBazarResumoDto MapearParaResumoDto(ItemBazar item) =>
+  private static ItemBazarResumoDto MapearParaResumoDto(ItemBazar item) =>
         new(
             item.Id, 
             item.Nome, 
@@ -158,8 +162,22 @@ public class ItensBazarController : ControllerBase
             item.Condicao,
             item.Status, 
             item.DataPublicacao, 
-            item.VendedorId
+            item.VendedorId,
+            NomeVendedor(item.Vendedor),
+            FotoVendedor(item.Vendedor)
     );
+
+    private static string NomeVendedor(Vendedor? vendedor) =>
+        string.IsNullOrWhiteSpace(vendedor?.Usuario?.NomeCompleto)
+            ? "Vendedor"
+            : vendedor.Usuario.NomeCompleto;
+
+    private static string? FotoVendedor(Vendedor? vendedor) =>
+        !string.IsNullOrWhiteSpace(vendedor?.FotoUrl)
+            ? vendedor.FotoUrl
+            : !string.IsNullOrWhiteSpace(vendedor?.Usuario?.FotoPerfilUrl)
+                ? vendedor.Usuario.FotoPerfilUrl
+                : null;
 
     private static ItemBazarRespostaDto MapearParaDto(ItemBazar item) =>
         new(

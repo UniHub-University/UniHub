@@ -14,10 +14,12 @@ public class AlimentoRepository : IAlimentoRepository
         _context = context;
     }
 
-    public async Task<List<Alimento>> ObterDisponiveisAsync()
+ public async Task<List<Alimento>> ObterDisponiveisAsync()
     {
         return await _context.Alimentos
             .AsNoTracking()
+            .Include(a => a.Vendedor)
+                .ThenInclude(v => v!.Usuario)
             .Where(a =>
                 a.Status == ProdutoStatus.Disponivel &&
                 a.QuantidadeDisponivel > 0)

@@ -77,6 +77,42 @@
   line-height: 1.65;
 }
 
+.cartao-anuncio__vendedor {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  color: #596452;
+  font-size: 0.84rem;
+}
+
+.cartao-anuncio__foto-vendedor,
+.cartao-anuncio__avatar-vendedor {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 50%;
+}
+
+.cartao-anuncio__foto-vendedor {
+  object-fit: cover;
+  border: 1px solid rgba(177, 149, 99, 0.5);
+}
+
+.cartao-anuncio__avatar-vendedor {
+  display: grid;
+  place-items: center;
+  background: var(--cor-verde);
+  color: var(--cor-creme);
+  font-weight: 700;
+}
+
+.cartao-anuncio__nome-vendedor {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .cartao-anuncio__rodape {
   display: flex;
   align-items: center;

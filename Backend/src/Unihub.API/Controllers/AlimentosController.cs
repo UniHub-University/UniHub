@@ -17,7 +17,7 @@ public class AlimentosController : ControllerBase
         _alimentoService = alimentoService;
     }
 
-    // GET /api/alimentos
+       // GET /api/alimentos
     // Retorna alimentos disponíveis para os usuários
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<AlimentoResumoDto>>> ObterDisponiveis()

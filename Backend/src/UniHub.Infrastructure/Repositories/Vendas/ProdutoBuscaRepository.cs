@@ -77,7 +77,7 @@ public class ProdutoBuscaRepository : IProdutoBuscaRepository
             .ThenBy(p => p.Id) // ordenacao estavel para a paginacao
             .Skip((f.Page - 1) * f.PageSize)
             .Take(f.PageSize)
-            .Select(p => new ProdutoResumoDto(
+              .Select(p => new ProdutoResumoDto(
                 p.Id,
                 p.Nome,
                 p.Descricao,
@@ -87,6 +87,9 @@ public class ProdutoBuscaRepository : IProdutoBuscaRepository
                 p.DataPublicacao,
                 p.VendedorId,
                 p.Vendedor!.Usuario!.NomeCompleto,
+                p.Vendedor.FotoUrl != null && p.Vendedor.FotoUrl != ""
+                    ? p.Vendedor.FotoUrl
+                    : p.Vendedor.Usuario!.FotoPerfilUrl,
                 p.Vendedor.Locais.Select(l => l.Campus).Distinct().ToList()))
             .ToListAsync();
 

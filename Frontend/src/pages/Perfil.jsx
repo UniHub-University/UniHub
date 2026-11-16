@@ -131,6 +131,12 @@ export default function Perfil() {
   const [fotoSelecionada, setFotoSelecionada] = useState(null);
   const [previewFoto, setPreviewFoto] = useState('');
   const { recarregar: recarregarPerfilVendedor } = usePerfilVendedor();
+  const [chavePix, setChavePix] = useState('');
+  const [carregandoChavePix, setCarregandoChavePix] = useState(false);
+  const [falhaCarregamentoChavePix, setFalhaCarregamentoChavePix] = useState(false);
+  const [salvandoChavePix, setSalvandoChavePix] = useState(false);
+  const [erroChavePix, setErroChavePix] = useState('');
+  const [mensagemChavePix, setMensagemChavePix] = useState('');
   const [tornandoVendedor, setTornandoVendedor] = useState(false);
   const [tornandoVoluntario, setTornandoVoluntario] = useState(false);
   const [descricaoAberta, setDescricaoAberta] = useState(false);
@@ -165,6 +171,29 @@ export default function Perfil() {
 
     carregarPerfil();
   }, []);
+
+  useEffect(() => {
+    let cancelado = false;
+    async function carregarChavePix() {
+      if (!perfil?.ehVendedor) return;
+      setCarregandoChavePix(true);
+      setFalhaCarregamentoChavePix(false);
+      setErroChavePix('');
+      try {
+        const dados = await api.get('/api/perfil/vendedor/info');
+        if (!cancelado) setChavePix(dados?.chavePix ?? '');
+      } catch (e) {
+        if (!cancelado) {
+          setFalhaCarregamentoChavePix(true);
+          setErroChavePix(e instanceof ApiError ? e.message : 'Não foi possível carregar a chave PIX.');
+        }
+      } finally {
+        if (!cancelado) setCarregandoChavePix(false);
+      }
+    }
+    carregarChavePix();
+    return () => { cancelado = true; };
+  }, [perfil?.ehVendedor]);
 
   // Resumo das últimas compras.
   useEffect(() => {
@@ -346,6 +375,29 @@ export default function Perfil() {
       setErro(e instanceof ApiError ? e.message : 'Não foi possível concluir. Tente novamente.');
     } finally {
       setTornandoVendedor(false);
+    }
+  }
+
+  async function salvarChavePix(evento) {
+    evento.preventDefault();
+    setErroChavePix('');
+    setMensagemChavePix('');
+    setSalvandoChavePix(true);
+    try {
+      await api.put('/api/perfil/vendedor/info', {
+        fotoUrl: null,
+        cardapioUrl: null,
+        descricaoNegocio: null,
+        chavePix: chavePix.trim(),
+      });
+      setChavePix((valor) => valor.trim());
+      setMensagemChavePix(chavePix.trim()
+        ? 'Chave PIX atualizada com sucesso.'
+        : 'Chave PIX removida.');
+    } catch (e) {
+      setErroChavePix(e instanceof ApiError ? e.message : 'Não foi possível salvar a chave PIX.');
+    } finally {
+      setSalvandoChavePix(false);
     }
   }
 
@@ -537,6 +589,48 @@ export default function Perfil() {
                 <p className="perfil__card-aviso">
                   Gerencie seus produtos pelo Painel do vendedor, no menu acima.
                 </p>
+                <form className="perfil__formulario perfil__formulario--pix" onSubmit={salvarChavePix}>
+                  <div className="perfil__campo">
+                    <label htmlFor="chavePix">Chave PIX para receber pagamentos</label>
+                    <input
+                      id="chavePix"
+                      name="chavePix"
+                      type="text"
+                      value={chavePix}
+                      onChange={(evento) => {
+                        setChavePix(evento.target.value);
+                        setErroChavePix('');
+                        setMensagemChavePix('');
+                      }}
+                      placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória"
+                      autoComplete="off"
+                      disabled={carregandoChavePix || falhaCarregamentoChavePix || salvandoChavePix}
+                      aria-describedby="chavePix-ajuda"
+                    />
+                    <small id="chavePix-ajuda">
+                      {carregandoChavePix
+                        ? 'Carregando chave PIX…'
+                        : 'Deixe em branco e salve para remover a chave.'}
+                    </small>
+                  </div>
+                  {erroChavePix && (
+                    <p className="perfil__mensagem perfil__mensagem--erro" role="alert">
+                      {erroChavePix}
+                    </p>
+                  )}
+                  {mensagemChavePix && (
+                    <p className="perfil__mensagem perfil__mensagem--sucesso" role="status">
+                      {mensagemChavePix}
+                    </p>
+                  )}
+                  <button
+                    className="perfil__botao perfil__botao--compacto"
+                    type="submit"
+                    disabled={carregandoChavePix || falhaCarregamentoChavePix || salvandoChavePix}
+                  >
+                    {salvandoChavePix ? 'Salvando…' : 'Salvar chave PIX'}
+                  </button>
+                </form>
               </>
             ) : (
               <>

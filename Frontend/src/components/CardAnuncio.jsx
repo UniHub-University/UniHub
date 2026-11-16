@@ -21,6 +21,7 @@ function formatarPreco(valor) {
 
 export default function CardAnuncio({ item }) {
   const condicao = rotuloCondicao(item.condicao);
+  const nomeVendedor = item.nomeVendedor?.trim();
 
   return (
     <li className="cartao-anuncio">
@@ -51,6 +52,22 @@ export default function CardAnuncio({ item }) {
       {item.descricao && (
         <p className="cartao-anuncio__descricao">{item.descricao}</p>
       )}
+
+      <div className="cartao-anuncio__vendedor" aria-label={`Vendedor: ${nomeVendedor || 'Vendedor'}`}>
+        {item.fotoVendedorUrl ? (
+          <img
+            className="cartao-anuncio__foto-vendedor"
+            src={item.fotoVendedorUrl}
+            alt={`Foto de ${nomeVendedor || 'vendedor'}`}
+            loading="lazy"
+          />
+        ) : nomeVendedor ? (
+          <span className="cartao-anuncio__avatar-vendedor" aria-hidden="true">
+            {nomeVendedor.charAt(0).toUpperCase()}
+          </span>
+        ) : null}
+        <span className="cartao-anuncio__nome-vendedor">{nomeVendedor || 'Vendedor'}</span>
+      </div>
 
       <div className="cartao-anuncio__rodape">
         <span className="cartao-anuncio__preco">{formatarPreco(item.preco)}</span>

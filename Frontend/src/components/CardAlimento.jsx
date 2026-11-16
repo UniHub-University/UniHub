@@ -16,6 +16,8 @@ function formatarPreco(preco) {
 }
 
 export default function CardAlimento({ alimento }) {
+  const nomeVendedor = alimento.nomeVendedor?.trim();
+
   return (
     <li className="cartao-alimento">
       {alimento.imagemUrl && (
@@ -53,7 +55,24 @@ export default function CardAlimento({ alimento }) {
             Restrições: {alimento.restricoes}
           </p>
         )}
+
+       <div className="cartao-alimento__vendedor" aria-label={`Vendedor: ${nomeVendedor || 'Vendedor'}`}>
+          {alimento.fotoVendedorUrl ? (
+            <img
+              className="cartao-alimento__foto-vendedor"
+              src={alimento.fotoVendedorUrl}
+              alt={`Foto de ${nomeVendedor || 'vendedor'}`}
+              loading="lazy"
+            />
+          ) : nomeVendedor ? (
+            <span className="cartao-alimento__avatar-vendedor" aria-hidden="true">
+              {nomeVendedor.charAt(0).toUpperCase()}
+            </span>
+          ) : null}
+          <span className="cartao-alimento__nome-vendedor">{nomeVendedor || 'Vendedor'}</span>
+        </div>
       </div>
+
 
       <div className="cartao-alimento__rodape">
         <span className="cartao-alimento__preco">
