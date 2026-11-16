@@ -161,7 +161,7 @@
 }
 
 /* Banner de entrada: arte em CSS, sem imagens externas. */
-.home__banner { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 24px; position: relative; isolation: isolate; padding: clamp(24px, 5vw, 56px); margin-bottom: 40px; border-radius: 28px; background: linear-gradient(120deg, #203c24, #365536); color: #fffbed; overflow: hidden; }
+.home__banner { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 24px; position: relative; isolation: isolate; padding: clamp(24px, 5vw, 56px); margin-bottom: 40px; border-radius: 28px; background: linear-gradient(120deg, #0079fa, #0e56ff); color: #070601; overflow: hidden; }
 .home__banner-conteudo { position: relative; z-index: 1; min-width: 0; }
 .home__banner-etiqueta { display: block; max-width: 34ch; font-size: .7rem; font-weight: 700; line-height: 1.6; letter-spacing: .14em; color: #e3d4a9; }
 .home__banner-titulo { margin: 22px 0 18px; font-family: var(--fonte-titulo); font-size: clamp(2rem, 4.5vw, 3.4rem); line-height: 1.12; letter-spacing: -.035em; color: #fffbed; }
