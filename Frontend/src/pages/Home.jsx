@@ -121,7 +121,7 @@ export default function Home() {
       <header className="home__banner">
         <div className="home__banner-conteudo">
           <span className="home__banner-etiqueta">FEITO PELA COMUNIDADE, PARA A COMUNIDADE</span>
-          <h1 className="home__banner-titulo">Seu campus.<br />Novas conexões.<br /><em>Mais possibilidades.</em></h1>
+          <h1 className="home__banner-titulo">Seu campus.<br />Novas conexões.<br /><em>Mais conexões.</em></h1>
           <p className="home__banner-descricao">Dê uma nova história ao que você não usa mais e descubra achados de quem compartilha a vida universitária com você.</p>
           <Link className="home__banner-botao" to="/bazar">Explorar o Bazar <span aria-hidden="true">↗</span></Link>
         </div>
