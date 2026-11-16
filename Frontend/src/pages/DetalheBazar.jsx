@@ -207,9 +207,10 @@ function ConsultaDetalhe({ id }) {
             <dd>{item.quantidadeDisponivel ?? 'Não informada'}</dd>
           </dl>
 
-          <BlocoVendedor vendedorId={item.vendedorId} />
+          <BlocoVendedor vendedorId={item.vendedorId} chavePix={item.chavePix} />
 
           <AcoesPedido item={item} />
+
         </article>
       ) : null}
     </section>

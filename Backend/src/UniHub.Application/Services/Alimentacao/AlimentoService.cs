@@ -225,7 +225,7 @@ public class AlimentoService
             : ProdutoStatus.Esgotado;
     }
 
-    private static AlimentoResumoDto MapearParaResumoDto(
+      private static AlimentoResumoDto MapearParaResumoDto(
         Alimento alimento)
     {
         return new AlimentoResumoDto(
@@ -240,9 +240,22 @@ public class AlimentoService
             alimento.HorarioDisponibilidade,
             alimento.Status,
             alimento.DataPublicacao,
-            alimento.VendedorId);
+            alimento.VendedorId,
+            NomeVendedor(alimento.Vendedor),
+            FotoVendedor(alimento.Vendedor));
     }
 
+    private static string NomeVendedor(Vendedor? vendedor) =>
+        vendedor?.Usuario?.NomeCompleto?.Trim() is { Length: > 0 } nome
+            ? nome
+            : "Vendedor";
+
+    private static string? FotoVendedor(Vendedor? vendedor) =>
+        !string.IsNullOrWhiteSpace(vendedor?.FotoUrl)
+            ? vendedor.FotoUrl
+            : !string.IsNullOrWhiteSpace(vendedor?.Usuario?.FotoPerfilUrl)
+                ? vendedor.Usuario.FotoPerfilUrl
+                : null;
     private static AlimentoRespostaDto MapearParaRespostaDto(
         Alimento alimento)
     {

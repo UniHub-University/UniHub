@@ -88,6 +88,35 @@
   color: var(--cor-verde);
 }
 
+.produto-card__vendedor-identidade {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.produto-card__foto-vendedor,
+.produto-card__avatar-vendedor {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border-radius: 50%;
+}
+
+.produto-card__foto-vendedor {
+  object-fit: cover;
+  border: 1px solid rgba(177, 149, 99, 0.5);
+}
+
+.produto-card__avatar-vendedor {
+  display: grid;
+  place-items: center;
+  background: var(--cor-verde);
+  color: var(--cor-creme);
+  font-weight: 700;
+}
+
 /* Nome do vendedor: link para o perfil publico dele. */
 .produto-card__vendedor {
   font-weight: 600;

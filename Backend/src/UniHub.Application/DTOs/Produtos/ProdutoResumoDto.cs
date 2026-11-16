@@ -12,5 +12,6 @@ public record ProdutoResumoDto(
     DateTime DataPublicacao,
     Guid VendedorId,
     string NomeVendedor,
+    string? FotoVendedorUrl,
     List<string> Campi
 );

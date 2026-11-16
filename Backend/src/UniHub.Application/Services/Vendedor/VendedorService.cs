@@ -136,6 +136,16 @@ public class VendedorService
     /// Espera que FotoUrl/CardapioUrl ja tenham sido geradas previamente
     /// via POST /api/upload/imagem -- este metodo so persiste as URLs,
     /// nao faz upload.
+
+    public async Task<InfoVendedorDto?> ObterInfoAsync(Guid usuarioId)
+    {
+        var vendedor = await _context.Vendedores
+            .AsNoTracking()
+            .FirstOrDefaultAsync(v => v.UsuarioId == usuarioId);
+
+        return vendedor is null ? null : new InfoVendedorDto(vendedor.ChavePix);
+    }
+    
     public async Task<InfoVendedorResultDto> AtualizarInfoAsync(Guid usuarioId, AtualizarInfoVendedorDto dto)
     {
         var vendedor = await _context.Vendedores.FirstOrDefaultAsync(v => v.UsuarioId == usuarioId);

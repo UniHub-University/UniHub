@@ -37,7 +37,9 @@ public record AlimentoResumoDto(
     TimeSpan HorarioDisponibilidade,
     ProdutoStatus Status,
     DateTime DataPublicacao,
-    Guid VendedorId
+    Guid VendedorId,
+    string NomeVendedor,
+    string? FotoVendedorUrl
 );
 
 public record AlimentoRespostaDto(
@@ -53,5 +55,6 @@ public record AlimentoRespostaDto(
     ProdutoStatus Status,
     DateTime DataPublicacao,
     Guid VendedorId,
-    string? ChavePix
+    string? ChavePix          
 );
+

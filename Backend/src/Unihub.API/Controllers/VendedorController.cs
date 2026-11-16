@@ -37,6 +37,16 @@ public class VendedorController : ControllerBase
     ou pasta=perfis) e persiste no perfil do vendedor. Nao faz upload diretamente -- ver AtualizarInfoVendedorDto para o motivo dessa
     separacao de responsabilidade. */
 
+    [HttpGet("info")]
+    public async Task<ActionResult<InfoVendedorDto>> ObterInfo()
+    {
+        var usuarioId = Guid.Parse(User.FindFirst("sub")?.Value ?? Guid.Empty.ToString());
+        var info = await _vendedorService.ObterInfoAsync(usuarioId);
+        if (info is null)
+            return NotFound(new { mensagem = "Usuário não possui um perfil de vendedor válido." });
+        return Ok(info);
+    }
+    
     [HttpPut("info")]
     public async Task<IActionResult> AtualizarInfo([FromBody] AtualizarInfoVendedorDto dto)
     {

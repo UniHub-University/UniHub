@@ -35,7 +35,9 @@ public record ItemBazarResumoDto(
     CondicaoItem Condicao,
     ProdutoStatus Status,
     DateTime DataPublicacao,
-    Guid VendedorId
+    Guid VendedorId,
+    string NomeVendedor,
+    string? FotoVendedorUrl
 );
 
 public record ItemBazarRespostaDto(
@@ -52,4 +54,3 @@ public record ItemBazarRespostaDto(
     Guid VendedorId,
     string? ChavePix // Adicionado para exibir ao comprador (Sprint 3)
 );
-
