@@ -118,7 +118,7 @@ export default function BoasVindas() {
             />
             <div>
               <h1 className="boasvindas__titulo">UniHub</h1>
-              <p className="boasvindas__subtitulo">Troca e conexão para estudantes.</p>
+              <p className="boasvindas__subtitulo">Conectando estudantes dentro e fora da sala de aula.</p>
             </div>
           </div>
 

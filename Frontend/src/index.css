@@ -35,7 +35,7 @@ body,
 body {
   margin: 0;
   font-family: var(--fonte-corpo);
-  background-color: var(--cor-creme);
+  background-color: var(--cor-erro);
   color: var(--cor-verde);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
