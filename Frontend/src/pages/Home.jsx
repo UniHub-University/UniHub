@@ -117,7 +117,7 @@ function cardAlimento(alimento) {
 
 export default function Home() {
   return (
-    <section className="home">
+    <section className="inicio">
       <header className="home__banner">
         <div className="home__banner-conteudo">
           <span className="home__banner-etiqueta">FEITO PELA COMUNIDADE, PARA A COMUNIDADE</span>
