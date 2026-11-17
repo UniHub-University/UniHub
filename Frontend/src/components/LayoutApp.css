@@ -4,7 +4,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--cor-creme);
+  background-color:blueviolet;
 }
 
 .layout__header {
