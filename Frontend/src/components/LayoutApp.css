@@ -12,7 +12,7 @@
   align-items: center;
   gap: 24px;
   padding: 14px 24px;
-  background-color: var(--cor-superficie);
+  background-color:blueviolet;
   border-bottom: 1px solid rgba(177, 149, 99, 0.35);
   box-shadow: var(--sombra);
   position: sticky;
@@ -44,6 +44,7 @@
   gap: 4px;
   flex: 1;
   flex-wrap: wrap;
+  color: blueviolet;
 }
 
 .layout__link {
