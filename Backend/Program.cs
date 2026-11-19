@@ -19,6 +19,8 @@ using UniHub.Application.Services.Alimentacao;
 using UniHub.Infrastructure.Repositories.Alimentacao;
 using UniHub.API.BackgroundServices;
 using UniHub.API.Hubs;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +34,25 @@ if (!string.IsNullOrWhiteSpace(port))
 }
 
 builder.Services.AddControllers();
+
+// Rate limiting (S3 / seguranca): protege endpoints sensiveis contra abuso e
+// brute-force. NAO e defesa contra DDoS volumetrico (isso e tratado na borda
+// por Cloudflare/Render) -- aqui limitamos requisicoes por cliente a rotas
+// especificas (login e criar denuncia).
+builder.Services.AddRateLimiter(opcoes =>
+{
+    // Resposta padrao quando o limite estoura.
+    opcoes.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    // Politica "sensivel": no maximo 5 requisicoes por 30s por cliente.
+    opcoes.AddFixedWindowLimiter("sensivel", limite =>
+    {
+        limite.PermitLimit = 5;
+        limite.Window = TimeSpan.FromSeconds(30);
+        limite.QueueLimit = 0; // sem fila: excedeu, rejeita na hora
+    });
+});
+
 
 // Frente 2 (BRV-185): SignalR para o Painel do Vendedor em tempo real.
 // O hub (PainelHub) agrupa cada conexao em "vendedor:{id}"; a emissao de
@@ -196,15 +217,46 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Swagger habilitado tambem em producao para validacao/testes online da API
-// durante a Sprint 3 (frontend ainda nao desenvolvido). O time testa via
-// Swagger + "Authorize" com token obtido no Google OAuth Playground.
-// TODO: considerar restringir/desligar apos a entrega, quando o front assumir.
-app.UseSwagger();
-app.UseSwaggerUI();
+// Handler global de excecao: em producao, qualquer excecao nao tratada vira um
+// 500 generico em JSON, sem vazar stack trace / detalhes internos (information
+// disclosure). Em Development mostramos a pagina de erro detalhada para depurar.
+// (S2 / seguranca)
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler(ramo =>
+    {
+        ramo.Run(async contexto =>
+        {
+            contexto.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            contexto.Response.ContentType = "application/json";
+            await contexto.Response.WriteAsJsonAsync(new
+            {
+                mensagem = "Ocorreu um erro interno. Tente novamente mais tarde."
+            });
+        });
+    });
+}
+
+
+// Swagger exposto APENAS em Development. Em producao expor a UI/spec revela o
+// mapa completo da API (endpoints, DTOs, parametros) -- reconhecimento gratuito
+// para um atacante. O front ja cobre os fluxos; nao ha mais necessidade do
+// Swagger em producao. (S1 / seguranca)
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 
 
 app.UseCors("PermitirFrontend");
+
+app.UseRateLimiter();
 
 // A ordem aqui é CRÍTICA. Authentication sempre antes de Authorization.
 app.UseAuthentication();
