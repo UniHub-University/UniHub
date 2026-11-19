@@ -1,14 +1,25 @@
-// Home — vitrine de entrada com duas linhas: Bazar e Alimentação.
+// Home — vitrine de entrada da plataforma.
 //
-// Cada linha mostra os anúncios mais recentes da categoria e tem um link
-// "Ver todos" para a página específica (/bazar e /alimentacao), onde ficam o
-// feed completo e a busca. As duas linhas carregam de forma independente: se
-// uma API falhar, a outra continua aparecendo (cada uma trata seu próprio
-// carregando/erro/vazio).
+// Banner reposicionado para representar os 3 módulos do UniHub (Bazar,
+// Alimentação e Ação Solidária), seguido das linhas de vitrine de Bazar e
+// Alimentação e de um convite institucional para a Ação Solidária.
+//
+// ⚠️ LGPD (AGENTS §8): a Ação Solidária NÃO entra como vitrine de solicitações
+// (exporia pessoas em necessidade). É um bloco de CONVITE que leva ao módulo —
+// sem fetch de solicitações, sem dados reais.
+//
+// Cada LinhaVitrine carrega de forma independente: se uma API falhar, a outra
+// continua aparecendo (cada uma trata seu próprio carregando/erro/vazio).
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiBookOpen, FiShoppingBag, FiHeart, FiCoffee } from 'react-icons/fi';
+import {
+  FiShoppingBag,
+  FiHeart,
+  FiCoffee,
+  FiArrowRight,
+} from 'react-icons/fi';
+import { FaHandHoldingHeart } from 'react-icons/fa';
 
 import { listarItensBazar } from '../services/anuncios.js';
 import { listarAlimentos } from '../services/alimentos.js';
@@ -118,48 +129,91 @@ function cardAlimento(alimento) {
 export default function Home() {
   return (
     <section className="home">
+      {/* Banner da plataforma: fala dos 3 módulos (não só do Bazar). */}
       <header className="home__banner">
         <div className="home__banner-conteudo">
           <span className="home__banner-etiqueta">FEITO PELA COMUNIDADE, PARA A COMUNIDADE</span>
-          <h1 className="home__banner-titulo">Seu campus.<br />Novas conexões.<br /><em>Mais possibilidades.</em></h1>
-          <p className="home__banner-descricao">Dê uma nova história ao que você não usa mais e descubra achados de quem compartilha a vida universitária com você.</p>
-          <Link className="home__banner-botao" to="/bazar">Explorar o Bazar <span aria-hidden="true">↗</span></Link>
+          <h1 className="home__banner-titulo">
+            Seu campus.<br />Novas conexões.<br /><em>Mais possibilidades.</em>
+          </h1>
+          <p className="home__banner-descricao">
+            Um só lugar para circular o que você não usa, encontrar lanches e
+            doces e apoiar quem precisa. O UniHub reúne Bazar, Alimentação e
+            Ação Solidária do seu campus.
+          </p>
+          <a className="home__banner-botao" href="#home-vitrine">
+            Explorar o UniHub <span aria-hidden="true">↓</span>
+          </a>
         </div>
         <div className="home__banner-arte" aria-hidden="true">
           <span className="home__banner-orbita" />
-          <div className="home__banner-cartao home__banner-cartao--livro"><FiBookOpen /><span>Uma nova leitura.<br /><strong>Outra descoberta.</strong></span></div>
-          <div className="home__banner-cartao home__banner-cartao--sacola"><FiShoppingBag /><span>Seu próximo achado<br /><strong>pode estar aqui.</strong></span></div>
+          <div className="home__banner-cartao home__banner-cartao--livro">
+            <FiShoppingBag /><span>Bazar<br /><strong>Dê um novo uso.</strong></span>
+          </div>
+          <div className="home__banner-cartao home__banner-cartao--sacola">
+            <FiCoffee /><span>Alimentação<br /><strong>Lanches, doces e salgados.</strong></span>
+          </div>
+          <div className="home__banner-cartao home__banner-cartao--solidariedade">
+            <FaHandHoldingHeart /><span>Ação Solidária<br /><strong>Apoie quem precisa.</strong></span>
+          </div>
           <span className="home__banner-selo"><FiHeart /> Conexões que circulam</span>
         </div>
       </header>
 
-      <LinhaVitrine
-        id="home-bazar"
-        tom="bazar"
-        icone={<FiShoppingBag />}
-        titulo="Bazar"
-        descricao="Livros, materiais e achados de quem vive o campus."
-        rotuloLink="Ver todos no Bazar"
-        destino="/bazar"
-        buscar={listarItensBazar}
-        renderizarCard={cardBazar}
-        mensagemVazia="Ainda não há itens no Bazar. Volte em breve!"
-        mensagemErro="Não foi possível carregar os itens do Bazar. Tente novamente."
-      />
+      {/* Âncora de rolagem do CTA do banner. */}
+      <div id="home-vitrine">
+        <LinhaVitrine
+          id="home-bazar"
+          tom="bazar"
+          icone={<FiShoppingBag />}
+          titulo="Bazar"
+          descricao="Livros, materiais e achados de quem vive o campus."
+          rotuloLink="Ver todos no Bazar"
+          destino="/bazar"
+          buscar={listarItensBazar}
+          renderizarCard={cardBazar}
+          mensagemVazia="Ainda não há itens no Bazar. Volte em breve!"
+          mensagemErro="Não foi possível carregar os itens do Bazar. Tente novamente."
+        />
 
-      <LinhaVitrine
-        id="home-alimentacao"
-        tom="alimentacao"
-        icone={<FiCoffee />}
-        titulo="Alimentação"
-        descricao="Lanches e comidinhas feitos pela comunidade."
-        rotuloLink="Ver todos em Alimentação"
-        destino="/alimentacao"
-        buscar={listarAlimentos}
-        renderizarCard={cardAlimento}
-        mensagemVazia="Ainda não há alimentos disponíveis. Volte em breve!"
-        mensagemErro="Não foi possível carregar os alimentos. Tente novamente."
-      />
+        <LinhaVitrine
+          id="home-alimentacao"
+          tom="alimentacao"
+          icone={<FiCoffee />}
+          titulo="Alimentação"
+          descricao="Lanches, doces e salgados feitos por quem vive o campus."
+          rotuloLink="Ver todos em Alimentação"
+          destino="/alimentacao"
+          buscar={listarAlimentos}
+          renderizarCard={cardAlimento}
+          mensagemVazia="Ainda não há alimentos disponíveis. Volte em breve!"
+          mensagemErro="Não foi possível carregar os alimentos. Tente novamente."
+        />
+
+        {/* Convite institucional para a Ação Solidária (NÃO é vitrine — LGPD). */}
+        <section
+          className="home__secao home__secao--solidariedade home__convite"
+          aria-labelledby="home-solidariedade"
+        >
+          <div className="home__secao-identidade">
+            <span className="home__secao-icone" aria-hidden="true">
+              <FaHandHoldingHeart />
+            </span>
+            <div>
+              <h2 className="home__secao-titulo" id="home-solidariedade">
+                Ação Solidária
+              </h2>
+              <p className="home__secao-descricao">
+                Peça apoio quando precisar ou ajude quem precisa — com privacidade.
+                As solicitações são anônimas por padrão.
+              </p>
+            </div>
+          </div>
+          <Link className="home__ver-todos" to="/solidariedade">
+            Ver Ação Solidária <FiArrowRight aria-hidden="true" />
+          </Link>
+        </section>
+      </div>
     </section>
   );
 }

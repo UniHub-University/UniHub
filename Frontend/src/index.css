@@ -32,6 +32,18 @@ body,
   height: 100%;
 }
 
+/* Rolagem suave em navegação por âncora (ex.: CTA "Explorar o UniHub" na Home).
+   Fica no html porque é o elemento que realmente rola o documento. */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
   margin: 0;
   font-family: var(--fonte-corpo);
