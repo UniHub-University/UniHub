@@ -178,6 +178,22 @@ Infrastructure implementa interfaces da Application; API monta tudo via injeçã
   credenciais do Cloudinary.
 - **`EnableSensitiveDataLogging` só em Development** — nunca em produção (LGPD).
 - CORS em produção lê as origens de `Cors:AllowedOrigins` (env var).
+- **Swagger só em Development.** Em produção, `UseSwagger`/`UseSwaggerUI` ficam dentro de
+  `if (app.Environment.IsDevelopment())` — expor a UI/spec em produção revela o mapa
+  completo da API (endpoints, DTOs, parâmetros) e serve de reconhecimento a um atacante.
+- **Erros nunca vazam detalhes internos.** Há um handler global de exceção
+  (`UseExceptionHandler`): em produção retorna um `500` genérico em JSON, sem stack
+  trace. A página de erro detalhada (`UseDeveloperExceptionPage`) só em Development.
+- **Rate limiting em endpoints sensíveis.** Usar o `AddRateLimiter` nativo do .NET
+  (política `"sensivel"`) com `[EnableRateLimiting("sensivel")]` no login e no criar
+  denúncia — protege contra abuso/brute-force. ⚠️ Isso NÃO é defesa contra DDoS
+  volumétrico (tratado na borda por Cloudflare/Render); é limite de abuso por endpoint.
+- **Privilégio (`Role`) só muda no banco, NUNCA via API.** Não expor `Role` em nenhum
+  DTO de entrada e não criar endpoint que altere a role. Virar Admin é feito manualmente
+  no banco (Neon); a role vai no JWT no login (mudar a role exige relogar). Isso mantém
+  fechada a porta de auto-promoção (verificado: cadastro nasce `Aluno`, nenhum DTO aceita
+  `Role`, JWT com role forjada é rejeitado pela validação de assinatura).
+
 
 ## 6. Banco de dados e MIGRATIONS (crítico)
 

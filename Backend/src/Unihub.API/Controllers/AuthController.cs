@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using UniHub.Application.DTOs;
 using UniHub.Application.Services;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace UniHub.API.Controllers;
 
@@ -18,6 +19,7 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
+    [EnableRateLimiting("sensivel")]
     [HttpPost("google-login")]
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDTO request)
     {

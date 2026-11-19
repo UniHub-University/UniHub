@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using UniHub.Application.DTOs.Denuncias;
 using UniHub.Application.Interfaces;
 using UniHub.Domain.Entities;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace UniHub.API.Controllers
 {
@@ -23,6 +24,7 @@ namespace UniHub.API.Controllers
             _usuarioRepository = usuarioRepository;
         }
 
+        [EnableRateLimiting("sensivel")]
         [HttpPost]
         public async Task<IActionResult> CriarDenuncia([FromBody] CriarDenunciaDto dto)
         {
