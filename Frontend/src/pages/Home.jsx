@@ -137,8 +137,8 @@ export default function Home() {
             Seu campus.<br />Novas conexões.<br /><em>Mais possibilidades.</em>
           </h1>
           <p className="home__banner-descricao">
-            Um só lugar para circular o que você não usa, compartilhar comida da
-            comunidade e apoiar quem precisa. O UniHub reúne Bazar, Alimentação e
+            Um só lugar para circular o que você não usa, encontrar lanches e
+            doces e apoiar quem precisa. O UniHub reúne Bazar, Alimentação e
             Ação Solidária do seu campus.
           </p>
           <a className="home__banner-botao" href="#home-vitrine">
@@ -151,7 +151,7 @@ export default function Home() {
             <FiShoppingBag /><span>Bazar<br /><strong>Dê um novo uso.</strong></span>
           </div>
           <div className="home__banner-cartao home__banner-cartao--sacola">
-            <FiCoffee /><span>Alimentação<br /><strong>Comida da comunidade.</strong></span>
+            <FiCoffee /><span>Alimentação<br /><strong>Lanches, doces e salgados.</strong></span>
           </div>
           <div className="home__banner-cartao home__banner-cartao--solidariedade">
             <FaHandHoldingHeart /><span>Ação Solidária<br /><strong>Apoie quem precisa.</strong></span>
@@ -181,7 +181,7 @@ export default function Home() {
           tom="alimentacao"
           icone={<FiCoffee />}
           titulo="Alimentação"
-          descricao="Lanches e comidinhas feitos pela comunidade."
+          descricao="Lanches, doces e salgados feitos por quem vive o campus."
           rotuloLink="Ver todos em Alimentação"
           destino="/alimentacao"
           buscar={listarAlimentos}

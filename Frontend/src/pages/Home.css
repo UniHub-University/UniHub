@@ -5,6 +5,14 @@
   color: #243322;
 }
 
+/* Âncora do CTA do banner. O header do app é sticky (fica no topo ao rolar),
+   então damos um respiro acima do alvo para o título da 1ª seção (Bazar) não
+   ficar escondido/cortado atrás do header ao parar a rolagem. A rolagem suave
+   em si fica no html (index.css), que é o elemento que rola o documento. */
+#home-vitrine {
+  scroll-margin-top: 96px;
+}
+
 .home__cabecalho {
   margin-bottom: 32px;
 }
