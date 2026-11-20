@@ -22,4 +22,13 @@ public class VendedorConsultaRepository : IVendedorConsultaRepository
             .Where(v => v.UsuarioId == usuarioId)
             .Select(v => (Guid?)v.Id)
             .FirstOrDefaultAsync();
+
+    // Espelho do ObterVendedorIdPorUsuarioAsync: busca pelo Id do vendedor e
+    // projeta o UsuarioId. Null quando o vendedor não existe.
+    public async Task<Guid?> ObterUsuarioIdPorVendedorAsync(Guid vendedorId) =>
+        await _context.Vendedores
+            .AsNoTracking()
+            .Where(v => v.Id == vendedorId)
+            .Select(v => (Guid?)v.UsuarioId)
+            .FirstOrDefaultAsync();
 }
