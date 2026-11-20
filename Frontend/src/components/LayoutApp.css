@@ -48,12 +48,12 @@
 
 .layout__link {
   padding: 8px 14px;
-  border-radius: 999px;
+  border-radius: var(--raio-full);
   font-size: 0.95rem;
   font-weight: 500;
   color: var(--cor-verde);
   text-decoration: none;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color var(--transicao), color var(--transicao);
 }
 
 .layout__link:hover {
@@ -61,8 +61,13 @@
 }
 
 .layout__link--ativo {
-  background-color: var(--cor-verde);
-  color: var(--cor-superficie);
+  background-color: var(--acao-500);
+  color: var(--creme-100);
+}
+
+.layout__link--ativo:hover {
+  background-color: var(--acao-600);
+  color: var(--creme-100);
 }
 
 .layout__usuario {

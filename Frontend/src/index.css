@@ -1,29 +1,135 @@
 /* ---------------------------------------------------------------------------
-   Tema global do UniHub — baseado na identidade visual (paleta TAN Ashford).
-   Fontes: Playfair Display (títulos, aproxima a serifada display da logo)
-           + Inter (corpo), carregadas no index.html via Google Fonts.
+   Sistema de design do UniHub — tema global.
+
+   Identidade visual (paleta TAN Ashford): verde institucional UNIFESP + tan +
+   creme. Fontes: Playfair Display (títulos, serifada display que aproxima a
+   logo) + Inter (corpo), carregadas no index.html via Google Fonts.
+
+   Estrutura:
+   1. Escala de tokens (cores, raio, sombra, espaçamento, transição)
+   2. Aliases legados (compatibilidade — telas antigas continuam funcionando)
+   3. Base de elementos (body, títulos, links)
+   4. Sistema de botões (.btn + variantes)
    --------------------------------------------------------------------------- */
 
 :root {
-  /* Paleta oficial */
-  --cor-verde: #2a4515;       /* texto principal, logo, botões */
-  --cor-verde-escuro: #1f340f;/* hover de botões */
-  --cor-tan: #b19563;         /* texto secundário / detalhes */
-  --cor-creme: #fef6c7;       /* fundo */
-  --cor-superficie: #fffdf2;  /* cartões / superfícies claras */
-  --cor-erro: #9b2c2c;
+  /* ===================== 1. ESCALA DE TOKENS ===================== */
 
+  /* --- Verde institucional (texto, marca, superfícies escuras) --- */
+  --verde-50:  #eef3e9;
+  --verde-100: #d8e3cd;
+  --verde-200: #b3c79e;
+  --verde-300: #8aa771;
+  --verde-400: #5f7f46;
+  --verde-500: #3f5a27;  /* base institucional */
+  --verde-600: #2a4515;  /* texto/marca principal (antigo --cor-verde) */
+  --verde-700: #1f340f;  /* hover escuro (antigo --cor-verde-escuro) */
+  --verde-800: #162709;
+  --verde-900: #0e1a05;
+
+  /* --- AÇÃO (CTAs, estado ativo) ---
+     É o VERDE DA LOGO, não uma cor nova. O destaque vem de profundidade
+     (sombra/gradiente) e do acento dourado, não de um verde saturado que
+     brigaria com a marca. */
+  --acao-400: #3f5a27;  /* verde da logo, um passo mais claro (hover claro) */
+  --acao-500: #2a4515;  /* verde da logo — CTA primário */
+  --acao-600: #223a11;  /* hover */
+  --acao-700: #1a2d0c;  /* ativo */
+
+  /* --- Tan / dourado (texto secundário, detalhes) --- */
+  --tan-100: #f0e7d4;
+  --tan-200: #e0d0ae;
+  --tan-300: #cbb485;
+  --tan-400: #b19563;  /* antigo --cor-tan */
+  --tan-500: #96794a;
+  --tan-600: #7a5c27;
+
+  /* --- DESTAQUE / acento (o dourado da borla da logo) ---
+     Cor quente da marca para acentos: ícones ativos, detalhes, hover,
+     selos, estados de foco. Dá calor e hierarquia sem sair da identidade. */
+  --destaque-400: #c6a86f;  /* hover claro do acento */
+  --destaque-500: #b19563;  /* acento principal (tan da logo) */
+  --destaque-600: #96794a;  /* acento sobre superfícies claras */
+
+  /* --- Creme / superfícies claras (fundos) --- */
+  --creme-50:  #fffdf2;  /* superfície de cartão (antigo --cor-superficie) */
+  --creme-100: #fef6c7;  /* fundo (antigo --cor-creme) */
+  --creme-200: #f8efc9;
+  --creme-300: #f1f1d8;  /* fundo de seção suave */
+
+  /* --- Neutros (bordas, textos sobre claro) --- */
+  --neutro-50:  #fbfbf6;
+  --neutro-100: #f1f1ea;
+  --neutro-200: #e2dfd2;  /* bordas suaves */
+  --neutro-300: #c7cfbd;  /* bordas */
+  --neutro-400: #9aa48c;
+  --neutro-500: #717b66;  /* texto secundário */
+  --neutro-600: #596452;  /* texto secundário escuro */
+  --neutro-700: #425637;
+  --neutro-800: #243322;  /* texto forte sobre creme */
+
+  /* --- Semânticas --- */
+  --erro:         #9b2c2c;  /* antigo --cor-erro */
+  --erro-fundo:   #f8e8e8;
+  --erro-borda:   #e4bdbd;
+  --sucesso:      #2a661f;
+  --sucesso-fundo:#e7f1df;
+  --aviso:        #8a5a12;
+  --aviso-fundo:  #faefcf;
+
+  /* --- Fontes --- */
   --fonte-titulo: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --fonte-corpo: 'Inter', system-ui, -apple-system, sans-serif;
 
-  --raio: 14px;
-  --sombra: 0 10px 30px rgba(42, 69, 21, 0.12);
+  /* --- Raio (degraus) --- */
+  --raio-sm: 8px;
+  --raio-md: 14px;
+  --raio-lg: 18px;
+  --raio-xl: 24px;
+  --raio-full: 999px;
+
+  /* --- Sombra (degraus) --- */
+  --sombra-sm: 0 2px 8px rgba(42, 69, 21, 0.06);
+  --sombra-md: 0 8px 24px rgba(42, 69, 21, 0.10);
+  --sombra-lg: 0 16px 40px rgba(42, 69, 21, 0.16);
+
+  /* --- Espaçamento (escala 4px) --- */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 24px;
+  --esp-6: 32px;
+  --esp-7: 48px;
+  --esp-8: 64px;
+
+  /* --- Transições --- */
+  --transicao-rapida: 120ms ease;
+  --transicao: 180ms ease;
+
+  /* ============ 2. ALIASES LEGADOS (não remover) ============
+     As telas antigas consomem estes nomes. Agora eles apontam para a escala
+     acima, então o visual fica coeso sem precisar editar cada arquivo. */
+  --cor-verde: var(--verde-600);
+  --cor-verde-escuro: var(--verde-700);
+  --cor-tan: var(--tan-400);
+  --cor-creme: var(--creme-100);
+  --cor-superficie: var(--creme-50);
+  --cor-erro: var(--erro);
+  --raio: var(--raio-md);
+  --sombra: var(--sombra-md);
 
   color-scheme: light;
 }
 
+/* ===================== 3. BASE ===================== */
+
 * {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,
@@ -48,7 +154,7 @@ body {
   margin: 0;
   font-family: var(--fonte-corpo);
   background-color: var(--cor-creme);
-  color: var(--cor-verde);
+  color: var(--verde-600);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -58,7 +164,7 @@ h2,
 h3 {
   font-family: var(--fonte-titulo);
   font-weight: 700;
-  color: var(--cor-verde);
+  color: var(--verde-600);
   margin: 0;
 }
 
@@ -68,5 +174,219 @@ button {
 }
 
 a {
-  color: var(--cor-verde);
+  color: var(--verde-600);
+}
+
+/* ===================== 4. SISTEMA DE BOTÕES ===================== */
+
+/* Base: use em qualquer <button>/<a> de ação.
+   Ex.: <a class="btn btn--primario">Explorar</a> */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+  min-height: 44px;              /* alvo de toque acessível */
+  padding: 11px 20px;
+  border: 1px solid transparent;
+  border-radius: var(--raio-md);
+  font-family: var(--fonte-corpo);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--transicao),
+    border-color var(--transicao),
+    color var(--transicao),
+    box-shadow var(--transicao),
+    transform var(--transicao-rapida);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--tan-400);
+  outline-offset: 3px;
+}
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Primário: o VERDE DA LOGO — a ação mais importante da tela. O destaque vem
+   de profundidade (gradiente sutil + sombra verde) e de um filete dourado no
+   hover, tudo dentro da identidade da marca. */
+.btn--primario {
+  background-image: linear-gradient(180deg, var(--acao-400) 0%, var(--acao-500) 100%);
+  color: var(--creme-100);
+  box-shadow: 0 6px 16px rgb(42 69 21 / 28%);
+}
+
+.btn--primario:hover {
+  background-image: linear-gradient(180deg, var(--acao-500) 0%, var(--acao-600) 100%);
+  box-shadow: 0 10px 22px rgb(42 69 21 / 36%);
+}
+
+.btn--primario:active {
+  background-image: linear-gradient(180deg, var(--acao-600) 0%, var(--acao-700) 100%);
+}
+
+/* Destaque: o DOURADO da logo. CTA alternativo quente — bom sobre fundos
+   verdes escuros (ex.: o banner da Home), onde o verde não contrastaria. */
+.btn--destaque {
+  background-color: var(--destaque-500);
+  color: var(--verde-700);
+  box-shadow: 0 6px 16px rgb(122 92 39 / 30%);
+}
+
+.btn--destaque:hover {
+  background-color: var(--destaque-400);
+  box-shadow: 0 10px 22px rgb(122 92 39 / 38%);
+}
+
+.btn--destaque:active {
+  background-color: var(--destaque-600);
+}
+
+/* Secundário: contornado, para ações de apoio. */
+.btn--secundario {
+  background-color: transparent;
+  border-color: var(--verde-600);
+  color: var(--verde-600);
+}
+
+.btn--secundario:hover {
+  background-color: var(--verde-600);
+  color: var(--creme-50);
+}
+
+/* Sutil: fundo creme discreto, para ações terciárias. */
+.btn--sutil {
+  background-color: var(--creme-50);
+  border-color: var(--neutro-200);
+  color: var(--verde-600);
+}
+
+.btn--sutil:hover {
+  background-color: var(--creme-300);
+  border-color: var(--neutro-300);
+}
+
+/* Tamanhos opcionais. */
+.btn--grande {
+  min-height: 52px;
+  padding: 15px 28px;
+  font-size: 1.02rem;
+  border-radius: var(--raio-lg);
+}
+
+.btn--pequeno {
+  min-height: 38px;
+  padding: 8px 14px;
+  font-size: 0.86rem;
+}
+
+/* Pílula (cantos totalmente arredondados). */
+.btn--pilula {
+  border-radius: var(--raio-full);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .btn {
+    transition: background-color var(--transicao), color var(--transicao);
+  }
+
+  .btn:hover,
+  .btn:active {
+    transform: none;
+  }
+}
+
+/* ===================== 5. UTILITÁRIOS DE ANIMAÇÃO ===================== */
+
+/* Dinamismo reutilizável. Aplique .anim-surgir num container para a entrada
+   suave; use .anim-atraso-N para escalonar filhos (ex.: cards aparecendo em
+   sequência). Tudo respeita prefers-reduced-motion. */
+
+@keyframes surgir {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulsar-suave {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+/* Fade puro (sem translate): seguro para elementos que já usam transform
+   (ex.: cartões rotacionados), onde .anim-surgir apagaria a rotação. */
+@keyframes surgir-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.anim-surgir {
+  animation: surgir 0.55s ease both;
+}
+
+.anim-fade {
+  animation: surgir-fade 0.7s ease both;
+}
+
+.anim-atraso-1 { animation-delay: 0.08s; }
+.anim-atraso-2 { animation-delay: 0.16s; }
+.anim-atraso-3 { animation-delay: 0.24s; }
+.anim-atraso-4 { animation-delay: 0.32s; }
+
+/* Elevação dinâmica reutilizável em cartões/painéis clicáveis. */
+.elevar {
+  transition:
+    transform var(--transicao),
+    box-shadow var(--transicao);
+}
+
+.elevar:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sombra-lg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-surgir,
+  .anim-fade,
+  .anim-atraso-1,
+  .anim-atraso-2,
+  .anim-atraso-3,
+  .anim-atraso-4 {
+    animation: none;
+  }
+
+  .elevar {
+    transition: box-shadow var(--transicao);
+  }
+
+  .elevar:hover {
+    transform: none;
+  }
 }
