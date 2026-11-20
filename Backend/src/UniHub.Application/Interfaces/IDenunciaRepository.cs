@@ -19,5 +19,4 @@ namespace UniHub.Application.Interfaces
             int pageSize);
 
     }
-
 }
