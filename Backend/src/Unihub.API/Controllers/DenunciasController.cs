@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UniHub.Application.DTOs.Denuncias;
 using UniHub.Application.Interfaces;
+using UniHub.Application.Interfaces.Vendas;
 using UniHub.Domain.Entities;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -17,11 +18,13 @@ namespace UniHub.API.Controllers
     {
         private readonly IDenunciaRepository _denunciaRepository;
         private readonly IUsuarioRepository _usuarioRepository;
+        private readonly IVendedorConsultaRepository _vendedorRepository;
 
-        public DenunciasController(IDenunciaRepository denunciaRepository, IUsuarioRepository usuarioRepository)
+        public DenunciasController(IDenunciaRepository denunciaRepository, IUsuarioRepository usuarioRepository, IVendedorConsultaRepository vendedorRepository)
         {
             _denunciaRepository = denunciaRepository;
             _usuarioRepository = usuarioRepository;
+            _vendedorRepository = vendedorRepository;
         }
 
         [EnableRateLimiting("sensivel")]
@@ -38,14 +41,32 @@ namespace UniHub.API.Controllers
                 return Unauthorized(new { mensagem = "Usuário inválido ou não autenticado. Verifique as Claims do Token." });
             }
 
+            // Resolve o denunciado: aceita VendedorId (traduz para o UsuarioId dono)
+            // ou DenunciadoId direto. O front público manda o VendedorId.
+            Guid denunciadoId;
+            if (dto.VendedorId.HasValue)
+            {
+                var donoId = await _vendedorRepository.ObterUsuarioIdPorVendedorAsync(dto.VendedorId.Value);
+                if (donoId is null) return NotFound(new { mensagem = "Vendedor não encontrado."} );
+                denunciadoId = donoId.Value;
+            }
+            else if (dto.DenunciadoId.HasValue)
+            {
+                denunciadoId = dto.DenunciadoId.Value;
+            }
+            else
+            {
+                return BadRequest(new {mensagem = "Informe o vendedor (VendedorId) ou o usuário denunciado (DenunciadoId)."});
+            }
+
             // Impedir auto-denúncia
-            if(dto.DenunciadoId == usuarioLogadoId)
+            if(denunciadoId == usuarioLogadoId)
             {
                 return BadRequest(new { mensagem = "Você não pode denunciar a si mesmo."});
             }
 
             // Validar se o denunciado existe no banco para evitar erro de Foreign Key 500
-            var denunciado = await _usuarioRepository.ObterPorIdAsync(dto.DenunciadoId);
+            var denunciado = await _usuarioRepository.ObterPorIdAsync(denunciadoId);
             if (denunciado == null)
             {
                 return NotFound(new {mensagem = "O usuário denunciado não foi encontrado no sistema."});
@@ -60,7 +81,7 @@ namespace UniHub.API.Controllers
             var denuncia = new Denuncia
             {
                 DenuncianteId = usuarioLogadoId,
-                DenunciadoId = dto.DenunciadoId,
+                DenunciadoId = denunciadoId,
                 ProdutoId = dto.ProdutoId,
                 Descricao = dto.Descricao,
                 Motivo = motivo

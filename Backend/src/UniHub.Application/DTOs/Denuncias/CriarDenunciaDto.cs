@@ -5,8 +5,12 @@ namespace UniHub.Application.DTOs.Denuncias
 {
     public class CriarDenunciaDto
     {
-        [Required(ErrorMessage = "O ID do usuário denunciado é obrigatório.")]
-        public Guid DenunciadoId {get; set;}
+        // Pode vir o usuário direto (DenunciadoId) OU o vendedor (VendedorId), que o
+        // backend traduz para o UsuarioId dono. O front público manda o VendedorId,
+        // pois o UsuarioId não é exposto nas telas (LGPD). Um dos dois é obrigatório.
+        public Guid? DenunciadoId {get; set;}
+
+        public Guid? VendedorId {get; set;}
 
         public Guid? ProdutoId {get; set;} // opcional, pois a denúnicia pode ser apenas sobre o comportamento do usuário
 
