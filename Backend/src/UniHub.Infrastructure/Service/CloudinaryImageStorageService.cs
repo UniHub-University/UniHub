@@ -80,15 +80,29 @@ public class CloudinaryImageStorageService : IImageStorageService
     {
         if (string.IsNullOrWhiteSpace(publicId)) return false;
 
-        var resultado = await _cloudinary.DestroyAsync(new DeletionParams(publicId));
-
-        if (resultado.Error is not null)
+        try
         {
-            _logger.LogWarning("Falha ao remover imagem {PublicId}: {Erro}", publicId, resultado.Error.Message);
+            var resultado = await _cloudinary.DestroyAsync(new DeletionParams(publicId));
+
+            if (resultado.Error is not null)
+            {
+                _logger.LogWarning("Falha ao remover imagem {PublicId}: {Erro}", publicId, resultado.Error.Message);
+                return false;
+            }
+
+            return resultado.Result == "ok";
+        }
+        catch (Exception ex)
+        {
+            // Falha de INFRAESTRUTURA (timeout, Cloudinary fora do ar, DNS,
+            // credencial): o DestroyAsync lanca antes de retornar. Tratamos como
+            // best-effort -- logar e seguir. Remover a imagem orfa NUNCA pode
+            // derrubar a operacao de negocio (edicao/atualizacao do produto ou
+            // perfil). Uma imagem orfa e um incomodo menor que uma edicao que falha.
+            // (AGENTS secao 7.1 / issue #104)
+            _logger.LogWarning(ex, "Erro ao contatar o Cloudinary ao remover {PublicId}", publicId);
             return false;
         }
-
-        return resultado.Result == "ok";
     }
 
     public string? ExtrairPublicId(string url)

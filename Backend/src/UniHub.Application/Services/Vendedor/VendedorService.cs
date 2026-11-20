@@ -238,10 +238,22 @@ public class VendedorService
     {
         if (string.IsNullOrWhiteSpace(urlAntiga)) return;
 
-        var publicId = _imageStorage.ExtrairPublicId(urlAntiga);
-        if (publicId is not null)
+        try
         {
-            await _imageStorage.DeleteAsync(publicId);
+            var publicId = _imageStorage.ExtrairPublicId(urlAntiga);
+            if (publicId is not null)
+            {
+                await _imageStorage.DeleteAsync(publicId);
+            }
+        }
+        catch (Exception)
+        {
+            // Best-effort: remover a imagem antiga NUNCA pode derrubar a atualizacao
+            // do produto. Se o storage falhar, seguimos (a imagem orfa e um incomodo
+            // menor que uma edicao que quebra). (#104)
+            // Obs.: nao ha ILogger aqui; o CloudinaryImageStorageService.DeleteAsync
+            // ja loga. Se futuramente injetarmos ILogger no service, logar aqui tambem.
         }
     }
+
 }
