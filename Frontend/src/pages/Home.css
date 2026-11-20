@@ -2,7 +2,7 @@
 
 .home {
   font-family: var(--fonte-corpo);
-  color: #243322;
+  color: var(--neutro-800);
 }
 
 /* Âncora do CTA do banner. O header do app é sticky (fica no topo ao rolar),
@@ -28,7 +28,7 @@
   margin: 12px 0 0;
   font-size: 1rem;
   line-height: 1.6;
-  color: #596452;
+  color: var(--neutro-600);
 }
 
 .home__secao {
@@ -39,9 +39,9 @@
 
   padding: clamp(18px, 3vw, 32px);
   border: 1px solid var(--secao-borda);
-  border-radius: 24px;
-  background: linear-gradient(165deg, #fffdf2 0%, var(--secao-fundo) 100%);
-  box-shadow: var(--sombra);
+  border-radius: var(--raio-xl);
+  background: linear-gradient(165deg, var(--creme-50) 0%, var(--secao-fundo) 100%);
+  box-shadow: var(--sombra-md);
 }
 
 .home__secao--alimentacao {
@@ -116,7 +116,7 @@
   margin: 4px 0 0;
   font-size: 0.9rem;
   line-height: 1.5;
-  color: #596452;
+  color: var(--neutro-600);
 }
 
 .home__ver-todos {
@@ -125,21 +125,25 @@
   gap: 8px;
   padding: 10px 18px;
   border: 1px solid var(--secao-destaque);
-  border-radius: 999px;
-  background: #fffdf2;
+  border-radius: var(--raio-full);
+  background: var(--creme-50);
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--secao-destaque);
   text-decoration: none;
   white-space: nowrap;
   transition:
-    background 150ms ease,
-    color 150ms ease;
+    background var(--transicao),
+    color var(--transicao),
+    box-shadow var(--transicao),
+    transform var(--transicao-rapida);
 }
 
 .home__ver-todos:hover {
   background: var(--secao-destaque);
   color: var(--secao-destaque-texto);
+  box-shadow: var(--sombra-sm);
+  transform: translateY(-1px);
 }
 
 .home__ver-todos:focus-visible {
@@ -151,15 +155,16 @@
 .home__erro {
   margin: 24px 0;
   padding: 24px;
-  border-radius: 14px;
+  border-radius: var(--raio-md);
   line-height: 1.6;
-  background: #fffdf7;
-  color: #52604e;
+  background: var(--creme-50);
+  color: var(--neutro-600);
 }
 
 .home__erro {
-  color: var(--cor-erro);
-  border: 1px solid #e4bdbd;
+  color: var(--erro);
+  background: var(--erro-fundo);
+  border: 1px solid var(--erro-borda);
 }
 
 .home__secao + .home__secao {
@@ -192,8 +197,13 @@
 .home__banner-titulo { margin: 22px 0 18px; font-family: var(--fonte-titulo); font-size: clamp(2rem, 4.5vw, 3.4rem); line-height: 1.12; letter-spacing: -.035em; color: #fffbed; }
 .home__banner-titulo em { color: #e3d4a9; font-weight: inherit; }
 .home__banner-descricao { max-width: 43ch; color: #e6ebdd; line-height: 1.75; font-size: .95rem; }
-.home__banner-botao { display: inline-flex; gap: 22px; align-items: center; margin-top: 26px; padding: 14px 22px; border-radius: 14px; background: #f4e5ba; color: #203c24; font-weight: 700; text-decoration: none; }
-.home__banner-botao:hover { background: #fff5d6; }
+/* CTA sobre o banner verde escuro: creme-dourado luminoso (da família do tan
+   da logo, porém mais claro) com texto verde bem escuro. O contraste alto —
+   fundo claro + texto escuro — faz o botão "acender" sobre o verde e convidar
+   ao clique, sem o tom terroso/apagado do dourado médio. */
+.home__banner-botao { display: inline-flex; gap: 12px; align-items: center; margin-top: 26px; padding: 15px 28px; border-radius: var(--raio-lg); background: #f0e2bd; color: var(--verde-700); font-weight: 700; text-decoration: none; box-shadow: 0 8px 22px rgb(16 40 25 / 50%); transition: background-color var(--transicao), box-shadow var(--transicao), transform var(--transicao-rapida); }
+.home__banner-botao:hover { background: #fbf1d2; box-shadow: 0 12px 30px rgb(16 40 25 / 60%); transform: translateY(-2px); }
+.home__banner-botao:active { transform: translateY(0); }
 .home__banner-botao:focus-visible { outline: 3px solid white; outline-offset: 4px; }
 .home__banner-arte { position: relative; min-height: 380px; align-self: center; }
 .home__banner-orbita { position: absolute; inset: 10px -60px 0 0; border: 1px solid #ffffff25; border-radius: 50%; transform: rotate(-25deg); }
