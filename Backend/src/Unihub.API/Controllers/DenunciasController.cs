@@ -60,7 +60,7 @@ namespace UniHub.API.Controllers
             }
 
             // Impedir auto-denúncia
-            if(dto.DenunciadoId == usuarioLogadoId)
+            if(denunciadoId == usuarioLogadoId)
             {
                 return BadRequest(new { mensagem = "Você não pode denunciar a si mesmo."});
             }
