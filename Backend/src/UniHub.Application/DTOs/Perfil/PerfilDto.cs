@@ -28,7 +28,7 @@ public record PerfilRespostaDto(
         usuario.EmailInstitucional,
         usuario.Telefone,
         usuario.FotoPerfilUrl,
-        usuario.Role.ToString(),
+        usuario.RoleEfetivo.ToString(),
         usuario.Vendedor != null,
         usuario.Voluntario != null,
         usuario.CreatedAt

@@ -148,6 +148,29 @@
   line-height: 1.6;
 }
 
+/* Container das tags de papel (Aluno sempre; Admin adicional quando aplicável). */
+.perfil__badges {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* A tag "margin-top" individual sai do badge quando dentro do container,
+   porque o espaçamento agora é do container. */
+.perfil__badges .perfil__badge {
+  margin-top: 0;
+}
+
+/* Tag de Admin: destaque em dourado (tan) para chamar atenção, contrastando
+   com o verde da tag de Aluno. Mantém a paleta do projeto. */
+.perfil__badge--admin {
+  background-color: var(--cor-creme);
+  color: var(--cor-verde);
+  border: 2px solid var(--cor-verde);
+}
+
+
 .perfil__botao {
   width: 100%;
   min-height: 46px;

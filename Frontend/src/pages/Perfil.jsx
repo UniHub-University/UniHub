@@ -37,17 +37,20 @@ const TIPOS_DE_IMAGEM_PERMITIDOS = [
 // Resumo de pedidos no Perfil: mesmas convenções da tela /pedidos (BRV-89).
 const QTD_RESUMO_PEDIDOS = 3;
 
-// O backend envia o Role como texto do enum (Aluno/Voluntario/Admin). Aqui
+// O backend envia o Role como texto do enum (Aluno/Admin). Aqui
 // traduzimos para um rótulo amigável exibido no badge do perfil.
 const ROTULOS_PAPEL = {
   Aluno: 'Aluno(a)',
-  Voluntario: 'Voluntário(a)',
   Admin: 'Administrador(a)',
 };
 
-function rotuloPapel(role) {
-  return ROTULOS_PAPEL[role] ?? 'Não informado';
+// A tag-base "Aluno(a)" representa "membro da comunidade" e aparece para todos.
+// Admin é um papel adicional (superconjunto): o admin também é aluno, então
+// recebe as DUAS tags — a de admin em destaque para chamar atenção.
+function ehAdmin(role) {
+  return role === 'Admin';
 }
+
 
 const STATUS_PEDIDO = {
   0: 'Reservado',
@@ -484,7 +487,12 @@ export default function Perfil() {
               <p className="perfil__subtitulo">
                 Consulte e atualize seus dados pessoais.
               </p>
-              <span className="perfil__badge">{rotuloPapel(perfil?.role)}</span>
+              <div className="perfil__badges">
+                <span className="perfil__badge">Aluno(a)</span>
+                {ehAdmin(perfil?.role) && (
+                  <span className="perfil__badge perfil__badge--admin">Administrador(a)</span>
+                )}
+              </div>
             </div>
           </header>
 

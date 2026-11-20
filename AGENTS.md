@@ -480,8 +480,9 @@ cada entidade, especialmente no módulo de Ação Solidária, que tem termos nã
 
 ### Usuários e papéis
 - **Usuario** — entidade central; autentica via Google (`@unifesp.br`). Tem `Role`
-  (`UserRole`: `Aluno=0`, `Voluntario=1`, `Admin=2`) e `IsActive` (conta suspensa
-  pela Moderação fica `false`).
+  (`UserRole`: `Aluno=0`, `Admin=2`; o valor `1` era `Voluntario`, removido — ser
+  voluntário é representado pelo perfil `Usuario.Voluntario`, não por role) e `IsActive`
+
 - **Vendedor** — perfil opcional de um `Usuario` (relação 1:0..1). Quem publica
   produtos. Tem `ChavePix`, dados da loja e logística.
 - **Voluntario** — perfil opcional de um `Usuario` (relação 1:0..1). Quem atende
