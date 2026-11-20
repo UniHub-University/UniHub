@@ -128,4 +128,21 @@ public class AuthServiceTests
         var minutos = (lido.ValidTo - antes).TotalMinutes;
         Assert.InRange(minutos, 28, 31);
     }
+
+    [Fact]
+    [Trait("Categoria", "Unit")]
+    public void RoleEfetivo_QuandoValorOrfao_RetornaAluno()
+    {
+        var u = new Usuario { Role = (UserRole)1 };   // valor orfao (antigo Voluntario)
+        Assert.Equal(UserRole.Aluno, u.RoleEfetivo);
+    }
+
+    [Fact]
+    [Trait("Categoria", "Unit")]
+    public void RoleEfetivo_QuandoAdmin_RetornaAdmin()
+    {
+        var u = new Usuario { Role = UserRole.Admin };
+        Assert.Equal(UserRole.Admin, u.RoleEfetivo);
+    }
+
 }

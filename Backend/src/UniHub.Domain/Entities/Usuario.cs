@@ -5,9 +5,13 @@ namespace UniHub.Domain.Entities;
 public enum UserRole
 {
     Aluno = 0,
-    Voluntario = 1,
+    // 1 era "Voluntario", removido: ser voluntario e representado pela existencia
+    // do perfil (Usuario.Voluntario), nunca por role. Admin mantem o valor 2 de
+    // proposito -- renumerar quebraria os dados ja persistidos (contas Admin
+    // estao salvas como 2 no banco).
     Admin = 2
 }
+
 
 /// Representa um usuario do sistema.
 /// Um usuario pode, opcionalmente, se tornar um Vendedor (relacao 1:0..1).
@@ -125,4 +129,14 @@ public class Usuario
     {
         IsActive = true;
     }
+
+    /// Papel efetivo do usuario, com fail-safe de seguranca: qualquer valor de Role
+    /// que NAO seja um valor conhecido do enum (ex.: um numero orfao gravado direto
+    /// no banco, como o antigo 1) e tratado como Aluno -- o menor privilegio. Assim,
+    /// um valor inesperado NUNCA concede acesso administrativo por acidente.
+    /// Usar este metodo (em vez de Role.ToString() cru) em tudo que decide privilegio
+    /// ou exibe o papel.
+    public UserRole RoleEfetivo =>
+        Enum.IsDefined(typeof(UserRole), Role) ? Role : UserRole.Aluno;
+
 }
