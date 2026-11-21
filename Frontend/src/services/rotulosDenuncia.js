@@ -49,3 +49,16 @@ export const OPCOES_STATUS_DENUNCIA = [
   { valor: 2, rotulo: 'Resolvida' },
   { valor: 3, rotulo: 'Rejeitada' },
 ];
+
+// Opções de motivo para o seletor ao CRIAR uma denúncia (B1).
+// O `valor` é o NOME do enum DenunciaMotivo: o POST /api/denuncias recebe o
+// motivo como string e faz Enum.TryParse por nome (ao contrário do GET do
+// painel, que devolve inteiro). Os rótulos reaproveitam o mapa MOTIVO acima.
+export const OPCOES_MOTIVO_DENUNCIA = [
+  {valor: 'ConteudoOfensivo', rotulo: MOTIVO.ConteudoOfensivo},
+  {valor: 'ComportamentoInadequado', rotulo: MOTIVO.ComportamentoInadequado},
+  {valor: 'Assedio', rotulo: MOTIVO.Assedio},
+  {valor: 'Fraude', rotulo: MOTIVO.Fraude},
+  {valor: 'ProdutoInadequado', rotulo: MOTIVO.ProdutoInadequado},
+  {valor: 'Outro', rotulo: MOTIVO.Outro},
+];
