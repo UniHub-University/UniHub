@@ -79,11 +79,11 @@ let DENUNCIAS_MOCK = [
 // Real (B2): return api.get('/api/admin/denuncias');
 export async function listarDenuncias() {
   if (USAR_MOCK) {
-    // Clona para a UI não mutar o mock por referência.
     return DENUNCIAS_MOCK.map((d) => ({ ...d }));
   }
+  // O backend (#119) devolve um PaginatedResultDto: a lista vem em `.items`.
   const dados = await api.get('/api/admin/denuncias');
-  return Array.isArray(dados) ? dados : [];
+  return Array.isArray(dados?.items) ? dados.items : [];
 }
 
 // Altera o status de uma denúncia (status: inteiro de DenunciaStatus).
