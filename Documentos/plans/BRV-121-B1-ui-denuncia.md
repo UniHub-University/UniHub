@@ -33,8 +33,7 @@ Permitir que um usuário autenticado denuncie um vendedor (e, quando aplicável,
 - **Motivos (enum, enviado como nome):** `ConteudoOfensivo`, `ComportamentoInadequado`,
   `Assedio`, `Fraude`, `ProdutoInadequado`, `Outro`. No select, rótulos amigáveis
   ("Conteúdo ofensivo", "Comportamento inadequado", "Assédio", "Fraude", "Produto
-  inadequado", "Outro"); envia o nome do enum. Reaproveitar `rotulosDenuncia.js` do
-  PR da B3 (Pedro), se já estiver na main — evitar duplicar.
+  inadequado", "Outro"); envia o nome do enum. Reaproveitar `rotulosDenuncia.js` do PR da B3 (Pedro).
 - **Justificativa:** `Descricao`, obrigatória, 10–500 caracteres (validação do backend).
 - **UI do botão:** cor **vermelha/alerta** (não verde — não é ação positiva como Comprar),
   discreto. No detalhe do produto: do lado oposto aos botões Comprar/Reservar, mesma altura.
@@ -51,14 +50,11 @@ traduzir para `UsuarioId`. Mudanças previstas (sem migration):
    (irmão do `ObterVendedorIdPorUsuarioAsync` que já existe).
 3. `DenunciasController`: se vier `VendedorId`, traduzir para `DenunciadoId` antes de salvar.
 
-> ⚠️ Mexer no backend de denúncia é, a rigor, escopo da B2. **Alinhar com a pessoa da
-> B2** quem faz esse ajuste: a B1 (como trabalho extra, em PR separado) ou a própria B2.
-> Decisão pendente.
+~~> ⚠️ Mexer no backend de denúncia é, a rigor, escopo da B2. **Alinhar com a pessoa da B2** quem faz esse ajuste: a B1 (como trabalho extra, em PR separado) ou a própria B2. Decisão pendente.~~ **RESOLVIDO**
 
 ## Passos de implementação
 
-1. **[Backend — pré-requisito]** Ajuste da Opção escolhida por LGPD (DTO + método de tradução + controller),
-   em PR próprio. (Só após alinhar com a B2.)
+1. **[Backend — pré-requisito]** Ajuste da Opção escolhida por LGPD (DTO + método de tradução + controller), em PR próprio. (Só após alinhar com a B2.)
 2. **[Service]** `services/denuncias.js` com `criarDenuncia({ vendedorId, produtoId, motivo, descricao })`.
 3. **[Componente]** `components/ModalDenuncia.jsx` (+ css): overlay + modal, select de motivo,
    textarea, validação (motivo obrigatório, descrição 10–500), estados enviando/sucesso/erro.
@@ -82,13 +78,12 @@ traduzir para `UsuarioId`. Mudanças previstas (sem migration):
 
 ## Pendências / dúvidas em aberto
 
-1. **Quem faz o ajuste de backend da Opção B?** Alinhar com a pessoa da B2: a B1 (trabalho extra, PR separado de backend) ou a própria B2. Aguardando resposta.
-2. **Ordem de merge (AGENTS §9):** B1 e B3 (Pedro) tocam `App.jsx`, detalhe e perfil. B3 fez antes e já fez PR, vou esperar a parte dele estar na main. 
-3. **Reaproveitar `rotulosDenuncia.js`:** a B3 (Pedro) já criou os rótulos de motivo/status.
-   Usar o mesmo arquivo quando estiver na main, em vez de duplicar.
+1. ~~Quem faz o ajuste de backend da Opção B?~~ **RESOLVIDO:** feito por B1 (eu), como trabalho extra em PR separado (#121, mergeado), com aval da Maria e Henrique.
+2. ~~Ordem de merge com a B3 (Pedro)~~ **RESOLVIDO:** o PR do Pedro (#118) já está na main. A task 1 (service+modal) não toca arquivos compartilhados; ao chegar nos botões (detalhe/perfil), rebasear na main antes de abrir o PR de front.
+3. ~~Reaproveitar `rotulosDenuncia.js`~~ **RESOLVIDO:** já está na main (#118).
 
 ## Decisões confirmadas
 
 - **Abordagem do ID = Opção escolhida por LGPD** (backend traduz `VendedorId` → `UsuarioId`), por proteger
   a LGPD (o `UsuarioId` nunca sai para o front).
-- **Entrega em 2 PRs:** primeiro o ajuste de backend, depois o frontend (modal + botões).
+- **Entrega em 2 PRs:** (1) ajuste de backend — PR 121, mergeado; (2) frontend — PR único a partir da branch `feat/BRV-121-B1-front-ui-denuncia`, com commits por task: service + modal, depois o botão no detalhe do produto, depois no perfil do vendedor.
