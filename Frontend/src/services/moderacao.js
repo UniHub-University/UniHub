@@ -17,7 +17,7 @@
 import { api } from './api.js';
 
 // Vire para false quando o backend da frente B2 estiver disponível.
-const USAR_MOCK = true;
+const USAR_MOCK = false;
 
 // Base do mock em memória. Nomes já RESOLVIDOS (a UI não resolve id→nome; isso
 // é responsabilidade do backend/B2). Enums como INTEIRO (ver DenunciaStatus e
