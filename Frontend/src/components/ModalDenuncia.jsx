@@ -117,7 +117,9 @@ export default function ModalDenuncia({ vendedorId, produtoId, onFechar }) {
             </p>
 
             <label className="modal-denuncia__campo">
-              <span className="modal-denuncia__rotulo">Motivo</span>
+              <span className="modal-denuncia__rotulo">
+                Motivo <span className="modal-denuncia__obrigatorio" aria-hidden="true">*</span>
+              </span>
               <select
                 className="modal-denuncia__select"
                 value={motivo}
@@ -137,7 +139,9 @@ export default function ModalDenuncia({ vendedorId, produtoId, onFechar }) {
             </label>
 
             <label className="modal-denuncia__campo">
-              <span className="modal-denuncia__rotulo">Justificativa</span>
+              <span className="modal-denuncia__rotulo">
+                Justificativa <span className="modal-denuncia__obrigatorio" aria-hidden="true">*</span>
+              </span>
               <textarea
                 className="modal-denuncia__textarea"
                 value={descricao}
@@ -152,6 +156,10 @@ export default function ModalDenuncia({ vendedorId, produtoId, onFechar }) {
                 {descricaoLimpa.length}/{DESCRICAO_MAX}
               </span>
             </label>
+
+            <p className="modal-denuncia__legenda-obrigatorio">
+              <span className="modal-denuncia__obrigatorio" aria-hidden="true">*</span> campo obrigatório
+            </p>
 
             {erro && (
               <p className="modal-denuncia__erro" role="alert">

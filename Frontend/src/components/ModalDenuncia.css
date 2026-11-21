@@ -168,3 +168,16 @@
   align-self: center;
   margin-top: 0.5rem;
 }
+
+/* Asterisco de campo obrigatório: vermelho, discreto. */
+.modal-denuncia__obrigatorio {
+  color: var(--cor-erro);
+  font-weight: 700;
+}
+
+/* Legenda explicando o "*", sutil, acima das ações. */
+.modal-denuncia__legenda-obrigatorio {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--cor-tan);
+}
