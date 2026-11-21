@@ -245,3 +245,24 @@
   margin-left: auto;
   margin-right: auto;
 }
+
+/* Botão "Denunciar": ação de alerta (vermelha), visualmente distinta das ações
+   positivas (Comprar/Reservar). Discreto, abaixo da área de ações. */
+.detalhe-bazar__denunciar {
+  display: block;
+  margin-top: 16px;
+  margin-left: auto;          /* empurra para a direita */
+  padding: 10px 16px;
+  border: 0 !important;
+  border-radius: 10px;
+  background: var(--cor-erro) !important;   /* vermelho cheio, sempre */
+  color: #fff !important;                   /* texto branco */
+  font-family: var(--fonte-corpo);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.detalhe-bazar__denunciar:hover {
+  background: #7f2222 !important;           /* vermelho mais escuro no hover */
+}
