@@ -175,7 +175,7 @@ public class AlimentosController : ControllerBase
             {
                 mensagem =
                     "Não foi possível reativar o alimento. " +
-                    "Verifique se ele pertence ao vendedor e possui estoque."
+                    "Verifique se ele pertence ao vendedor."
             });
         }
 

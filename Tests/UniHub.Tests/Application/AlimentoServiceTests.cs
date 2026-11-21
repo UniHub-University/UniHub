@@ -274,9 +274,11 @@ public class AlimentoServiceTests
             .InativarAsync(alimentoId);
     }
 
-    // um alimento inativo com estoque = 0 não pode ser reativado
+    // Issue #89: um alimento inativo sem estoque PODE ser reativado. O serviço
+    // delega ao repositório, que o devolve como Esgotado (a regra do status
+    // fica no UPDATE do repositório).
     [Fact]
-    public async Task Reativar_SemEstoque_NaoReativa()
+    public async Task Reativar_SemEstoque_DelegaAoRepositorio()
     {
         var usuarioId = Guid.NewGuid();
         var vendedorId = Guid.NewGuid();
@@ -296,12 +298,52 @@ public class AlimentoServiceTests
                 Status = ProdutoStatus.Inativo
             });
 
+        _repository
+            .ReativarAsync(alimentoId)
+            .Returns(true);
+
         var resultado = await CriarService()
             .ReativarAsync(usuarioId, alimentoId);
 
-        Assert.False(resultado);
+        Assert.True(resultado);
 
-        await _repository.DidNotReceive()
-            .ReativarAsync(Arg.Any<Guid>());
+        await _repository.Received(1)
+            .ReativarAsync(alimentoId);
+    }
+
+    // Issue #89: um alimento Esgotado pode ser inativado (antes a tela travava
+    // essa ação para não deixá-lo preso).
+    [Fact]
+    public async Task Inativar_AlimentoEsgotado_Inativa()
+    {
+        var usuarioId = Guid.NewGuid();
+        var vendedorId = Guid.NewGuid();
+        var alimentoId = Guid.NewGuid();
+
+        _repository
+            .ObterVendedorIdPorUsuarioAsync(usuarioId)
+            .Returns(vendedorId);
+
+        _repository
+            .ObterDoVendedorAsync(alimentoId, vendedorId)
+            .Returns(new Alimento
+            {
+                Id = alimentoId,
+                VendedorId = vendedorId,
+                QuantidadeDisponivel = 0,
+                Status = ProdutoStatus.Esgotado
+            });
+
+        _repository
+            .InativarAsync(alimentoId)
+            .Returns(true);
+
+        var resultado = await CriarService()
+            .InativarAsync(usuarioId, alimentoId);
+
+        Assert.True(resultado);
+
+        await _repository.Received(1)
+            .InativarAsync(alimentoId);
     }
 }

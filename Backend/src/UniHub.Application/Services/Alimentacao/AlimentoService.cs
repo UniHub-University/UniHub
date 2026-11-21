@@ -168,12 +168,14 @@ public class AlimentoService
         var alimento = await _alimentoRepository
             .ObterDoVendedorAsync(alimentoId, vendedorId.Value);
 
-        if (alimento is null ||
-            alimento.QuantidadeDisponivel <= 0)
+        if (alimento is null)
         {
             return false;
         }
 
+        // Sem estoque, o alimento volta como Esgotado (o repositório decide o
+        // status pela quantidade). Assim o vendedor consegue reativar e, depois,
+        // repor o estoque pela edição normal (issue #89).
         return await _alimentoRepository.ReativarAsync(alimentoId);
     }
 
