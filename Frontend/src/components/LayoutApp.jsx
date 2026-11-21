@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiMenu, FiX, FiSearch } from 'react-icons/fi';
+import { FiUser, FiMenu, FiX, FiSearch, FiShield } from 'react-icons/fi';
 import { LuStore } from 'react-icons/lu';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { PerfilVendedorProvider, usePerfilVendedor } from '../auth/PerfilVendedor.jsx';
+import { SomenteAdminProvider, useAdmin } from '../auth/SomenteAdmin.jsx';
 import { LINKS_NAV } from './navegacao.js';
 import Rodape from './Rodape.jsx';
 import logoUniHub from '../assets/logo-unihub.png';
@@ -14,6 +15,7 @@ function Navegacao() {
   const { pathname } = useLocation();
   const { logout } = useAuth();
   const { ehVendedor } = usePerfilVendedor();
+  const { ehAdmin } = useAdmin();
   const [menuRota, setMenuRota] = useState(null);
   const aberto = menuRota === pathname;
   const botaoMenu = useRef(null);
@@ -38,6 +40,14 @@ function Navegacao() {
           <span className="layout__texto-painel">Painel do Vendedor</span>
         </NavLink>
       )}
+      {ehAdmin && (
+        <NavLink to="/moderacao"
+          className={({ isActive }) => `layout__painel-botao${isActive ? ' layout__painel-botao--ativo' : ''}`}
+          aria-label="Moderação" title="Moderação" onClick={fechar}>
+          <FiShield aria-hidden="true" size={21} />
+          <span className="layout__texto-painel">Moderação</span>
+        </NavLink>
+      )}
       <NavLink to="/produtos" className={classe} aria-label="Pesquisar produtos" title="Pesquisar produtos" onClick={fechar}>
         <FiSearch aria-hidden="true" size={22} />
       </NavLink>
@@ -48,5 +58,5 @@ function Navegacao() {
   </header>;
 }
 export default function LayoutApp() {
-  return <PerfilVendedorProvider><div className="layout"><Navegacao/><main className="layout__conteudo"><Outlet/></main><Rodape/></div></PerfilVendedorProvider>;
+  return <PerfilVendedorProvider><SomenteAdminProvider><div className="layout"><Navegacao/><main className="layout__conteudo"><Outlet/></main><Rodape/></div></SomenteAdminProvider></PerfilVendedorProvider>;
 }

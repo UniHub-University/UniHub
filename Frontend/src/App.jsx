@@ -4,6 +4,8 @@ import PainelVendedor from './pages/PainelVendedor.jsx';
 import MeusProdutos from './pages/MeusProdutos.jsx';
 import PedidosVendedor from './pages/PedidosVendedor.jsx';
 import { SomenteVendedor } from './auth/PerfilVendedor.jsx';
+import { SomenteAdmin } from './auth/SomenteAdmin.jsx';
+import PainelAdmin from './pages/PainelAdmin.jsx';
 import FormularioBazar from './pages/FormularioBazar.jsx';
 import FormularioAlimentacao from './pages/FormularioAlimentacao.jsx';
 import BoasVindas from './pages/BoasVindas.jsx';
@@ -118,6 +120,16 @@ function App() {
         <Route path="/vendedores/:id" element={<Titulo texto="Vendedor"><PaginaVendedor /></Titulo>} />
         <Route path="/pedidos" element={<Titulo texto="Meus pedidos"><HistoricoPedidos /></Titulo>} />
         <Route path="/perfil" element={<Titulo texto="Meu perfil"><Perfil /></Titulo>} />
+        <Route
+          path="/moderacao"
+          element={
+            <SomenteAdmin>
+              <Titulo texto="Moderação">
+                <PainelAdmin />
+              </Titulo>
+            </SomenteAdmin>
+          }
+        />
         <Route path="/alimentacao" element={ <Titulo texto="Alimentação"><Alimentacao /></Titulo>}/>
         <Route path="/alimentacao/:id" element={ <Titulo texto="Detalhe do alimento"><DetalheAlimentacao /></Titulo>}/>
         {/* ---------- Módulo de Ação Solidária (Frente 1, Sprint 5) ---------- */}
