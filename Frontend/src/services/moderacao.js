@@ -4,20 +4,23 @@
 // do projeto (as telas não montam URL nem usam fetch direto — passam pelo
 // wrapper `api`). Veja services/vendedor.js como molde.
 //
-// IMPORTANTE — estado atual (B3 consome; B2 ainda não existe):
+// IMPORTANTE — estado atual (B2 entregue parcialmente):
 //  - As AÇÕES de usuário/produto (suspender/reativar/inativar) usam os endpoints
 //    REAIS do AdminController, que já existem.
-//  - As consultas/ações de DENÚNCIA (listar, alterar status) ficam atrás de um
-//    MOCK local, porque o backend de denúncias (frente B2) ainda não existe.
-//    Quando a B2 entregar GET /api/admin/denuncias e PATCH
-//    /api/admin/denuncias/{id}/status, basta inverter USAR_MOCK para false
-//    (ou remover o ramo do mock) — a página NÃO muda, pois consome só estas
-//    funções.
+//  - LISTAR denúncias usa o endpoint REAL: GET /api/admin/denuncias (#119) já está
+//    na main.
+//  - ALTERAR STATUS ainda usa MOCK local: o PATCH /api/admin/denuncias/{id}/status
+//    (outra metade do B2/#114) ainda NÃO existe. Quando entrar, vire
+//    USAR_MOCK_STATUS para false (e remova o ramo do mock) — a página NÃO muda.
+
+
 
 import { api } from './api.js';
 
-// Vire para false quando o backend da frente B2 estiver disponível.
-const USAR_MOCK = false;
+// Listagem: o GET real já existe (#119) -> sem mock.
+const USAR_MOCK_LISTAGEM = false;
+// Alterar status: o PATCH ainda não existe (B2/#114 parcial) -> mock até chegar.
+const USAR_MOCK_STATUS = true;
 
 // Base do mock em memória. Nomes já RESOLVIDOS (a UI não resolve id→nome; isso
 // é responsabilidade do backend/B2). Enums como INTEIRO (ver DenunciaStatus e
@@ -78,7 +81,7 @@ let DENUNCIAS_MOCK = [
 // Lista as denúncias para o painel de moderação.
 // Real (B2): return api.get('/api/admin/denuncias');
 export async function listarDenuncias() {
-  if (USAR_MOCK) {
+  if (USAR_MOCK_LISTAGEM) {
     return DENUNCIAS_MOCK.map((d) => ({ ...d }));
   }
   // O backend (#119) devolve um PaginatedResultDto: a lista vem em `.items`.
@@ -86,10 +89,11 @@ export async function listarDenuncias() {
   return Array.isArray(dados?.items) ? dados.items : [];
 }
 
+
 // Altera o status de uma denúncia (status: inteiro de DenunciaStatus).
 // Real (B2): return api.patch(`/api/admin/denuncias/${id}/status`, { status });
 export async function alterarStatusDenuncia(id, status) {
-  if (USAR_MOCK) {
+  if (USAR_MOCK_STATUS) {
     DENUNCIAS_MOCK = DENUNCIAS_MOCK.map((d) =>
       d.id === id ? { ...d, status } : d,
     );
