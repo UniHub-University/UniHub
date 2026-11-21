@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 
 import ProdutoCard from '../components/ProdutoCard.jsx';
+import ModalDenuncia from '../components/ModalDenuncia.jsx';
 import { ApiError } from '../services/api.js';
 import { listarProdutosDoVendedor, obterVendedorPublico } from '../services/vendedoresPublico.js';
 import './PaginaVendedor.css';
@@ -41,6 +42,7 @@ function PerfilDoVendedor({ id }) {
   const [vendedor, setVendedor] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
+  const [modalAberto, setModalAberto] = useState(false);
 
   useEffect(() => {
     let cancelado = false;
@@ -122,7 +124,22 @@ function PerfilDoVendedor({ id }) {
             </a>
           )}
         </div>
+
+        <button
+          type="button"
+          className="vendedor-pagina__denunciar"
+          onClick={() => setModalAberto(true)}
+        >
+          Denunciar
+        </button>
       </header>
+
+      {modalAberto && (
+        <ModalDenuncia
+          vendedorId={vendedor.id}
+          onFechar={() => setModalAberto(false)}
+        />
+      )}
 
       {(vendedor.locais.length > 0 || vendedor.horarios.length > 0) && (
         <section className="vendedor-pagina__info" aria-label="Onde e quando">

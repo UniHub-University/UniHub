@@ -191,3 +191,23 @@
     font-size: 1.7rem;
   }
 }
+
+/* Botão "Denunciar" no cabeçalho do perfil: alerta (vermelho cheio), empurrado
+   para a direita do card. Mesmo visual dos botões de denúncia das telas de detalhe. */
+.vendedor-pagina__denunciar {
+  margin-left: auto;          /* empurra para a direita do cabeçalho (flex) */
+  align-self: flex-start;     /* fica no topo do card, não centralizado verticalmente */
+  padding: 10px 16px;
+  border: 0 !important;
+  border-radius: 10px;
+  background: var(--cor-erro) !important;
+  color: #fff !important;
+  font-family: var(--fonte-corpo);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.vendedor-pagina__denunciar:hover {
+  background: #7f2222 !important;
+}
