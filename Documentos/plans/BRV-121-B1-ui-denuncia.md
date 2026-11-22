@@ -66,15 +66,15 @@ traduzir para `UsuarioId`. Mudanças previstas (sem migration):
 
 ## Critérios de aceite
 
-- [ ] Usuário denuncia um vendedor pelo **detalhe do produto** (motivo + justificativa + produto).
-- [ ] Usuário denuncia um vendedor pelo **perfil do vendedor** (motivo + justificativa, sem produto).
-- [ ] Modal aparece sobre a tela escurecida; dá para cancelar sem enviar.
-- [ ] Os 6 motivos aparecem com rótulos amigáveis e enviam o nome do enum.
-- [ ] Justificativa valida 10–500 caracteres antes de enviar.
-- [ ] Mensagem de sucesso após enviar; erros tratados (401/400/404/500).
-- [ ] Não é possível denunciar a si mesmo (backend bloqueia; UI exibe a mensagem).
-- [ ] Botão "Denunciar" é visualmente distinto (alerta/vermelho), não confundível com Comprar.
-- [ ] `npm run lint` e `npm run build` limpos.
+- [x] Usuário denuncia um vendedor pelo **detalhe do produto** (motivo + justificativa + produto).
+- [x] Usuário denuncia um vendedor pelo **perfil do vendedor** (motivo + justificativa, sem produto).
+- [x] Modal aparece sobre a tela escurecida; dá para cancelar sem enviar.
+- [x] Os 6 motivos aparecem com rótulos amigáveis e enviam o nome do enum.
+- [x] Justificativa valida 10–500 caracteres antes de enviar.
+- [x] Mensagem de sucesso após enviar; erros tratados (401/400/404/500).
+- [x] Não é possível denunciar a si mesmo (backend bloqueia; UI exibe a mensagem).
+- [x] Botão "Denunciar" é visualmente distinto (alerta/vermelho), não confundível com Comprar.
+- [x] `npm run lint` e `npm run build` limpos.
 
 ## Pendências / dúvidas em aberto
 
