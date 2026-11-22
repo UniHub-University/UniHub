@@ -4,26 +4,14 @@
 // do projeto (as telas não montam URL nem usam fetch direto — passam pelo
 // wrapper `api`). Veja services/vendedor.js como molde.
 //
-// IMPORTANTE — estado atual (B2 entregue parcialmente):
-//  - As AÇÕES de usuário/produto (suspender/reativar/inativar) usam os endpoints
-//    REAIS do AdminController, que já existem.
-//  - LISTAR denúncias usa o endpoint REAL: GET /api/admin/denuncias (#119) já está
-//    na main.
-//  - ALTERAR STATUS ainda usa MOCK local: o PATCH /api/admin/denuncias/{id}/status
-//    (outra metade do B2/#114) ainda NÃO existe. Quando entrar, vire
-//    USAR_MOCK_STATUS para false (e remova o ramo do mock) — a página NÃO muda.
-
-
+// Todas as chamadas do painel usam os endpoints reais do AdminController:
+//  - listar denúncias: GET /api/admin/denuncias (#119)
+//  - alterar status:   PATCH /api/admin/denuncias/{id}/status (#124)
+//  - suspender/reativar usuário e inativar produto: PATCH existentes
 
 import { api } from './api.js';
 
-// Listagem: o GET real já existe (#119) -> sem mock.
-const USAR_MOCK_LISTAGEM = false;
-// Alterar status: o PATCH ainda não existe (B2/#114 parcial) -> mock até chegar.
-const USAR_MOCK_STATUS = false;
-
-
-// ----------------------- Denúncias (MOCK por enquanto) -----------------------
+// ----------------------- Denúncias -----------------------
 
 // Lista as denúncias para o painel de moderação.
 // Real (B2): return api.get('/api/admin/denuncias');
