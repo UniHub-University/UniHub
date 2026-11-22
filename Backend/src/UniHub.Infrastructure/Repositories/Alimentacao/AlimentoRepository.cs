@@ -78,14 +78,17 @@ public class AlimentoRepository : IAlimentoRepository
 
     public async Task<bool> ReativarAsync(Guid id)
     {
+        // Reativar nunca falha por falta de estoque: com estoque volta como
+        // Disponivel; sem estoque volta como Esgotado (issue #89). A decisão é
+        // feita no próprio UPDATE, a partir da quantidade gravada no banco.
         var linhasAfetadas = await _context.Alimentos
-            .Where(a =>
-                a.Id == id &&
-                a.QuantidadeDisponivel > 0)
+            .Where(a => a.Id == id)
             .ExecuteUpdateAsync(update =>
                 update.SetProperty(
                     alimento => alimento.Status,
-                    ProdutoStatus.Disponivel));
+                    alimento => alimento.QuantidadeDisponivel > 0
+                        ? ProdutoStatus.Disponivel
+                        : ProdutoStatus.Esgotado));
 
         return linhasAfetadas == 1;
     }
