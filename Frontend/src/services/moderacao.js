@@ -20,7 +20,7 @@ import { api } from './api.js';
 // Listagem: o GET real já existe (#119) -> sem mock.
 const USAR_MOCK_LISTAGEM = false;
 // Alterar status: o PATCH ainda não existe (B2/#114 parcial) -> mock até chegar.
-const USAR_MOCK_STATUS = true;
+const USAR_MOCK_STATUS = false;
 
 // Base do mock em memória. Nomes já RESOLVIDOS (a UI não resolve id→nome; isso
 // é responsabilidade do backend/B2). Enums como INTEIRO (ver DenunciaStatus e
@@ -81,24 +81,15 @@ let DENUNCIAS_MOCK = [
 // Lista as denúncias para o painel de moderação.
 // Real (B2): return api.get('/api/admin/denuncias');
 export async function listarDenuncias() {
-  if (USAR_MOCK_LISTAGEM) {
-    return DENUNCIAS_MOCK.map((d) => ({ ...d }));
-  }
-  // O backend (#119) devolve um PaginatedResultDto: a lista vem em `.items`.
   const dados = await api.get('/api/admin/denuncias');
   return Array.isArray(dados?.items) ? dados.items : [];
 }
 
 
+
 // Altera o status de uma denúncia (status: inteiro de DenunciaStatus).
 // Real (B2): return api.patch(`/api/admin/denuncias/${id}/status`, { status });
 export async function alterarStatusDenuncia(id, status) {
-  if (USAR_MOCK_STATUS) {
-    DENUNCIAS_MOCK = DENUNCIAS_MOCK.map((d) =>
-      d.id === id ? { ...d, status } : d,
-    );
-    return;
-  }
   return api.patch(`/api/admin/denuncias/${id}/status`, { status });
 }
 
