@@ -53,5 +53,36 @@ namespace UniHub.Infrastructure.Repositories
 
             return (denuncias, total);
         }
+
+        /// <summary>
+        /// Há denúncia em andamento (Aberta/EmAnalise) do mesmo denunciante para o
+        /// mesmo denunciado e o mesmo produto? ProdutoId é comparado por igualdade,
+        /// o que cobre o caso nulo (denúncia só de perfil) como alvo distinto de uma
+        /// denúncia sobre um produto específico.
+        /// </summary>
+        public async Task<bool> ExisteDenunciaEmAndamentoAsync(System.Guid denuncianteId, System.Guid denunciadoId, System.Guid? produtoId)
+        {
+            return await _context.Denuncias
+                .AsNoTracking()
+                .AnyAsync(d =>
+                    d.DenuncianteId == denuncianteId &&
+                    d.DenunciadoId == denunciadoId &&
+                    d.ProdutoId == produtoId &&
+                    (d.Status == DenunciaStatus.Aberta || d.Status == DenunciaStatus.EmAnalise));
+        }
+
+        /// <summary>
+        /// Busca a denúncia rastreada (sem AsNoTracking) para permitir que a mudança
+        /// de status feita por AtualizarStatus seja persistida com SaveChangesAsync.
+        /// </summary>
+        public async Task<Denuncia?> ObterRastreadaAsync(System.Guid id)
+        {
+            return await _context.Denuncias.FirstOrDefaultAsync(d => d.Id == id);
+        }
+
+        public async Task SalvarAlteracoesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }

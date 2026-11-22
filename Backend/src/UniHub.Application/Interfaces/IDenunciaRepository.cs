@@ -18,5 +18,17 @@ namespace UniHub.Application.Interfaces
             int page,
             int pageSize);
 
+        /// Verifica se já existe denúncia em andamento (Aberta ou EmAnalise) do mesmo
+        /// denunciante, para o mesmo denunciado e o mesmo produto (ProdutoId comparado
+        /// por igualdade, incluindo o caso nulo). Usado para bloquear duplicata.
+        Task<bool> ExisteDenunciaEmAndamentoAsync(System.Guid denuncianteId, System.Guid denunciadoId, System.Guid? produtoId);
+
+        /// Obtém a denúncia como entidade rastreada, para que uma alteração de status
+        /// seja persistida com SaveChangesAsync. Retorna null se não existir.
+        Task<Denuncia?> ObterRastreadaAsync(System.Guid id);
+
+        /// Persiste as alterações pendentes (ex.: status alterado via AtualizarStatus
+        /// numa entidade obtida por ObterRastreadaAsync).
+        Task SalvarAlteracoesAsync();
     }
 }
