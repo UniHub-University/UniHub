@@ -22,59 +22,6 @@ const USAR_MOCK_LISTAGEM = false;
 // Alterar status: o PATCH ainda não existe (B2/#114 parcial) -> mock até chegar.
 const USAR_MOCK_STATUS = false;
 
-// Base do mock em memória. Nomes já RESOLVIDOS (a UI não resolve id→nome; isso
-// é responsabilidade do backend/B2). Enums como INTEIRO (ver DenunciaStatus e
-// DenunciaMotivo no domínio): status 0..3, motivo 0..5.
-let DENUNCIAS_MOCK = [
-  {
-    id: '11111111-1111-1111-1111-111111111111',
-    denuncianteNome: 'João Silva',
-    denunciadoId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-    denunciadoNome: 'Maria Souza',
-    produtoId: '99999999-9999-9999-9999-999999999999',
-    produtoNome: 'Camiseta UNIFESP (usada)',
-    motivo: 4, // ProdutoInadequado
-    descricao: 'O produto anunciado não corresponde à descrição e parece falsificado.',
-    status: 0, // Aberta
-    criadaEm: '2026-11-10T14:30:00Z',
-  },
-  {
-    id: '22222222-2222-2222-2222-222222222222',
-    denuncianteNome: 'Ana Pereira',
-    denunciadoId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-    denunciadoNome: 'Carlos Lima',
-    produtoId: null,
-    produtoNome: null,
-    motivo: 2, // Assedio
-    descricao: 'Mensagens de assédio durante a negociação de um pedido.',
-    status: 1, // EmAnalise
-    criadaEm: '2026-11-09T09:15:00Z',
-  },
-  {
-    id: '33333333-3333-3333-3333-333333333333',
-    denuncianteNome: 'Beatriz Nunes',
-    denunciadoId: 'cccccccc-cccc-cccc-cccc-cccccccccccc',
-    denunciadoNome: 'Diego Rocha',
-    produtoId: null,
-    produtoNome: null,
-    motivo: 0, // ConteudoOfensivo
-    descricao: 'Conteúdo ofensivo no nome de exibição do perfil.',
-    status: 2, // Resolvida
-    criadaEm: '2026-11-05T18:45:00Z',
-  },
-  {
-    id: '44444444-4444-4444-4444-444444444444',
-    denuncianteNome: 'Rafael Costa',
-    denunciadoId: 'dddddddd-dddd-dddd-dddd-dddddddddddd',
-    denunciadoNome: 'Fernanda Dias',
-    produtoId: '88888888-8888-8888-8888-888888888888',
-    produtoNome: 'Apostila de Cálculo I',
-    motivo: 3, // Fraude
-    descricao: 'Cobrou o pagamento e não entregou o material combinado.',
-    status: 3, // Rejeitada
-    criadaEm: '2026-11-02T11:00:00Z',
-  },
-];
 
 // ----------------------- Denúncias (MOCK por enquanto) -----------------------
 
