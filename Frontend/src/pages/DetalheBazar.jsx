@@ -5,6 +5,7 @@ import { ApiError } from '../services/api.js';
 import { criarPedido, TIPO_PEDIDO } from '../services/pedidos.js';
 import { rotuloStatus, rotuloCondicao } from '../services/rotulosProduto.js';
 import BlocoVendedor from '../components/BlocoVendedor.jsx';
+import ModalDenuncia from '../components/ModalDenuncia.jsx';
 import './DetalheBazar.css';
 
 const moeda = new Intl.NumberFormat('pt-BR', {
@@ -128,6 +129,7 @@ function ConsultaDetalhe({ id }) {
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(true);
   const [tentativa, setTentativa] = useState(0);
+  const [modalAberto, setModalAberto] = useState(false);
 
   useEffect(() => {
     let ativo = true;
@@ -210,6 +212,22 @@ function ConsultaDetalhe({ id }) {
           <BlocoVendedor vendedorId={item.vendedorId} chavePix={item.chavePix} />
 
           <AcoesPedido item={item} />
+
+          <button
+            type="button"
+            className="detalhe-bazar__denunciar"
+            onClick={() => setModalAberto(true)}
+          >
+            Denunciar
+          </button>
+
+          {modalAberto && (
+            <ModalDenuncia
+              vendedorId={item.vendedorId}
+              produtoId={item.id}
+              onFechar={() => setModalAberto(false)}
+            />
+          )}
 
         </article>
       ) : null}

@@ -222,5 +222,25 @@
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
 
+/* Botão "Denunciar": ação de alerta, preenchida de vermelho. Alinhado à direita.
+   Usa !important para vencer a regra genérica de botão verde da tela. */
+.detalhe-alimentacao__denunciar {
+  display: block;
+  margin-top: 16px;
+  margin-left: auto;
+  padding: 10px 16px;
+  border: 0 !important;
+  border-radius: 10px;
+  background: var(--cor-erro) !important;
+  color: #fff !important;
+  font-family: var(--fonte-corpo);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.detalhe-alimentacao__denunciar:hover {
+  background: #7f2222 !important;
 }

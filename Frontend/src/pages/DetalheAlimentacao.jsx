@@ -11,6 +11,7 @@ import { criarPedido, TIPO_PEDIDO } from '../services/pedidos.js';
 import { ApiError } from '../services/api.js';
 import { rotuloStatus } from '../services/rotulosProduto.js';
 import BlocoVendedor from '../components/BlocoVendedor.jsx';
+import ModalDenuncia from '../components/ModalDenuncia.jsx';
 
 import './DetalheAlimentacao.css';
 
@@ -36,6 +37,7 @@ function ConsultaDetalhe({ id }) {
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(true);
   const [tentativa, setTentativa] = useState(0);
+  const [modalAberto, setModalAberto] = useState(false);
 
   const [quantidade, setQuantidade] = useState(1);
   const [comprando, setComprando] = useState(false);
@@ -279,6 +281,23 @@ function ConsultaDetalhe({ id }) {
               Este alimento está esgotado ou indisponível no momento.
             </p>
           )}
+
+          <button
+            type="button"
+            className="detalhe-alimentacao__denunciar"
+            onClick={() => setModalAberto(true)}
+          >
+            Denunciar
+          </button>
+
+          {modalAberto && (
+            <ModalDenuncia
+              vendedorId={alimento.vendedorId}
+              produtoId={alimento.id}
+              onFechar={() => setModalAberto(false)}
+            />
+          )}
+
         </article>
       ) : null}
     </section>
