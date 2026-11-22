@@ -40,7 +40,24 @@ public class Denuncia
 
     public string Descricao { get; set; } = string.Empty;
 
-    public DenunciaStatus Status { get; set; } = DenunciaStatus.Aberta;
+    // Setter privado: a transição de status só pode passar por AtualizarStatus,
+    // que aplica as regras de negócio. O EF Core consegue materializar mesmo
+    // com setter privado.
+    public DenunciaStatus Status { get; private set; } = DenunciaStatus.Aberta;
 
     public DateTime CriadaEm { get; set; } = DateTime.UtcNow;
+
+    // Transição de status da denúncia (painel de moderação).
+    // Regras: Aberta e EmAnalise podem ir para qualquer status válido;
+    // Resolvida e Rejeitada são finais e não aceitam mais nenhuma alteração.
+    public void AtualizarStatus(DenunciaStatus novoStatus)
+    {
+        if (!Enum.IsDefined(typeof(DenunciaStatus), novoStatus))
+            throw new ArgumentException("Status de denúncia inválido.", nameof(novoStatus));
+
+        if (Status == DenunciaStatus.Resolvida || Status == DenunciaStatus.Rejeitada)
+            throw new InvalidOperationException("Uma denúncia já resolvida ou rejeitada não pode mudar de status.");
+
+        Status = novoStatus;
+    }
 }
