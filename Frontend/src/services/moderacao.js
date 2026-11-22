@@ -14,7 +14,6 @@ import { api } from './api.js';
 // ----------------------- Denúncias -----------------------
 
 // Lista as denúncias para o painel de moderação.
-// Real (B2): return api.get('/api/admin/denuncias');
 export async function listarDenuncias() {
   const dados = await api.get('/api/admin/denuncias');
   return Array.isArray(dados?.items) ? dados.items : [];
@@ -23,7 +22,6 @@ export async function listarDenuncias() {
 
 
 // Altera o status de uma denúncia (status: inteiro de DenunciaStatus).
-// Real (B2): return api.patch(`/api/admin/denuncias/${id}/status`, { status });
 export async function alterarStatusDenuncia(id, status) {
   return api.patch(`/api/admin/denuncias/${id}/status`, { status });
 }
