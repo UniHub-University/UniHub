@@ -77,6 +77,12 @@ namespace UniHub.API.Controllers
                 return BadRequest(new { mensagem = "Motivo inválido. Use: ConteudoOfensivo, ComportamentoInadequado, "
                                 +"Assedio, Fraude, ProdutoInadequado ou Outro." });
 
+            // Bloqueia denúncia duplicada: mesmo denunciante, mesmo denunciado e mesmo
+            // produto (incluindo o caso sem produto) já com uma denúncia em andamento.
+            var jaExiste = await _denunciaRepository.ExisteDenunciaEmAndamentoAsync(usuarioLogadoId, denunciadoId, dto.ProdutoId);
+            if (jaExiste)
+                return Conflict(new { mensagem = "Você já tem uma denúncia em andamento para este alvo." });
+
             // Mapeia o DTO 
             var denuncia = new Denuncia
             {
