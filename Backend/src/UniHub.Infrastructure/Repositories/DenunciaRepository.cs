@@ -84,5 +84,22 @@ namespace UniHub.Infrastructure.Repositories
         {
             await _context.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// Lista as denúncias feitas por um denunciante (tela "minhas denúncias").
+        /// Somente leitura (AsNoTracking). Inclui Denunciado e Produto para o
+        /// controller montar os nomes. Mais recentes primeiro; Id desempata.
+        /// </summary>
+        public async Task<IReadOnlyList<Denuncia>> ListarPorDenuncianteAsync(System.Guid denuncianteId)
+        {
+            return await _context.Denuncias
+                .AsNoTracking()
+                .Where(d => d.DenuncianteId == denuncianteId)
+                .Include(d => d.Denunciado)
+                .Include(d => d.Produto)
+                .OrderByDescending(d => d.CriadaEm)
+                .ThenBy(d => d.Id)
+                .ToListAsync();
+        }
     }
 }
