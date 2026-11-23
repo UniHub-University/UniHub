@@ -23,7 +23,7 @@ export default function SolidariedadeHub() {
       </header>
 
       <nav className="solidariedade-hub__atalhos" aria-label="Áreas da Ação Solidária">
-        <Link className="solidariedade-hub__atalho" to="/solidariedade/solicitar">
+        <Link className="solidariedade-hub__atalho elevar" to="/solidariedade/solicitar">
           <FaHandHoldingHeart aria-hidden="true" size={28} />
           <span>
             <strong>Preciso de apoio</strong>
@@ -31,7 +31,7 @@ export default function SolidariedadeHub() {
           </span>
         </Link>
 
-        <Link className="solidariedade-hub__atalho" to="/solidariedade/voluntario">
+        <Link className="solidariedade-hub__atalho elevar" to="/solidariedade/voluntario">
           <FaHandsHelping aria-hidden="true" size={28} />
           <span>
             <strong>Quero ajudar</strong>

@@ -131,7 +131,7 @@ export default function Home() {
     <section className="home">
       {/* Banner da plataforma: fala dos 3 módulos (não só do Bazar). */}
       <header className="home__banner">
-        <div className="home__banner-conteudo">
+        <div className="home__banner-conteudo anim-surgir">
           <span className="home__banner-etiqueta">FEITO PELA COMUNIDADE, PARA A COMUNIDADE</span>
           <h1 className="home__banner-titulo">
             Seu campus.<br />Novas conexões.<br /><em>Mais possibilidades.</em>
@@ -147,13 +147,13 @@ export default function Home() {
         </div>
         <div className="home__banner-arte" aria-hidden="true">
           <span className="home__banner-orbita" />
-          <div className="home__banner-cartao home__banner-cartao--livro">
+          <div className="home__banner-cartao home__banner-cartao--livro anim-fade anim-atraso-1">
             <FiShoppingBag /><span>Bazar<br /><strong>Dê um novo uso.</strong></span>
           </div>
-          <div className="home__banner-cartao home__banner-cartao--sacola">
+          <div className="home__banner-cartao home__banner-cartao--sacola anim-fade anim-atraso-2">
             <FiCoffee /><span>Alimentação<br /><strong>Lanches, doces e salgados.</strong></span>
           </div>
-          <div className="home__banner-cartao home__banner-cartao--solidariedade">
+          <div className="home__banner-cartao home__banner-cartao--solidariedade anim-fade anim-atraso-3">
             <FaHandHoldingHeart /><span>Ação Solidária<br /><strong>Apoie quem precisa.</strong></span>
           </div>
           <span className="home__banner-selo"><FiHeart /> Conexões que circulam</span>
