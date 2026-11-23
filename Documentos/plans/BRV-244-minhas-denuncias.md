@@ -68,12 +68,12 @@ leitura — sem editar nem cancelar.
 ## Critérios de aceite
 
 - [x] `GET /api/denuncias/minhas` retorna só as denúncias do usuário logado.
-- [ ] Usuário sem denúncias vê estado vazio amigável.
-- [ ] Cada item mostra status, motivo, descrição, data e produto (quando houver).
+- [x] Usuário sem denúncias vê estado vazio amigável.
+- [x] Cada item mostra status, motivo, descrição, data e produto (quando houver).
 - [x] Rota protegida: sem login, redireciona; ninguém vê denúncia de outro (sem IDOR).
 - [x] Nenhum ID sensível (UsuarioId) trafega para o front.
-- [ ] Card "Denúncias feitas por mim" no Perfil leva à página.
-- [ ] `dotnet build` / `npm run lint` / `npm run build` limpos.
+- [x] Card "Denúncias feitas por mim" no Perfil leva à página.
+- [x] `dotnet build` / `npm run lint` / `npm run build` limpos.
 
 ## Pendências / dúvidas em aberto
 
