@@ -768,6 +768,18 @@ export default function Perfil() {
               </ul>
             )}
           </section>
+
+          <section className="perfil__card" aria-label="Minhas denúncias">
+            <div className="perfil__card-linha">
+              <p className="perfil__card-titulo perfil__card-titulo--denuncia">Denúncias feitas por mim</p>
+              <Link className="perfil__botao perfil__ver-denuncias" to="/minhas-denuncias">
+                Ver
+              </Link>
+            </div>
+            <p className="perfil__card-descricao">
+              Acompanhe o andamento das denúncias que você enviou.
+            </p>
+          </section>
         </aside>
       </div>
     </main>

@@ -401,3 +401,19 @@
   line-height: 1.5;
 }
 
+/* Card "Denúncias feitas por mim": título em vermelho escuro (tema de alerta,
+   consistente com os botões de denúncia) e botão "Ver" maior. */
+.perfil__card-titulo--denuncia {
+  color: #7f2222;
+}
+
+.perfil__ver-denuncias {
+  flex-shrink: 0;       /* não deixa o título espremer o botão */
+  width: auto;          /* largura do conteúdo, não estica a linha toda */
+  padding: 8px 22px;
+  font-size: 0.95rem;
+  background: #7f2222 !important;   /* vermelho escuro, igual ao título */
+  color: #fff !important;
+  border: 0 !important;
+  text-decoration: none;   /* tira o sublinhado padrão de link */
+}
