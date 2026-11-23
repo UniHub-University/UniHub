@@ -97,5 +97,36 @@ namespace UniHub.API.Controllers
 
             return StatusCode(201, new {mensagem = "Denúncia registrada com sucesso para análise da administração."});
         }
+
+        // GET /api/denuncias/minhas — lista as denúncias feitas pelo próprio
+        // usuário logado (tela "Denúncias feitas por mim"). Só-leitura.
+        [HttpGet("minhas")]
+        public async Task<IActionResult> ListarMinhas()
+        {
+            // O denunciante vem SEMPRE do token (claim "sub"), nunca de parâmetro:
+            // assim cada usuário só vê as próprias denúncias (sem IDOR).
+            var userIdString = User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid usuarioLogadoId))
+            {
+                return Unauthorized(new { mensagem = "Usuário inválido ou não autenticado. Verifique as Claims do Token." });
+            }
+
+            var denuncias = await _denunciaRepository.ListarPorDenuncianteAsync(usuarioLogadoId);
+
+            // Mapeia para o DTO de resposta: só nomes prontos para exibição, nunca
+            // IDs de usuário (LGPD). ProdutoNome fica nulo se a denúncia é só de perfil.
+            var resultado = denuncias.Select(d => new MinhaDenunciaDto(
+                d.Id,
+                d.Denunciado?.NomeCompleto ?? "Usuário removido",
+                d.Produto?.Nome,
+                d.Motivo,
+                d.Descricao,
+                d.Status,
+                d.CriadaEm
+            ));
+
+            return Ok(resultado);
+        }
     }
 }

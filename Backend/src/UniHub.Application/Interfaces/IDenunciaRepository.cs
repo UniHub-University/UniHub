@@ -30,5 +30,10 @@ namespace UniHub.Application.Interfaces
         /// Persiste as alterações pendentes (ex.: status alterado via AtualizarStatus
         /// numa entidade obtida por ObterRastreadaAsync).
         Task SalvarAlteracoesAsync();
+
+        /// Lista as denúncias feitas por um denunciante específico (as "minhas
+        /// denúncias"). Somente leitura, mais recentes primeiro. Traz Denunciado e
+        /// Produto para o controller resolver os nomes de exibição.
+        Task<IReadOnlyList<Denuncia>> ListarPorDenuncianteAsync(System.Guid denuncianteId);
     }
 }
