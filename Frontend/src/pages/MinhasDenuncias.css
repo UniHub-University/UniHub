@@ -1,0 +1,142 @@
+/* Tela "Denúncias feitas por mim" (BRV-244). Molde visual: MinhasSolicitacoes.css.
+   Usa as variáveis de tema de index.css. */
+
+.minhas-denuncias {
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: var(--fonte-corpo);
+  color: var(--cor-verde);
+}
+
+.minhas-denuncias__cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.minhas-denuncias__titulo {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.minhas-denuncias__subtitulo {
+  margin: 4px 0 0;
+  color: var(--cor-tan);
+  font-size: 0.95rem;
+}
+
+.minhas-denuncias__voltar {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--cor-verde);
+  text-decoration: none;
+}
+
+.minhas-denuncias__voltar:hover {
+  text-decoration: underline;
+}
+
+.minhas-denuncias__status-msg,
+.minhas-denuncias__vazio {
+  padding: 24px;
+  color: var(--cor-tan);
+  text-align: center;
+}
+
+.minhas-denuncias__erro {
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(155, 44, 44, 0.08);
+  color: var(--cor-erro);
+}
+
+.minhas-denuncias__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.minhas-denuncias__item {
+  padding: 16px 18px;
+  background: var(--cor-superficie);
+  border: 1px solid rgba(177, 149, 99, 0.35);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+}
+
+.minhas-denuncias__item-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.minhas-denuncias__motivo {
+  font-weight: 700;
+}
+
+/* Selo de status, cor por valor do enum (0 Aberta, 1 Em análise, 2 Resolvida, 3 Rejeitada). */
+.minhas-denuncias__status {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.minhas-denuncias__status--0 { background: rgba(177, 149, 99, 0.2); color: #6b5a2e; }
+.minhas-denuncias__status--1 { background: rgba(42, 69, 21, 0.12); color: var(--cor-verde); }
+.minhas-denuncias__status--2 { background: rgba(42, 69, 21, 0.2); color: var(--cor-verde); }
+.minhas-denuncias__status--3 { background: rgba(155, 44, 44, 0.12); color: var(--cor-erro); }
+
+.minhas-denuncias__alvo {
+  margin: 0 0 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.minhas-denuncias__alvo-linha {
+  display: flex;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+/* Rótulo pequeno e discreto; valor em destaque. Mesmo padrão das <dl> de detalhe. */
+.minhas-denuncias__alvo-linha dt {
+  flex-shrink: 0;
+  min-width: 90px;
+  color: var(--cor-tan);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  padding-top: 2px;
+}
+
+.minhas-denuncias__alvo-linha dd {
+  margin: 0;
+  font-weight: 600;
+  color: #243322;
+}
+
+
+.minhas-denuncias__descricao {
+  margin: 0 0 10px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.minhas-denuncias__item-base {
+  font-size: 0.82rem;
+  color: var(--cor-tan);
+}

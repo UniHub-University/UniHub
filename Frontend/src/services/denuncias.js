@@ -32,3 +32,11 @@ export function criarDenuncia({ vendedorId, produtoId, motivo, descricao}) {
 
     return api.post('/api/denuncias', corpo);
 }
+
+// Lista as denúncias feitas pelo próprio usuário logado (tela "Denúncias feitas
+// por mim"). GET /api/denuncias/minhas — o backend filtra pelo denunciante do
+// token (sem IDOR). Retorna uma LISTA DIRETA (array), não paginada — diferente
+// do painel admin (#119). Portanto o chamador usa o array como veio.
+export function listarMinhasDenuncias(){
+    return api.get('/api/denuncias/minhas');
+}

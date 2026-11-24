@@ -67,13 +67,13 @@ leitura — sem editar nem cancelar.
 
 ## Critérios de aceite
 
-- [ ] `GET /api/denuncias/minhas` retorna só as denúncias do usuário logado.
-- [ ] Usuário sem denúncias vê estado vazio amigável.
-- [ ] Cada item mostra status, motivo, descrição, data e produto (quando houver).
-- [ ] Rota protegida: sem login, redireciona; ninguém vê denúncia de outro (sem IDOR).
-- [ ] Nenhum ID sensível (UsuarioId) trafega para o front.
-- [ ] Card "Denúncias feitas por mim" no Perfil leva à página.
-- [ ] `dotnet build` / `npm run lint` / `npm run build` limpos.
+- [x] `GET /api/denuncias/minhas` retorna só as denúncias do usuário logado.
+- [x] Usuário sem denúncias vê estado vazio amigável.
+- [x] Cada item mostra status, motivo, descrição, data e produto (quando houver).
+- [x] Rota protegida: sem login, redireciona; ninguém vê denúncia de outro (sem IDOR).
+- [x] Nenhum ID sensível (UsuarioId) trafega para o front.
+- [x] Card "Denúncias feitas por mim" no Perfil leva à página.
+- [x] `dotnet build` / `npm run lint` / `npm run build` limpos.
 
 ## Pendências / dúvidas em aberto
 
@@ -86,3 +86,4 @@ decisão de LGPD fechada (DTO devolve nome, nunca ID).
 - **Nome do card:** "Denúncias feitas por mim".
 - **DTO devolve nome do denunciado, nunca ID** (LGPD).
 - **Entrega em 2 PRs:** backend primeiro, frontend depois.
+- **Contrato do endpoint:** `GET /api/denuncias/minhas` devolve **lista direta** (não paginada), diferente do painel admin (#119, que usa PaginatedResultDto). Decisão consciente (um usuário tem poucas denúncias). O service de front lê o array direto, sem `.items`. (Confirmado na review do PR128.)

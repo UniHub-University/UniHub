@@ -29,6 +29,7 @@ import AreaVoluntario from './pages/solidariedade/voluntario/AreaVoluntario.jsx'
 import Sugestoes from './pages/solidariedade/voluntario/Sugestoes.jsx';
 import MinhasCorrespondencias from './pages/solidariedade/voluntario/MinhasCorrespondencias.jsx';
 import Doacoes from './pages/solidariedade/voluntario/Doacoes.jsx';
+import MinhasDenuncias from './pages/MinhasDenuncias.jsx';
 
 function App() {
   return (
@@ -120,6 +121,7 @@ function App() {
         <Route path="/vendedores/:id" element={<Titulo texto="Vendedor"><PaginaVendedor /></Titulo>} />
         <Route path="/pedidos" element={<Titulo texto="Meus pedidos"><HistoricoPedidos /></Titulo>} />
         <Route path="/perfil" element={<Titulo texto="Meu perfil"><Perfil /></Titulo>} />
+        <Route path="/minhas-denuncias" element={<Titulo texto="Minhas denúncias"><MinhasDenuncias /></Titulo>} />
         <Route
           path="/moderacao"
           element={
