@@ -771,12 +771,12 @@ export default function Perfil() {
 
           <section className="perfil__card" aria-label="Minhas denúncias">
             <div className="perfil__card-linha">
-              <p className="perfil__card-titulo perfil__card-titulo--denuncia">Denúncias feitas por mim</p>
-              <Link className="perfil__botao perfil__ver-denuncias" to="/minhas-denuncias">
+              <p className="perfil__card-titulo">Denúncias feitas por mim</p>
+              <Link className="perfil__botao perfil__botao--compacto perfil__botao--denuncia" to="/minhas-denuncias">
                 Ver
               </Link>
             </div>
-            <p className="perfil__card-descricao">
+            <p className="perfil__card-aviso">
               Acompanhe o andamento das denúncias que você enviou.
             </p>
           </section>

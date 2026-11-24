@@ -407,13 +407,12 @@
   color: #7f2222;
 }
 
-.perfil__ver-denuncias {
-  flex-shrink: 0;       /* não deixa o título espremer o botão */
-  width: auto;          /* largura do conteúdo, não estica a linha toda */
-  padding: 8px 22px;
-  font-size: 0.95rem;
-  background: #7f2222 !important;   /* vermelho escuro, igual ao título */
-  color: #fff !important;
-  border: 0 !important;
-  text-decoration: none;   /* tira o sublinhado padrão de link */
+/* Botão "Ver" das denúncias: mesmo formato do Histórico (--compacto),
+   só a cor muda para vermelho (ação sensível). */
+.perfil__botao--denuncia {
+  background-color: var(--erro);
+}
+
+.perfil__botao--denuncia:hover:not(:disabled) {
+  background-color: #7f2222; /* vermelho mais escuro no hover, como o --compacto faz com o verde */
 }
