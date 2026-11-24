@@ -55,14 +55,17 @@ public class DenunciasAdminController : ControllerBase
         // completas nem propriedades de navegação desnecessárias.
         var items = denuncias.Select(d => new AdminDenunciaDto(
             d.Id,
+            d.DenunciadoId,
             d.Denunciante?.NomeCompleto ?? "Usuário não identificado",
             d.Denunciado?.NomeCompleto ?? "Usuário não identificado",
+            d.ProdutoId,
             d.Produto?.Nome,
             d.Motivo,
             d.Descricao,
             d.Status,
             d.CriadaEm
         )).ToList();
+
 
         // O resultado comum do projeto contém a página, o tamanho, o total
         // e o número de páginas. Uma lista vazia resulta em zero páginas.
