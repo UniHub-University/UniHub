@@ -210,7 +210,39 @@ Checklist de validação em produção:
 
 ---
 
-## 10. Troubleshooting
+## 10. Deploy do Frontend (Vercel)
+
+A SPA (React + Vite) é publicada na **Vercel**, separada da API. Passo a passo:
+
+1. **Importar o repositório** na Vercel (login com o GitHub da organização) e
+   selecionar o diretório raiz do frontend: **`Frontend/`** (Root Directory).
+2. A Vercel detecta Vite automaticamente. Confirmar:
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+   - **Install Command:** `npm install`
+3. **Variáveis de ambiente** (Settings → Environment Variables):
+   | Variável | Valor |
+   |---|---|
+   | `VITE_API_BASE_URL` | URL da API no Render, ex.: `https://unihub-api.onrender.com` |
+   | `VITE_GOOGLE_CLIENT_ID` | Client ID do OAuth 2.0 (Google Cloud Console) |
+   > As variáveis do Vite são lidas **no build** — após alterá-las, é preciso
+   > **refazer o deploy** (não basta salvar).
+4. **Node 20+**: garantir a versão do Node no projeto da Vercel (Settings → General →
+   Node.js Version) — o Vite 8 exige Node 20 ou superior.
+
+### ⚠ Vínculo crítico com a API (CORS)
+A URL de produção da Vercel **precisa estar** em `Cors__AllowedOrigins__0` no Render
+(ver seção 4) — **sem barra no final**. Se não bater, o browser bloqueia as chamadas
+e o front não fala com a API (sintoma clássico: "não foi possível conectar ao servidor",
+mesmo com a API no ar). Ver também o troubleshooting de CORS na seção 10.
+
+### Google OAuth
+O domínio da Vercel deve estar nas **Origens JavaScript autorizadas** do cliente OAuth
+(Google Cloud Console) — senão o login Google falha em produção.
+
+---
+
+## 11. Troubleshooting
 
 | Sintoma | Causa provável | Ação |
 |---|---|---|
