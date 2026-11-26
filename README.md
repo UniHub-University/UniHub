@@ -32,6 +32,14 @@ API  →  Application  →  Infrastructure  →  Domain
 
 O diagrama acima mostra o fluxo completo: o **Frontend (React + Vite)** se autentica via **Google OAuth**, consome a **API REST (.NET)** enviando o **JWT**, e a API orquestra as entidades de domínio, persistindo em **PostgreSQL (Neon)** via Entity Framework Core e armazenando imagens no **Cloudinary**. Eventos de tempo real (painel do vendedor) trafegam por um **hub SignalR**.
 
+### Modelo de domínio
+
+![Diagrama de Domínio do UniHub](Documentos/UniHub%20-%20Diagrama%20de%20Dominio.png)
+
+O diagrama de entidades mostra o núcleo do domínio: `Usuario` (com os perfis opcionais `Vendedor` e `Voluntario`), a hierarquia de `Produto` (TPH: `Alimento` e `ItemBazar`), o fluxo de `Pedido`/`ItemPedido`, o módulo de Ação Solidária (`SolicitacaoApoio` → `Correspondencia` → `Doacao`, com a identidade pseudonimizada) e a Moderação (`Denuncia`).
+
+> Os diagramas são versionados como código em [`Documentos/diagramas-mermaid.md`](Documentos/diagramas-mermaid.md) (Mermaid) e exportados para PNG — a fonte de verdade é o `.md`, então regenerar é fácil e sempre bate com o estado do projeto.
+
 ---
 
 ## 🛠 Stack Tecnológica
