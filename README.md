@@ -2,19 +2,20 @@
 
 O **UniHub** é um ecossistema digital desenvolvido para centralizar e otimizar as interações socioeconômicas no campus universitário da UNIFESP. O projeto combate a fragmentação de informações (hoje espalhadas em grupos de WhatsApp) através de uma plataforma unificada, de acesso restrito à comunidade acadêmica (`@unifesp.br`), organizada em três pilares: **comércio de alimentos**, **revenda de materiais acadêmicos** e **impacto social**.
 
-> Projeto desenvolvido na disciplina de **Engenharia de Software**, com metodologia Scrum (sprints de 2 semanas) por uma equipe de ~7-8 integrantes.
+> Projeto desenvolvido na disciplina de **Engenharia de Software**, com metodologia Scrum (sprints de 2 semanas) por uma equipe de 7 integrantes.
 
 ---
 
 ## → Módulos do Sistema
 
-* 🍔 **Alimentação:** vendedores anunciam e gerenciam o estoque de lanches, e alunos compram pela plataforma — evitando filas e incertezas no intervalo. É o módulo que concentra o maior desafio técnico (concorrência de estoque).
+* 🍔 **Alimentação:** vendedores anunciam e gerenciam o estoque de lanches, e alunos compram pela plataforma — evitando filas e incertezas no intervalo. É um dos módulos que concentram o maior desafio técnico (concorrência de estoque).
 * ▪ **Bazar Acadêmico:** marketplace de compra e venda de materiais universitários entre alunos (livros, calculadoras, equipamentos), reaproveitando a mesma modelagem de produto/estoque. Suporta **compra** e **reserva temporária** (que expira e devolve o estoque automaticamente).
 * 🤝 **Ação Solidária:** conecta alunos em situação de vulnerabilidade a voluntários, com **pseudonimização rigorosa** da identidade do solicitante (privacy by design / LGPD).
+* 🛡 **Moderação:** qualquer usuário pode denunciar um anúncio ou um vendedor (com motivo e justificativa); administradores acompanham as denúncias em um painel restrito (role `Admin`), mudam o status e aplicam ações (suspender/reativar conta, inativar produto). O denunciante acompanha o desfecho das próprias denúncias.
 
 ---
 
-## 🏛️ Arquitetura
+## 🏛 Arquitetura
 
 O backend segue uma **Clean Architecture simplificada** (projeto único, camadas separadas por pastas), em que cada camada só conhece a camada abaixo:
 
@@ -25,15 +26,23 @@ API  →  Application  →  Infrastructure  →  Domain
 * **Domain** — entidades puras, sem dependência de nada (regras e invariantes de negócio).
 * **Application** — serviços (regra de negócio), interfaces de repositório e DTOs, organizados por módulo.
 * **Infrastructure** — EF Core, `AppDbContext`, repositórios concretos e integrações externas (Cloudinary).
-* **API** — Controllers, autenticação JWT e composição via injeção de dependência.
+* **API** — Controllers, autenticação JWT, Hubs (SignalR) e composição via injeção de dependência.
 
 ![Diagrama de Arquitetura do UniHub](Documentos/UniHub%20-%20Diagrama%20Arquitetural.png)
 
-O diagrama acima mostra o fluxo completo: o **Frontend (React + Vite)** se autentica via **Google OAuth**, consome a **API REST (.NET)** enviando o **JWT**, e a API orquestra as entidades de domínio, persistindo em **PostgreSQL (Neon)** via Entity Framework Core e armazenando imagens no **Cloudinary**.
+O diagrama acima mostra o fluxo completo: o **Frontend (React + Vite)** se autentica via **Google OAuth**, consome a **API REST (.NET)** enviando o **JWT**, e a API orquestra as entidades de domínio, persistindo em **PostgreSQL (Neon)** via Entity Framework Core e armazenando imagens no **Cloudinary**. Eventos de tempo real (painel do vendedor) trafegam por um **hub SignalR**.
+
+### Modelo de domínio
+
+![Diagrama de Domínio do UniHub](Documentos/UniHub%20-%20Diagrama%20de%20Dominio.png)
+
+O diagrama de entidades mostra o núcleo do domínio: `Usuario` (com os perfis opcionais `Vendedor` e `Voluntario`), a hierarquia de `Produto` (TPH: `Alimento` e `ItemBazar`), o fluxo de `Pedido`/`ItemPedido`, o módulo de Ação Solidária (`SolicitacaoApoio` → `Correspondencia` → `Doacao`, com a identidade pseudonimizada) e a Moderação (`Denuncia`).
+
+> Os diagramas são versionados como código em [`Documentos/diagramas-mermaid.md`](Documentos/diagramas-mermaid.md) (Mermaid) e exportados para PNG — a fonte de verdade é o `.md`, então regenerar é fácil e sempre bate com o estado do projeto.
 
 ---
 
-## 🛠️ Stack Tecnológica
+## 🛠 Stack Tecnológica
 
 | Camada | Tecnologia |
 |---|---|
@@ -42,9 +51,11 @@ O diagrama acima mostra o fluxo completo: o **Frontend (React + Vite)** se auten
 | **ORM** | Entity Framework Core 10 (provider `Npgsql.EntityFrameworkCore.PostgreSQL`) |
 | **Banco de Dados** | **Neon** (PostgreSQL serverless) |
 | **Autenticação** | Google OAuth (login institucional) + JWT emitido pela própria API |
+| **Tempo real** | SignalR (painel do vendedor ao vivo) |
 | **Armazenamento de Imagens** | Cloudinary |
+| **Borda / rede** | Cloudflare (HTTPS e mitigação de DDoS na borda) |
 | **Testes** | xUnit + NSubstitute (unidade, integração e concorrência) |
-| **Documentação de API** | Swagger / Swashbuckle (ambiente de Development) |
+| **Documentação de API** | Swagger / Swashbuckle (apenas em ambiente de Development) |
 | **Deploy** | Render (container Docker) — ver [`DEPLOY.md`](DEPLOY.md) |
 
 ---
@@ -57,11 +68,15 @@ O diagrama acima mostra o fluxo completo: o **Frontend (React + Vite)** se auten
   SET "QuantidadeDisponivel" = "QuantidadeDisponivel" - @quantidade
   WHERE "Id" = @id AND "QuantidadeDisponivel" >= @quantidade
   ```
-  Se duas requisições disputam a última unidade, apenas uma afeta uma linha; a outra recebe zero linhas afetadas e sabe, de forma confiável, que perdeu a corrida. O mesmo padrão rege a conclusão e a expiração de pedidos (UPDATE condicional por `Status`), com o efeito colateral (ex.: devolver estoque) aplicado só por quem ganha a corrida.
+  Se duas requisições disputam a última unidade, apenas uma afeta uma linha; a outra recebe zero linhas afetadas e sabe, de forma confiável, que perdeu a corrida. O mesmo padrão rege a conclusão e a expiração de pedidos (UPDATE condicional por `Status`), com o efeito colateral (ex.: devolver estoque) aplicado só por quem ganha a corrida. O comportamento é **provado por teste de concorrência real** (N compradores simultâneos disputando 1 unidade → exatamente 1 vence, estoque nunca fica negativo).
+
+* **Painel do vendedor em tempo real (SignalR):** o estoque e os novos pedidos refletem no painel do vendedor **ao vivo, sem refresh**. Um hub SignalR isola os eventos por vendedor (`vendedor:{id}`), e a emissão é best-effort — uma falha no tempo real **nunca** derruba a venda (o painel degrada para o estado inicial via REST).
 
 * **Reserva temporária com expiração automática:** no Bazar, além de comprar, o aluno pode **reservar** um item por tempo limitado. Reservas vencidas têm o estoque devolvido e o status alterado para `Expirado` — por um `BackgroundService` em tempo real, com uma checagem *lazy* de segurança nos acessos (robusta mesmo que o serviço hiberne no plano free do Render).
 
 * **Privacy by Design (LGPD):** no módulo de Ação Solidária, a identidade do solicitante é separada da solicitação por meio de um `CodigoPublico` pseudonimizado. A identidade real só pode ser revelada após `Correspondencia.AutorizarRevelacaoIdentidade()` explícito — **nunca** automaticamente.
+
+* **Segurança e hardening:** autenticação por JWT assinado, autorização por *role* (o painel administrativo é restrito a `Admin`), *rate limiting* em endpoints sensíveis (login, denúncia), Swagger exposto apenas em Development e upload de imagem validado por *magic bytes* (não só pela extensão). O escalonamento de privilégio foi analisado e fechado — ver [`Analise-de-Seguranca.md`](Documentos/Analise-de-Seguranca.md).
 
 * **Autenticação Institucional:** o acesso é restrito ao domínio `@unifesp.br`, validado no login via Google OAuth antes da emissão do JWT.
 
@@ -78,13 +93,13 @@ UniHub/
 │   │   ├── UniHub.Domain/           # Entidades
 │   │   ├── UniHub.Application/       # Serviços, Interfaces, DTOs
 │   │   ├── UniHub.Infrastructure/    # EF Core, repositórios, Cloudinary
-│   │   └── Unihub.API/               # Controllers, BackgroundServices
+│   │   └── Unihub.API/               # Controllers (inclui painel admin), BackgroundServices, Hubs (SignalR)
 │   ├── Migrations/
 │   ├── Dockerfile                   # Imagem de produção (deploy no Render)
 │   └── Program.cs
 ├── Frontend/                # SPA React + Vite
 ├── Tests/                   # Suíte de testes (xUnit): unidade, integração, concorrência
-├── Documentos/              # Diagramas, identidade visual, planos e planejamento
+├── Documentos/              # Diagramas, identidade visual, planos e documentos de engenharia
 ├── AGENTS.md                # Guia de convenções para devs e IAs (ler antes de codar)
 ├── DEPLOY.md                # Runbook de deploy (Render + Neon)
 └── render.yaml              # Blueprint do serviço no Render
@@ -92,7 +107,7 @@ UniHub/
 
 ---
 
-## ⚙️ Como rodar o projeto localmente
+## ⚙ Como rodar o projeto localmente
 
 ### Pré-requisitos
 * [.NET 10 SDK](https://dotnet.microsoft.com/download)
@@ -153,12 +168,25 @@ O deploy da API é feito no **Render**, a partir do `Backend/Dockerfile`, manten
 
 ---
 
-## 🤝 Contribuindo
+## ▪ Documentação de Engenharia
 
-Antes de escrever código ou abrir um PR, leia o **[`AGENTS.md`](AGENTS.md)** — ele consolida as convenções, a arquitetura e as lições aprendidas (claim `"sub"`, concorrência de estoque, LGPD, fluxo de migrations, checklist de review e padrões do frontend). Vale tanto para desenvolvedores quanto para assistentes de IA.
+Antes de escrever código ou abrir um PR, leia o **[`AGENTS.md`](AGENTS.md)** — fonte de verdade das convenções (claim `"sub"`, concorrência de estoque, LGPD, fluxo de migrations, checklist de review e padrões do frontend). Vale tanto para desenvolvedores quanto para assistentes de IA.
+
+Outros documentos de engenharia do projeto:
+- **[Fluxo de Desenvolvimento](Documentos/Fluxo_desenvolvimento.md)** — do planejamento de uma tarefa ao deploy (Scrum, BRV → Issue → PR → review).
+- **[Estratégia de Testes](Documentos/Estrategia-de-Testes.md)** — o que e por que testamos (domínio, service, integração e concorrência).
+- **[Análise de Segurança](Documentos/Analise-de-Seguranca.md)** — hardening, LGPD e os vetores de segurança verificados.
+- **[Melhorias Futuras](Documentos/Melhorias-Futuras.md)** — itens de evolução priorizáveis.
 
 ---
 
 ## 👥 Equipe
 
-Projeto desenvolvido em ciclos ágeis (Scrum) com fatiamento vertical por domínio de negócio. Ao longo das sprints, o time entregou os 3 módulos de ponta a ponta (Alimentação, Bazar e Ação Solidária), o fluxo de Comprar/Reservar com expiração automática de reservas, os perfis de Vendedor e Voluntário, a suíte de testes automatizados (unidade, integração e concorrência) e o deploy contínuo no Render + Neon.
+Projeto desenvolvido em ciclos ágeis (Scrum) com fatiamento vertical por domínio de negócio. O time entregou os **3 módulos de ponta a ponta** (Alimentação, Bazar e Ação Solidária), o fluxo de Comprar/Reservar com expiração automática de reservas, os perfis de Vendedor e Voluntário, o **módulo de Moderação com painel administrativo**, o **painel do vendedor em tempo real (SignalR)**, a suíte de **testes automatizados** (unidade, integração e concorrência), um **hardening de segurança** (análise documentada, rate limiting, Swagger restrito a dev) e o **deploy contínuo** no Render + Neon.
+
+---
+
+## 📄 Licença
+
+Distribuído sob a **Apache License 2.0** — veja [`LICENSE`](LICENSE) para os termos
+e [`NOTICE`](NOTICE) para a atribuição aos autores.

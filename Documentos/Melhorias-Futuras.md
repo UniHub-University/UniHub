@@ -1,39 +1,35 @@
-## Achados de design (descobertos durante os testes automatizados)
+# Melhorias Futuras
 
-Registrados durante o desenvolvimento da suíte de testes. Escrever os testes
-expôs estes pontos — nenhum é escopo do PR de testes; ficam aqui para priorização.
+> Pontos de melhoria mapeados ao longo do desenvolvimento. Nenhum é bloqueante para
+> a entrega atual (os 3 módulos funcionam end-to-end, com deploy no ar); são itens
+> de qualidade/evolução priorizáveis depois.
 
-### 1. ● `Alimento` não está mapeado no EF Core
-A entidade `Alimento` (subtipo de `Produto`, Table-Per-Hierarchy) existe no domínio,
-mas **não está registrada no `AppDbContext`** — falta o `DbSet<Alimento>` e/ou a
-configuração do discriminator no `OnModelCreating`.
+## Código / robustez
+- **`Doacao` — `if` sem chaves nos métodos de estado:** em `ConfirmarEntrega()` e
+  `Cancelar()`, os `if` de validação não usam chaves `{ }`. Funciona hoje (o `throw`
+  impede seguir), mas é armadilha de manutenção — adicionar uma linha viraria bug.
+  **Resolver:** chaves explícitas. Impacto: baixo.
 
-- **Sintoma:** salvar/ler um `Alimento` pelo EF falha com *"No discriminators matched
-  the discriminator value 'Produto'"*. Hoje o único subtipo mapeado é o `ItemBazar`.
-- **Impacto:** ALTO — Alimentação é o módulo carro-chefe e está não-funcional na camada
-  de dados. Conecta com a lacuna já conhecida do "controller de Alimentação": o problema
-  começa na entidade, não só na API.
-- **Como resolver:** registrar `Alimento` no EF (`DbSet<Alimento>` +
-  `HasDiscriminator`/`HasValue`) e gerar a migration. [SCHEMA] — coordenar com o
-  Guardião de Migrations e testar na branch development do Neon antes da produção.
-- **Workaround atual:** os testes de produto usam `ItemBazar` (que funciona).
+## Frontend / UX
+- **Adotar o sistema de design nas telas restantes (issue #127):** o design system
+  (tokens + `.btn` + animações) foi criado e aplicado na Home e no Hub de Ação
+  Solidária. Migrar os botões das demais telas para `.btn` dá consistência total.
+  Fatiar por módulo (risco visual se feito tudo de uma vez).
+- **Dark mode:** registrado como evolução no plano do design system.
 
-### 2. 🟡 `Doacao` — `if` sem chaves nos métodos de estado
-Nos métodos `ConfirmarEntrega()` e `Cancelar()` de `Doacao`, o `if` de validação não
-usa chaves `{ }`.
+## Produto / escopo futuro
+- **Painel de moderação — exibir o produto denunciado:** o backend já devolve o nome
+  do produto; falta a UI renderizar quando a denúncia for sobre um anúncio.
+- **Backlog de features:** Chat entre usuários, Reputação/avaliações, Favoritos,
+  notificações — fora do escopo da entrega, candidatos a evolução.
 
-- **Sintoma:** funciona hoje por acaso (o `throw` impede chegar na linha seguinte quando
-  inválido), mas a indentação sugere que a mudança de status estaria dentro do `if` —
-  engana e vira bug se alguém adicionar uma linha.
-- **Impacto:** BAIXO (funciona), mas é armadilha de manutenção.
-- **Como resolver:** adicionar chaves `{ }` explícitas nos `if`.
+## Resiliência (não-bloqueantes, infra)
+- **Suspensão em tempo real:** hoje `IsActive` é checado no login; um usuário já
+  logado segue com o token válido até expirar. Mitigação rigorosa seria um middleware
+  validando `IsActive` por requisição. Aceitável no escopo atual.
+- **Robustez do Cloudinary (resolvido, #104):** falha na remoção de imagem antiga já
+  é best-effort e não derruba a edição. Mantido aqui como registro.
 
-### 3. 🟡 `Correspondencia.Concluir()` — conclusão sem sincronizar a solicitação
-Em `Correspondencia.Concluir()`, a chamada `Solicitacao?.Concluir()` é condicional (`?.`).
-Se a `Solicitacao` não estiver carregada (null), a correspondência é marcada como
-`Concluida` **sem** concluir a solicitação associada.
-
-- **Sintoma:** possível inconsistência entre o estado da correspondência e o da solicitação.
-- **Impacto:** MÉDIO — depende de o fluxo sempre carregar a `Solicitacao` antes.
-- **Como resolver:** decidir com o squad — exigir a `Solicitacao` carregada (remover o
-  `?.` e validar) ou documentar que a sincronização é responsabilidade do chamador.
+> **Histórico:** achados anteriores deste documento (ex.: `Alimento` não mapeado no
+> EF, `Correspondencia.Concluir` sem sincronizar) foram **resolvidos** durante o
+> desenvolvimento e removidos desta lista.

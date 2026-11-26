@@ -1,8 +1,9 @@
 # UniHub — Frontend
 
 SPA do UniHub em **React 19 + Vite**, que consome a API REST do backend. Cobre as
-telas dos três módulos (Alimentação, Bazar, Ação Solidária), perfil, pedidos e os
-painéis de vendedor.
+telas dos três módulos (Alimentação, Bazar, Ação Solidária), o módulo de Moderação
+(denúncias + painel do admin), perfil, pedidos e os painéis de vendedor — incluindo o
+painel em **tempo real** (SignalR) que atualiza estoque e pedidos sem refresh.
 
 > As convenções detalhadas do front (wrapper de API, env, enums, padrões de hooks)
 > estão no [`AGENTS.md`](../AGENTS.md) §14 — leia antes de criar telas novas.
@@ -13,6 +14,7 @@ painéis de vendedor.
   (o Vite 8 / rolldown usa APIs que não existem no Node 18).
 - **Roteamento:** `react-router-dom` 7.
 - **Login Google:** `@react-oauth/google`.
+- **Tempo real:** `@microsoft/signalr` (painel do vendedor ao vivo).
 - **Ícones:** `react-icons`.
 - **Autenticação:** Context API (`AuthContext`), sem Redux.
 
@@ -41,7 +43,7 @@ npm install
 npm run dev
 ```
 
-> ⚠️ Se o login Google falhar com *"Missing required parameter: client_id"*, é porque
+> ⚠ Se o login Google falhar com *"Missing required parameter: client_id"*, é porque
 > o `VITE_GOOGLE_CLIENT_ID` não está definido no `.env.local`. Peça o Client ID ao
 > squad e **reinicie** o `npm run dev` depois de preencher (o Vite só lê o `.env` na
 > inicialização).
@@ -50,16 +52,16 @@ npm run dev
 
 ```
 src/
-├── auth/         ← AuthContext, RotaProtegida, authStorage, PerfilVendedor / SomenteVendedor
+├── auth/         ← AuthContext, RotaProtegida, authStorage, PerfilVendedor / SomenteVendedor / SomenteAdmin
 ├── config/       ← leitura centralizada de env (env.js)
-├── services/     ← wrappers da API (api.js + um por módulo: pedidos, alimentos, itensBazar, vendedor…)
+├── services/     ← wrappers da API (api.js + um por módulo: pedidos, alimentos, itensBazar, vendedor, moderacao…)
 ├── pages/        ← telas (uma .jsx + .css por tela)
-├── components/   ← compartilhados (cards, formulários, LayoutApp, Rodapé…)
+├── components/   ← compartilhados (cards, formulários, LayoutApp, Rodapé, ModalDenuncia…)
 ├── hooks/        ← hooks reutilizáveis
 ├── assets/       ← imagens/logos
 ├── App.jsx       ← rotas
 ├── main.jsx      ← providers (GoogleOAuth, Router, Auth)
-└── index.css     ← tema global
+└── index.css     ← tema global (design system: tokens, botões, animações)
 ```
 
 ## Padrões essenciais (resumo — ver `AGENTS.md` §14)
@@ -70,19 +72,22 @@ src/
 - **Env só via `config/env.js`** — nunca ler `import.meta.env` espalhado. Variáveis
   do Vite exigem o prefixo `VITE_`.
 - **Autenticação via `useAuth()`**; rotas protegidas por `<RotaProtegida>`; rotas só de
-  vendedor por `<SomenteVendedor>`.
+  vendedor por `<SomenteVendedor>`; área administrativa por `<SomenteAdmin>`.
 - **Enums vêm como número** do backend (`ProdutoStatus` 0/1/2, `PedidoStatus` 0..4,
   `TipoPedido` 0/1) — mapear o inteiro para o rótulo.
 - **`setState` em `useEffect`:** não chamar de forma síncrona no corpo do effect
   (dispara `react-hooks/set-state-in-effect`); usar função assíncrona interna com flag
   de cancelamento.
+- **Tempo real:** a conexão SignalR é encapsulada num service único (`painelRealtime.js`)
+  — a tela não monta `HubConnection` na mão; há degradação graciosa se o hub cair.
 - **Upload de imagem:** `POST /api/upload/imagem?pasta=<perfis|produtos|cardapios>`
   retorna `{ url }`; a tela salva a URL na entidade. Reusar o fluxo do `Perfil.jsx`.
 
 ## Identidade visual
 
 Paleta verde `#2A4515` / tan `#B19563` / creme `#FEF6C7`; fontes Playfair Display +
-Inter. Reusar o tema de `index.css`.
+Inter. O tema vive em `index.css` como um sistema de design (tokens de cor, botões
+`.btn` e utilitários de animação, todos respeitando `prefers-reduced-motion`).
 
 ### Assets (logo)
 

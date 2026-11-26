@@ -13,10 +13,10 @@ API em **.NET 10** (ASP.NET Core), organizada em camadas (Clean Architecture
 simplificada) para separar regra de negócio de detalhes de infraestrutura:
 
 ```
-Domain          → entidades puras (Produto, Usuario, Pedido, Correspondencia, ...)
+Domain          → entidades puras (Produto, Usuario, Pedido, Correspondencia, Denuncia, ...)
 Application     → regras de negócio (Services), interfaces de repositório, DTOs
 Infrastructure  → EF Core, AppDbContext, repositórios, Cloudinary
-API             → Controllers, autenticação JWT, BackgroundServices, composição (DI)
+API             → Controllers, autenticação JWT, BackgroundServices, Hubs (SignalR), composição (DI)
 ```
 
 Cada camada só conhece a de baixo (API → Application → Infrastructure → Domain),
@@ -28,7 +28,7 @@ Todo acesso exige um usuário autenticado com e-mail institucional. O login via
 Google OAuth valida o domínio e a API emite um **JWT**, validado em cada requisição.
 Endpoints marcados com `[Authorize]` rejeitam chamadas sem token válido.
 
-> ⚠️ O usuário autenticado é SEMPRE extraído do claim `"sub"`
+> ⚠ O usuário autenticado é SEMPRE extraído do claim `"sub"`
 > (`User.FindFirst("sub")`), nunca de `ClaimTypes.NameIdentifier` — o projeto usa
 > `MapInboundClaims = false`. Ver `AGENTS.md` §4.
 
@@ -52,6 +52,16 @@ recebe zero linhas afetadas e sabe, de forma confiável, que perdeu a corrida. O
 padrão rege o aceite de solicitações de apoio (`WHERE Status = Aberta`), a baixa de
 pedido pelo vendedor (`WHERE Status = Reservado`) e a expiração de reservas. Em todos,
 o efeito colateral (ex.: devolver estoque) só é aplicado por quem ganha a corrida.
+O comportamento é coberto por um **teste de concorrência real** (N compradores
+simultâneos disputando 1 unidade → exatamente 1 vence, estoque nunca fica negativo).
+
+### Tempo real (SignalR)
+
+O painel do vendedor reflete mudanças de estoque e novos pedidos **ao vivo**, via um
+hub SignalR. Os eventos são isolados por vendedor (grupo `vendedor:{id}`) e a emissão
+é best-effort: uma falha no hub **nunca** derruba a venda. A direção de dependência é
+preservada — o Service depende de uma interface na Application; a implementação (com
+`IHubContext`) vive na API.
 
 ### Módulos
 
@@ -65,7 +75,9 @@ o efeito colateral (ex.: devolver estoque) só é aplicado por quem ganha a corr
 - **Ação Solidária:** solicitações são pseudonimizadas por um `CodigoPublico`. A
   identidade real do solicitante só é revelada após autorização explícita
   (`Correspondencia.AutorizarRevelacaoIdentidade()`), nunca no fluxo de listagem/match.
-- **Moderação:** denúncias de usuários/produtos, gerenciadas pelo Admin.
+- **Moderação:** qualquer usuário denuncia um anúncio ou um vendedor; o Admin gerencia
+  as denúncias em um painel restrito (listar, mudar status, suspender/reativar conta,
+  inativar produto). Endpoints administrativos exigem a role `Admin`.
 
 ## Banco de dados: Neon (Postgres serverless)
 
@@ -86,7 +98,7 @@ O projeto usa **Neon** (Postgres serverless gerenciado), com EF Core 10 + provid
 
 ### Migrations
 
-> ⚠️ Centralizadas pelo **Guardião de Migrations** (um por sprint). Não rode
+> ⚠ Centralizadas pelo **Guardião de Migrations** (um por sprint). Não rode
 > `dotnet ef migrations add` por conta própria. Detalhes em `AGENTS.md` §6.
 
 - Toda mudança de entidade/`AppDbContext` que afete o schema gera migration.
@@ -101,12 +113,15 @@ O projeto usa **Neon** (Postgres serverless gerenciado), com EF Core 10 + provid
   variáveis de ambiente no Render (formato `Secao__Chave`).
 - Segredos: connection string do Neon, `JwtSettings:SecureKey`, credenciais Cloudinary.
 - `EnableSensitiveDataLogging` só em Development (LGPD).
+- **Swagger exposto apenas em Development** (em produção não expõe o mapa da API).
+- **Rate limiting** em endpoints sensíveis (login, criar denúncia) e handler global de
+  exceção (não vaza stack trace). Ver `../Documentos/Analise-de-Seguranca.md`.
 
 ## Estrutura de pastas
 
 ```
 Backend/
-├── Program.cs                       # composição, DI, auth, CORS, hosted services
+├── Program.cs                       # composição, DI, auth, CORS, SignalR, hosted services
 ├── Dockerfile                       # imagem de produção (deploy no Render)
 ├── Migrations/                      # migrations do EF Core (Guardião)
 └── src/
@@ -114,8 +129,9 @@ Backend/
     ├── UniHub.Application/          # Services, Interfaces, DTOs (por módulo)
     ├── UniHub.Infrastructure/       # AppDbContext, repositórios, Cloudinary
     └── Unihub.API/
-        ├── Controllers/             # endpoints REST
-        └── BackgroundServices/      # jobs (ex.: expiração de reservas)
+        ├── Controllers/             # endpoints REST (inclui painel admin)
+        ├── BackgroundServices/      # jobs (ex.: expiração de reservas)
+        └── Hubs/                    # SignalR (painel do vendedor em tempo real)
 ```
 
 ## Como rodar localmente

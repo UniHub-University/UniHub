@@ -46,7 +46,7 @@ cada uma só conhece a camada abaixo:
 ```
 ┌────────────────┐────────────────────────────────────────┐
 │  API           │Controllers, autenticação, injeção de   │
-│                │dependência                             │
+│                │dependência, Hubs (SignalR)             │
 ├────────────────┤────────────────────────────────────────┤
 │  Application   │Services (regra de negócio), Interfaces,│
 │                │DTOs                                    │
@@ -58,7 +58,9 @@ cada uma só conhece a camada abaixo:
 ```
 
 Essa separação permite, por exemplo, trocar o banco de dados sem alterar uma linha
-de regra de negócio.
+de regra de negócio. A emissão de eventos em tempo real (SignalR) também respeita a
+direção de dependência: o Service depende de uma interface na Application, e a
+implementação (que usa o hub) vive na API.
 
 ---
 
@@ -85,7 +87,7 @@ Quando uma user story é desenvolvida, ela percorre as camadas de dentro para fo
 
 **Nenhuma alteração entra na `main` sem revisão.** Toda mudança passa por um Pull
 Request, revisado antes do merge. *(Ao longo do projeto já foram integrados mais de
-30 PRs seguindo este processo.)*
+90 Pull Requests seguindo este processo.)*
 
 O revisor aplica um **checklist** focado nos riscos recorrentes do projeto:
 - Extração correta do usuário autenticado (claim do token JWT).
@@ -93,6 +95,8 @@ O revisor aplica um **checklist** focado nos riscos recorrentes do projeto:
 - Ausência de vazamento de dados sensíveis (privacidade/LGPD).
 - Autorização por posse (prevenção de acesso indevido — IDOR).
 - Coordenação de migrations com o Guardião.
+- Falha em serviço externo (SignalR/Cloudinary) não derruba a operação de negócio
+  (emissão/efeito best-effort).
 - Compilação limpa (`dotnet build`).
 
 **Controle de versão:** branches de feature são mantidas atualizadas com a `main`
@@ -107,9 +111,11 @@ Um workflow de **GitHub Actions** (`.github/workflows/ci.yml`) roda automaticame
 em cada PR e valida:
 - Compilação do backend (.NET 10).
 - Verificação de migrations pendentes (schema sincronizado com o modelo).
+- Execução dos testes unitários (`Categoria=Unit`).
 - Build da imagem Docker de produção.
 
-Isso garante que código quebrado seja detectado **antes** do merge.
+Isso garante que código quebrado seja detectado **antes** do merge. Os testes de
+integração/concorrência rodam localmente (dependem de uma branch de banco do Neon).
 
 ---
 
@@ -135,6 +141,9 @@ Em tempo de execução, uma requisição percorre o sistema assim:
 
   → Resposta volta como JSON, respeitando as regras de
     privacidade (DTOs não expõem dados sensíveis).
+
+  Em paralelo, eventos de tempo real (ex.: mudança de estoque) são enviados
+  pelo hub SignalR ao painel do vendedor, sem recarregar a página.
 ```
 
 ---
@@ -143,6 +152,8 @@ Em tempo de execução, uma requisição percorre o sistema assim:
 
 - A API é publicada no **Render** (container Docker), com **HTTPS automático**.
 - O banco de dados é o **Neon** (PostgreSQL serverless).
+- O frontend é publicado na **Vercel** (SPA).
+- A borda (Cloudflare) fornece HTTPS e mitigação de DDoS.
 - Segredos (string de conexão, chave JWT, credenciais do Cloudinary) ficam em
   **variáveis de ambiente**, nunca versionados no repositório.
 - Mudanças integradas na `main` disparam a publicação; o endpoint `/health`
@@ -157,9 +168,13 @@ O time registra as decisões técnicas relevantes para dar rastreabilidade, por 
   banco por squad, reduzindo custo e fricção.
 - **Controle de concorrência por UPDATE atômico** (em vez de bloqueio em memória ou
   `RowVersion`): garante consistência do estoque sob acessos simultâneos, mesmo com
-  múltiplas instâncias da API.
+  múltiplas instâncias da API — comportamento provado por teste de concorrência real.
+- **Painel em tempo real (SignalR):** eventos emitidos de forma best-effort (uma
+  falha no hub nunca derruba a venda), com isolamento por vendedor.
 - **Privacy by design** no módulo de Ação Solidária: identidade do solicitante
   pseudonimizada, revelada apenas mediante autorização explícita.
+- **Hardening de segurança:** rate limiting em endpoints sensíveis, Swagger restrito
+  a Development, análise de escalonamento de privilégio (ver `Analise-de-Seguranca.md`).
 
 Essas convenções e lições estão consolidadas no arquivo `AGENTS.md`, que orienta
 tanto novos desenvolvedores quanto assistentes de IA a seguirem o mesmo padrão.
