@@ -75,9 +75,10 @@ flowchart LR
 
 ---
 
-## 2\. Diagrama de domínio (entidades e relacionamentos)
+## 2. Diagrama de domínio (entidades e relacionamentos)
 
-> O renderizador aparava a última letra do título (bug de medição de fonte nesta versão). Solução: um atributo `nome string "..."` como PRIMEIRA linha de cada entidade dá o nome legível e, por ser mais largo que o título, obriga a caixa a abrir — o título deixa de cortar. Os identificadores ficam em MAIÚSCULAS (estilo ER) e o nome legível aparece dentro da caixa.
+> Entidades e relacionamentos do núcleo do domínio. Identificadores em MAIÚSCULAS
+> (estilo ER); o nome legível de cada entidade aparece na primeira linha da caixa.
 
 ```mermaid
 erDiagram
@@ -162,6 +163,7 @@ erDiagram
     string nome "ItemPedido"
     guid ProdutoId
     int Quantidade
+    decimal PrecoUnitarioNaCompra "preço congelado na compra"
   }
   SOLICITACAOAPOIO {
     string nome "SolicitaçãoApoio"
